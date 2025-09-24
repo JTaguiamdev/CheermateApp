@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Rounded12Overlay">
+        <item name="shapeAppearanceSmallComponent">@style/Rounded12Shape</item>
+        <item name="shapeAppearanceMediumComponent">@style/Rounded12Shape</item>
+        <item name="shapeAppearanceLargeComponent">@style/Rounded12Shape</item>
+    </style>
+
+    <style name="Rounded12Shape">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">12dp</item>
+    </style>
+</resources>
+

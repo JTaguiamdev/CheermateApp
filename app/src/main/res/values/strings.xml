@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">CheermateApp</string>
+    <string name="welcome">Welcome!</string>
+    <string name="we_re_glad_to_see_you">We\'re Glad to see you</string>
+    <string name="type_a_password">Type a password</string>
+    <string name="username">Username</string>
+    <string name="forgot_the_password">Forgot the password?</string>
+    <string name="login">Login</string>
+    <string name="sign_up">Sign up</string>
+    <string name="forgot_password_underlined"><![CDATA[<u>Forgot the password?</u>]]></string>
+    <string name="dont_have_account_bold_signup"><![CDATA[Don’t have an account? <b>Sign up</b>]]></string>
+    <string name="choose_your_cheermate">Choose Your CheerMate! ✨</string>
+    <string name="pick_a_personality_that_will_motivate_and_nencourage_throughout_your_tasks">Pick a personality that will motivate and\nencourage throughout your tasks</string>
+</resources>
