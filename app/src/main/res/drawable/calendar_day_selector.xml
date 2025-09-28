@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Selected state -->
+    <item android:state_selected="true">
+        <shape android:shape="oval">
+            <solid android:color="#2196F3" />
+            <stroke android:width="2dp" android:color="#FFFFFF40" />
+            <size android:width="48dp" android:height="48dp" />
+        </shape>
+    </item>
+
+    <!-- Pressed state -->
+    <item android:state_pressed="true">
+        <shape android:shape="oval">
+            <solid android:color="#1976D2" />
+            <stroke android:width="2dp" android:color="#FFFFFF40" />
+            <size android:width="48dp" android:height="48dp" />
+        </shape>
+    </item>
+
+    <!-- Today's date (can be set programmatically) -->
+    <item android:state_activated="true">
+        <shape android:shape="oval">
+            <solid android:color="#4CAF50" />
+            <stroke android:width="2dp" android:color="#FFFFFF40" />
+            <size android:width="48dp" android:height="48dp" />
+        </shape>
+    </item>
+
+    <!-- Default state (transparent) -->
+    <item>
+        <shape android:shape="oval">
+            <solid android:color="@android:color/transparent" />
+            <size android:width="48dp" android:height="48dp" />
+        </shape>
+    </item>
+</selector>

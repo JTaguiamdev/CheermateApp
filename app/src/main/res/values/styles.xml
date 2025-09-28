@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Existing styles -->
     <style name="Rounded12Overlay">
         <item name="shapeAppearanceSmallComponent">@style/Rounded12Shape</item>
         <item name="shapeAppearanceMediumComponent">@style/Rounded12Shape</item>
@@ -10,5 +11,37 @@
         <item name="cornerFamily">rounded</item>
         <item name="cornerSize">12dp</item>
     </style>
-</resources>
 
+    <!-- Custom Calendar Theme -->
+    <style name="CustomCalendarTheme" parent="ThemeOverlay.MaterialComponents.Light">
+        <item name="colorAccent">@android:color/holo_blue_bright</item>
+        <item name="colorPrimary">@android:color/white</item>
+        <item name="android:textColorPrimary">@android:color/white</item>
+        <item name="android:datePickerStyle">@style/CustomDatePickerStyle</item>
+    </style>
+
+    <!-- Custom Date Picker Style -->
+    <style name="CustomDatePickerStyle" parent="android:Widget.Material.DatePicker">
+        <item name="android:headerBackground">@android:color/transparent</item>
+        <item name="android:calendarViewShown">true</item>
+        <item name="android:spinnersShown">false</item>
+    </style>
+
+    <!-- Selected Date Text Style -->
+    <style name="SelectedDateText">
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:fontFamily">@font/sf_pro_rounded_bold</item>
+    </style>
+
+    <!-- Calendar Day Button Style -->
+    <style name="CalendarDayButton">
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:background">@drawable/calendar_day_selector</item>
+        <item name="android:gravity">center</item>
+        <item name="android:padding">12dp</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+    </style>
+</resources>

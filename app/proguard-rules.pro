@@ -19,3 +19,10 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+#proguard
+-keep class com.example.cheermateapp.MainActivity { *; }
+#proguard
+-keep public class * extends android.app.Activity
+-keep public class * extends androidx.appcompat.app.AppCompatActivity
+-keep public class * extends androidx.fragment.app.FragmentActivity
+# Add similar lines for other base Activity classes you use

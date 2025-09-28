@@ -1,0 +1,8 @@
+// KEEP: app/src/main/java/com/example/cheermateapp/data/model/Appearance.kt
+package com.example.cheermateapp.data.model
+
+data class Appearance(
+    val theme: String = "dark",
+    val fontSize: String = "medium",
+    val colorScheme: String = "default"
+)

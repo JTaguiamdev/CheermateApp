@@ -47,7 +47,6 @@
             android:orientation="horizontal"
             android:gravity="center_vertical"
             android:padding="12dp"
-
             android:background="@drawable/bg_card_glass_hover"
             android:clickable="true"
             android:focusable="true"
@@ -55,7 +54,6 @@
             android:stateListAnimator="@animator/card_elevation_state"
             android:elevation="2dp">
 
-            <!-- existing inner content -->
             <ImageView
                 android:layout_width="40dp"
                 android:layout_height="40dp"
@@ -97,7 +95,6 @@
             android:orientation="horizontal"
             android:gravity="center_vertical"
             android:padding="12dp"
-
             android:background="@drawable/bg_card_glass_hover"
             android:clickable="true"
             android:focusable="true"
@@ -145,7 +142,6 @@
             android:orientation="horizontal"
             android:gravity="center_vertical"
             android:padding="12dp"
-
             android:background="@drawable/bg_card_glass_hover"
             android:clickable="true"
             android:focusable="true"
@@ -193,7 +189,6 @@
             android:orientation="horizontal"
             android:gravity="center_vertical"
             android:padding="12dp"
-
             android:background="@drawable/bg_card_glass_hover"
             android:clickable="true"
             android:focusable="true"
@@ -242,7 +237,6 @@
             android:orientation="horizontal"
             android:gravity="center_vertical"
             android:padding="12dp"
-
             android:background="@drawable/bg_card_glass_hover"
             android:clickable="true"
             android:focusable="true"

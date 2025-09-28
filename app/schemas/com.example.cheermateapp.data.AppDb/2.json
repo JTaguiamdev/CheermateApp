@@ -1,0 +1,156 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 2,
+    "identityHash": "46556600edfaf9e0ff0fa7cbc928a85a",
+    "entities": [
+      {
+        "tableName": "User",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`User_ID` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `Username` TEXT NOT NULL, `Email` TEXT NOT NULL, `PasswordHash` TEXT NOT NULL, `FirstName` TEXT, `LastName` TEXT, `Birthdate` TEXT, `Personality_ID` INTEGER, `CreatedAt` INTEGER NOT NULL, `UpdatedAt` INTEGER NOT NULL, `DeletedAt` INTEGER)",
+        "fields": [
+          {
+            "fieldPath": "User_ID",
+            "columnName": "User_ID",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "Username",
+            "columnName": "Username",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "Email",
+            "columnName": "Email",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "PasswordHash",
+            "columnName": "PasswordHash",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "FirstName",
+            "columnName": "FirstName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "LastName",
+            "columnName": "LastName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "Birthdate",
+            "columnName": "Birthdate",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "Personality_ID",
+            "columnName": "Personality_ID",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "CreatedAt",
+            "columnName": "CreatedAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "UpdatedAt",
+            "columnName": "UpdatedAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "DeletedAt",
+            "columnName": "DeletedAt",
+            "affinity": "INTEGER"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "User_ID"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_User_Username",
+            "unique": true,
+            "columnNames": [
+              "Username"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_User_Username` ON `${TABLE_NAME}` (`Username`)"
+          },
+          {
+            "name": "index_User_Email",
+            "unique": true,
+            "columnNames": [
+              "Email"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_User_Email` ON `${TABLE_NAME}` (`Email`)"
+          },
+          {
+            "name": "index_User_Personality_ID",
+            "unique": false,
+            "columnNames": [
+              "Personality_ID"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_User_Personality_ID` ON `${TABLE_NAME}` (`Personality_ID`)"
+          }
+        ]
+      },
+      {
+        "tableName": "Personality",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`Personality_ID` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `User_ID` TEXT NOT NULL, `PersonalityType` INTEGER NOT NULL, `Name` TEXT NOT NULL, `Description` TEXT)",
+        "fields": [
+          {
+            "fieldPath": "Personality_ID",
+            "columnName": "Personality_ID",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "User_ID",
+            "columnName": "User_ID",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "PersonalityType",
+            "columnName": "PersonalityType",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "Name",
+            "columnName": "Name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "Description",
+            "columnName": "Description",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "Personality_ID"
+          ]
+        }
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '46556600edfaf9e0ff0fa7cbc928a85a')"
+    ]
+  }
+}

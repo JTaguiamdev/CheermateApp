@@ -7,8 +7,25 @@
     <string name="forgot_the_password">Forgot the password?</string>
     <string name="login">Login</string>
     <string name="sign_up">Sign up</string>
-    <string name="forgot_password_underlined"><![CDATA[<u>Forgot the password?</u>]]></string>
+    <string name="forgot_password_underlined"><u>Forgot the password?</u></string>
     <string name="dont_have_account_bold_signup"><![CDATA[Don’t have an account? <b>Sign up</b>]]></string>
     <string name="choose_your_cheermate">Choose Your CheerMate! ✨</string>
     <string name="pick_a_personality_that_will_motivate_and_nencourage_throughout_your_tasks">Pick a personality that will motivate and\nencourage throughout your tasks</string>
+    <string name="jasper_taguiam">Jasper Taguiam</string>
+    <string name="cd_toggle_sidebar">Toggle sidebar</string>
+    <string name="cd_avatar">User avatar</string>
+    <string name="Continue">Continue</string>
+    <string name="tasks">Tasks</string>
+    <string name="done_0">Done (0)</string>
+    <string name="no_tasks_found_create_your_first_task">No tasks found. Create your first task!</string>
+    <string name="search_tasks">Search tasks...</string>
+    <string name="pending_0">Pending (0)</string>
+    <string name="_0_total_tasks">0 total tasks</string>
+    <string name="all_0">All (0)</string>
+    <string name="add">+</string>
+    <string name="_0_found">0 found</string>
+    <string name="today_0">Today (0)</string>
+    <string name="jasper">Jasper</string>
+
+
 </resources>
