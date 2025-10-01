@@ -467,7 +467,7 @@ class FragmentTaskActivity : AppCompatActivity() {
             try {
                 val db = AppDb.get(this@FragmentTaskActivity)
                 withContext(Dispatchers.IO) {
-                    db.taskDao().updateTaskStatus(task.Task_ID, task.User_ID, "Completed")
+                    db.taskDao().updateTaskStatus(task.User_ID, task.Task_ID, "Completed")
                     db.taskDao().updateTaskProgress(task.User_ID, task.Task_ID, 100)
                 }
 
@@ -615,7 +615,7 @@ class FragmentTaskActivity : AppCompatActivity() {
             try {
                 val db = AppDb.get(this@FragmentTaskActivity)
                 val allTasks = withContext(Dispatchers.IO) {
-                    db.taskDao().debugGetAllTasksForUser(userId)
+                    db.taskDao().getAllTasksForUser(userId)
                 }
 
                 android.util.Log.d("FragmentTaskActivity", "🔍 === DATABASE DEBUG ===")
@@ -641,7 +641,7 @@ class FragmentTaskActivity : AppCompatActivity() {
         try {
             val db = AppDb.get(this)
             val allTasks = withContext(Dispatchers.IO) {
-                db.taskDao().debugGetAllTasksForUser(userId)
+                db.taskDao().getAllTasksForUser(userId)
             }
 
             android.util.Log.d("FragmentTaskActivity", "=== DATABASE DEBUG ===")

@@ -25,10 +25,8 @@ interface TaskDao {
     @Query("SELECT * FROM Task")
     suspend fun getAllTasks(): List<Task>
 
+    // ✅ QUERY FOR USER TASKS
     @Query("SELECT * FROM Task WHERE User_ID = :userId ORDER BY CreatedAt DESC")
-    suspend fun listForUser(userId: Int): List<Task>
-
-    @Query("SELECT * FROM Task WHERE User_ID = :userId")
     suspend fun getTasksByUser(userId: Int): List<Task>
 
     @Query("SELECT * FROM Task WHERE Task_ID = :taskId")
@@ -45,10 +43,6 @@ interface TaskDao {
     @Query("UPDATE Task SET DeletedAt = :deletedAt, UpdatedAt = :updatedAt WHERE User_ID = :userId AND Task_ID = :taskId")
     suspend fun softDelete(userId: Int, taskId: Int, deletedAt: Long = System.currentTimeMillis(), updatedAt: Long = System.currentTimeMillis())
 
-    // Legacy soft delete method (preserved for compatibility)
-    @Query("UPDATE Task SET DeletedAt = :deletedAt WHERE Task_ID = :taskId AND User_ID = :userId")
-    suspend fun softDelete(taskId: Int, userId: Int, deletedAt: Long = System.currentTimeMillis())
-
     @Query("UPDATE Task SET DeletedAt = NULL, UpdatedAt = :updatedAt WHERE User_ID = :userId AND Task_ID = :taskId")
     suspend fun restoreTask(userId: Int, taskId: Int, updatedAt: Long = System.currentTimeMillis())
 
@@ -59,12 +53,9 @@ interface TaskDao {
     @Query("UPDATE Task SET TaskProgress = :progress, UpdatedAt = :updatedAt WHERE User_ID = :userId AND Task_ID = :taskId")
     suspend fun updateTaskProgress(userId: Int, taskId: Int, progress: Int, updatedAt: Long = System.currentTimeMillis())
 
-    // ✅ FIXED: Use String instead of Status enum in parameters
-    @Query("UPDATE Task SET Status = :status, UpdatedAt = :updatedAt WHERE Task_ID = :taskId AND User_ID = :userId")
-    suspend fun updateTaskStatus(taskId: Int, userId: Int, status: String, updatedAt: Long = System.currentTimeMillis())
-
+    // ✅ TASK STATUS UPDATE
     @Query("UPDATE Task SET Status = :status, UpdatedAt = :updatedAt WHERE User_ID = :userId AND Task_ID = :taskId")
-    suspend fun updateTaskStatusByCompositeKey(userId: Int, taskId: Int, status: String, updatedAt: Long = System.currentTimeMillis())
+    suspend fun updateTaskStatus(userId: Int, taskId: Int, status: String, updatedAt: Long = System.currentTimeMillis())
 
     // ✅ **MISSING METHODS IMPLEMENTED FOR FragmentTaskActivity**
 
@@ -102,9 +93,6 @@ interface TaskDao {
     fun getTodayTasksLive(userId: Int, todayStr: String): LiveData<List<Task>>
 
     @Query("SELECT * FROM Task WHERE User_ID = :userId AND Status IN ('Pending', 'InProgress') AND DeletedAt IS NULL ORDER BY DueAt ASC")
-    suspend fun getAllPendingTasks(userId: Int): List<Task>
-
-    @Query("SELECT * FROM Task WHERE User_ID = :userId AND Status IN ('Pending', 'InProgress') AND DeletedAt IS NULL ORDER BY DueAt ASC")
     fun getPendingTasksLive(userId: Int): LiveData<List<Task>>
 
     @Query("SELECT * FROM Task WHERE User_ID = :userId AND Status = 'Completed' AND DeletedAt IS NULL ORDER BY UpdatedAt DESC")
@@ -114,9 +102,7 @@ interface TaskDao {
     @Query("SELECT COUNT(*) FROM Task WHERE User_ID = :userId")
     suspend fun getTotalTasksForUser(userId: Int): Int
 
-    @Query("SELECT COUNT(*) FROM Task WHERE User_ID = :userId AND DueAt < :currentDateStr AND Status != 'Completed' AND DeletedAt IS NULL")
-    suspend fun getOverdueTasksCount(userId: Int, currentDateStr: String): Int
-
+    // ✅ OVERDUE TASKS COUNT
     @Query("SELECT COUNT(*) FROM Task WHERE User_ID = :userId AND Status = 'OverDue' AND DeletedAt IS NULL")
     suspend fun getOverdueTasksCount(userId: Int): Int
 
@@ -191,7 +177,4 @@ interface TaskDao {
 
     @Query("DELETE FROM Task")
     suspend fun deleteAllTasks()
-
-    @Query("SELECT * FROM Task WHERE User_ID = :userId AND DeletedAt IS NULL ORDER BY CreatedAt DESC")
-    suspend fun debugGetAllTasksForUser(userId: Int): List<Task>
 }

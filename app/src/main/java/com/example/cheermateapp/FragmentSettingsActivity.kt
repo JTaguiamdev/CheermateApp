@@ -70,7 +70,7 @@ class FragmentSettingsActivity : AppCompatActivity() {
                     val db = AppDb.get(this@FragmentSettingsActivity)
 
                     val user = withContext(Dispatchers.IO) {
-                        db.userDao().findById(userId)
+                        db.userDao().getById(userId)
                     }
 
                     val personality: Personality? = withContext(Dispatchers.IO) {

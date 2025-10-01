@@ -728,7 +728,7 @@ class MainActivity : AppCompatActivity() {
                 val db = AppDb.get(this@MainActivity)
 
                 val user = withContext(Dispatchers.IO) {
-                    db.userDao().findById(userId)
+                    db.userDao().getById(userId)
                 }
 
                 val personality: Personality? = withContext(Dispatchers.IO) {
@@ -1316,7 +1316,7 @@ class MainActivity : AppCompatActivity() {
                 val db = AppDb.get(this@MainActivity)
 
                 val user = withContext(Dispatchers.IO) {
-                    db.userDao().findById(userId)
+                    db.userDao().getById(userId)
                 }
 
                 val personality: Personality? = withContext(Dispatchers.IO) {
@@ -1763,7 +1763,7 @@ class MainActivity : AppCompatActivity() {
             try {
                 val db = AppDb.get(this@MainActivity)
                 withContext(Dispatchers.IO) {
-                    db.taskDao().updateTaskStatusByCompositeKey(
+                    db.taskDao().updateTaskStatus(
                         task.User_ID,
                         task.Task_ID,
                         "Completed"
@@ -1809,7 +1809,7 @@ class MainActivity : AppCompatActivity() {
             try {
                 val db = AppDb.get(this@MainActivity)
                 withContext(Dispatchers.IO) {
-                    db.taskDao().updateTaskStatusByCompositeKey(
+                    db.taskDao().updateTaskStatus(
                         task.User_ID,
                         task.Task_ID,
                         "InProgress"
@@ -1835,7 +1835,7 @@ class MainActivity : AppCompatActivity() {
                 val db = AppDb.get(this@MainActivity)
                 withContext(Dispatchers.IO) {
                     // ✅ FIXED: Use database DAO method instead of direct assignment
-                    db.taskDao().updateTaskStatusByCompositeKey(
+                    db.taskDao().updateTaskStatus(
                         task.User_ID,
                         task.Task_ID,
                         "Pending"
