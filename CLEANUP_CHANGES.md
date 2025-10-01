@@ -125,3 +125,22 @@ grep -r "debugGetAllTasksForUser" app/src/
 ```
 
 Then update any findings to use the new standardized method names.
+
+## Additional Fixes Applied
+
+After the DAO cleanup, the following files were updated to use the new method names:
+
+### 1. FragmentTaskActivity.kt
+- ✅ `debugGetAllTasksForUser()` → `getAllTasksForUser()` (2 occurrences)
+- ✅ `updateTaskStatus()` parameter order fixed (userId, taskId instead of taskId, userId)
+
+### 2. FragmentSettingsActivity.kt
+- ✅ `findById()` → `getById()` (1 occurrence)
+
+### 3. MainActivity.kt
+- ✅ `findById()` → `getById()` (2 occurrences)
+- ✅ `updateTaskStatusByCompositeKey()` → `updateTaskStatus()` (3 occurrences)
+
+**Total Updates:** 9 method calls updated across 3 activity files
+
+All references have been updated and the codebase is now consistent with the cleaned-up DAO interfaces.
