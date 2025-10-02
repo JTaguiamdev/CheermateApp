@@ -39,6 +39,20 @@ A comprehensive Android task management application built with Kotlin, featuring
 
 *Add screenshots of your app here*
 
+## 📋 Development
+
+### Documentation
+- **[TODO.md](TODO.md)** - Immediate tasks and known issues to address
+- **[ROADMAP.md](ROADMAP.md)** - Long-term development roadmap and feature planning
+- **[TESTING_CHECKLIST.md](TESTING_CHECKLIST.md)** - Comprehensive testing guidelines
+- **[MIGRATION_SUMMARY.md](MIGRATION_SUMMARY.md)** - Recent DAO cleanup changes
+- **[SUMMARY.md](SUMMARY.md)** - DAO cleanup project summary
+
+### Current Status
+- **Version:** 1.0.0
+- **Status:** Active Development
+- **Next Milestone:** v1.1 - Foundation & Core Features (Q1 2025)
+
 ## 🚀 Getting Started
 
 ### Prerequisites
