@@ -317,6 +317,8 @@ class FragmentTaskActivity : AppCompatActivity() {
     private fun displayTaskInCard(tasks: List<Task>) {
         try {
             filteredTasks = tasks
+            currentTasks.clear()
+            currentTasks.addAll(tasks)
             currentTaskIndex = 0 // Reset to first task
 
             if (tasks.isEmpty()) {
