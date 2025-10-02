@@ -47,9 +47,11 @@ class FragmentTaskActivity : AppCompatActivity() {
     private lateinit var tvTaskPriority: TextView
     private lateinit var tvTaskStatus: TextView
     private lateinit var tvTaskDueDate: TextView
+    private lateinit var tvTaskProgress: TextView
     private lateinit var layoutPriority: LinearLayout
     private lateinit var layoutStatus: LinearLayout
     private lateinit var layoutDueDate: LinearLayout
+    private lateinit var layoutProgress: LinearLayout
     private lateinit var btnMarkDone: TextView
 
     // ✅ Navigation elements
@@ -171,9 +173,11 @@ class FragmentTaskActivity : AppCompatActivity() {
             tvTaskPriority = findViewById(R.id.tvTaskPriority)
             tvTaskStatus = findViewById(R.id.tvTaskStatus)
             tvTaskDueDate = findViewById(R.id.tvTaskDueDate)
+            tvTaskProgress = findViewById(R.id.tvTaskProgress)
             layoutPriority = findViewById(R.id.layoutPriority)
             layoutStatus = findViewById(R.id.layoutStatus)
             layoutDueDate = findViewById(R.id.layoutDueDate)
+            layoutProgress = findViewById(R.id.layoutProgress)
             btnMarkDone = findViewById(R.id.btnMarkDone)
 
             // ✅ ADD: Navigation elements
@@ -379,6 +383,10 @@ class FragmentTaskActivity : AppCompatActivity() {
             tvTaskDueDate.text = task.getFormattedDueDateTime()
             layoutDueDate.visibility = View.VISIBLE
             
+            // Display progress
+            tvTaskProgress.text = "${task.TaskProgress}%"
+            layoutProgress.visibility = View.VISIBLE
+            
             // Show/hide Mark as Done button based on task status
             if (task.Status != Status.Completed) {
                 btnMarkDone.text = when (task.Status) {
@@ -514,6 +522,7 @@ class FragmentTaskActivity : AppCompatActivity() {
             layoutPriority.visibility = View.GONE
             layoutStatus.visibility = View.GONE
             layoutDueDate.visibility = View.GONE
+            layoutProgress.visibility = View.GONE
             btnMarkDone.visibility = View.GONE
             layoutNavigation.visibility = View.GONE
             
