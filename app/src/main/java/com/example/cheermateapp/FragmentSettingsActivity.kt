@@ -9,6 +9,7 @@ import androidx.appcompat.widget.Toolbar
 import androidx.lifecycle.lifecycleScope
 import com.example.cheermateapp.data.db.AppDb
 import com.example.cheermateapp.data.model.Personality
+import com.example.cheermateapp.util.ThemeManager
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -232,9 +233,23 @@ class FragmentSettingsActivity : AppCompatActivity() {
                 showDetailedStatisticsDialog()
             }
 
-            // Dark Mode Switch
-            findViewById<Switch>(R.id.switchDarkMode)?.setOnCheckedChangeListener { _, isChecked ->
-                Toast.makeText(this, if (isChecked) "🌙 Dark mode enabled" else "☀️ Light mode enabled", Toast.LENGTH_SHORT).show()
+            // Dark Mode Switch - Now with functional implementation
+            val switchDarkMode = findViewById<Switch>(R.id.switchDarkMode)
+            
+            // Set initial state based on current theme
+            switchDarkMode?.isChecked = ThemeManager.isDarkModeActive(this)
+            
+            switchDarkMode?.setOnCheckedChangeListener { _, isChecked ->
+                val newMode = if (isChecked) ThemeManager.THEME_DARK else ThemeManager.THEME_LIGHT
+                ThemeManager.setThemeMode(this, newMode)
+                Toast.makeText(
+                    this, 
+                    if (isChecked) "🌙 Dark mode enabled" else "☀️ Light mode enabled", 
+                    Toast.LENGTH_SHORT
+                ).show()
+                
+                // Recreate activity to apply theme
+                recreate()
             }
 
             // Notifications Row and Switch

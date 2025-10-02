@@ -3,6 +3,7 @@ package com.example.cheermateapp
 import android.app.Application
 import com.example.cheermateapp.data.db.AppDb
 import com.example.cheermateapp.util.NotificationUtil
+import com.example.cheermateapp.util.ThemeManager
 import com.google.gson.Gson
 
 /**
@@ -18,6 +19,9 @@ class CheermateApp : Application() {
         
         // Initialize database
         db = AppDb.get(this)
+        
+        // Initialize theme
+        ThemeManager.initializeTheme(this)
         
         // Create notification channel for reminders
         NotificationUtil.createNotificationChannel(this)
