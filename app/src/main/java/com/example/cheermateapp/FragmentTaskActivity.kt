@@ -403,7 +403,33 @@ class FragmentTaskActivity : AppCompatActivity() {
         }
     }
 
+<<<<<<< HEAD
     // ✅ EXTENSION METHODS FROM MAINACTIVITY
+=======
+    // ✅ NEW: Mark task as done (UPDATE OPERATION)
+    private fun markTaskAsDone(task: Task) {
+        lifecycleScope.launch {
+            try {
+                val db = AppDb.get(this@FragmentTaskActivity)
+                withContext(Dispatchers.IO) {
+                    db.taskDao().updateTaskStatus(task.User_ID, task.Task_ID, "Completed")
+                    db.taskDao().updateTaskProgress(task.User_ID, task.Task_ID, 100)
+                }
+
+                Toast.makeText(this@FragmentTaskActivity, "✅ Task '${task.Title}' completed!", Toast.LENGTH_SHORT).show()
+
+                // Reload current filter to refresh display
+                filterTasks(currentFilter)
+
+            } catch (e: Exception) {
+                android.util.Log.e("FragmentTaskActivity", "Error marking task as done", e)
+                Toast.makeText(this@FragmentTaskActivity, "Error completing task", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    // ✅ FIXED: Extension methods with proper private modifier
+>>>>>>> b582208d4bfc69a21fee7e40a0c472413368035c
     private fun Task.getPriorityText(): String {
         return when (this.Priority) {
             com.example.cheermateapp.data.model.Priority.High -> "🔴 High"
@@ -635,7 +661,7 @@ class FragmentTaskActivity : AppCompatActivity() {
             try {
                 val db = AppDb.get(this@FragmentTaskActivity)
                 val allTasks = withContext(Dispatchers.IO) {
-                    db.taskDao().debugGetAllTasksForUser(userId)
+                    db.taskDao().getAllTasksForUser(userId)
                 }
                 android.util.Log.d("FragmentTaskActivity", "🔍 Total tasks in DB: ${allTasks.size}")
             } catch (e: Exception) {
@@ -648,7 +674,7 @@ class FragmentTaskActivity : AppCompatActivity() {
         try {
             val db = AppDb.get(this)
             val allTasks = withContext(Dispatchers.IO) {
-                db.taskDao().debugGetAllTasksForUser(userId)
+                db.taskDao().getAllTasksForUser(userId)
             }
             android.util.Log.d("FragmentTaskActivity", "Total tasks in DB: ${allTasks.size}")
         } catch (e: Exception) {

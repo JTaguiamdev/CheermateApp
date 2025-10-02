@@ -19,12 +19,9 @@ interface PersonalityDao {
     @Upsert
     suspend fun upsert(personality: Personality)
 
-    // ✅ QUERY METHODS (MERGED FROM BOTH VERSIONS)
+    // ✅ QUERY METHODS
     @Query("SELECT * FROM Personality")
     suspend fun getAll(): List<Personality>
-
-    @Query("SELECT * FROM Personality")
-    suspend fun getAllPersonalities(): List<Personality>
 
     @Query("SELECT * FROM Personality WHERE Personality_ID = :personalityId")
     suspend fun getById(personalityId: Int): Personality?
@@ -32,12 +29,9 @@ interface PersonalityDao {
     @Query("SELECT * FROM Personality WHERE Name = :name")
     suspend fun getByName(name: String): Personality?
 
-    // ✅ USER-BASED QUERIES (HANDLES BOTH APPROACHES)
+    // ✅ USER-BASED QUERIES
     @Query("SELECT * FROM Personality WHERE User_ID = :userId LIMIT 1")
-    suspend fun getByUser(userId: String): Personality?
-
-    @Query("SELECT * FROM Personality WHERE User_ID = :userId")
-    suspend fun getPersonalityByUserId(userId: String): Personality?
+    suspend fun getByUserId(userId: Int): Personality?
 
     // ✅ JOIN QUERY FOR PERSONALITY VIA USER TABLE
     @Query("""
@@ -45,7 +39,7 @@ interface PersonalityDao {
         INNER JOIN User u ON p.Personality_ID = u.Personality_ID 
         WHERE u.User_ID = :userId
     """)
-    suspend fun getPersonalityByUserIdFromUser(userId: String): Personality?
+    suspend fun getPersonalityByUserIdFromUser(userId: Int): Personality?
 
     @Query("SELECT COUNT(*) FROM Personality")
     suspend fun getCount(): Int
