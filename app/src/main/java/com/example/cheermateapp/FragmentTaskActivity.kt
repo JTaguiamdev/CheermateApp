@@ -339,6 +339,9 @@ class FragmentTaskActivity : AppCompatActivity() {
             android.util.Log.d("DEBUG", "🎯 showTaskInCard called with task: ${task.Title}")
 
             currentDisplayedTask = task
+            
+            // ✅ Ensure card is visible when showing task
+            cardEmpty.visibility = View.VISIBLE
 
             // Update the existing XML TextViews with task data from database
             tvTaskTitle.text = task.Title
@@ -712,8 +715,12 @@ class FragmentTaskActivity : AppCompatActivity() {
                 allTasks.clear()
                 allTasks.addAll(tasks)
 
-                // ✅ NEW: Display single task in card instead of RecyclerView
+                // ✅ Display filtered tasks in card
                 displayTaskInCard(tasks)
+                
+                // ✅ Update chipFound with the filtered count immediately
+                chipFound.text = "${tasks.size} found"
+                
                 updateTabCounts()
 
             } catch (e: Exception) {
@@ -744,8 +751,6 @@ class FragmentTaskActivity : AppCompatActivity() {
 
                 val totalTasks = counts["all"] ?: 0
                 tvTasksSub.text = "$totalTasks total tasks"
-
-                chipFound.text = "${currentTasks.size} found"
 
             } catch (e: Exception) {
                 android.util.Log.e("FragmentTaskActivity", "Error updating tab counts", e)
