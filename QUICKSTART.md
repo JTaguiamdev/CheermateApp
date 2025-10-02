@@ -17,8 +17,11 @@ CheermateApp/
 ├── MIGRATION_SUMMARY.md         ← Recent DAO changes (technical)
 ├── SUMMARY.md                   ← DAO cleanup summary
 │
-└── This file (QUICKSTART.md)    ← You are here!
+├── QUICKSTART.md                ← You are here!
+└── DOCUMENTATION_INDEX.md       ← Complete documentation index
 ```
+
+💡 **Pro Tip:** Check [DOCUMENTATION_INDEX.md](DOCUMENTATION_INDEX.md) for a comprehensive guide to all 11+ documentation files!
 
 ---
 
