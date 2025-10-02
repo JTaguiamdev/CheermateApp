@@ -18,6 +18,7 @@ import com.example.cheermateapp.data.db.AppDb
 import com.example.cheermateapp.data.model.Personality
 import com.example.cheermateapp.data.model.Task
 import com.example.cheermateapp.data.model.Priority
+import com.example.cheermateapp.data.model.User
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -783,7 +784,212 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showProfileEditDialog() {
-        Toast.makeText(this, "👤 Profile editing coming soon!", Toast.LENGTH_SHORT).show()
+        uiScope.launch {
+            try {
+                val db = AppDb.get(this@MainActivity)
+                val user = withContext(Dispatchers.IO) {
+                    db.userDao().getById(currentUserId)
+                }
+
+                if (user == null) {
+                    Toast.makeText(this@MainActivity, "Error loading user profile", Toast.LENGTH_SHORT).show()
+                    return@launch
+                }
+
+                // Create custom dialog view
+                val dialogView = layoutInflater.inflate(R.layout.dialog_edit_profile, null)
+                val etEditUsername = dialogView.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.etEditUsername)
+                val etEditEmail = dialogView.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.etEditEmail)
+                val etEditFirstName = dialogView.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.etEditFirstName)
+                val etEditLastName = dialogView.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.etEditLastName)
+
+                // Pre-fill with current values
+                etEditUsername.setText(user.Username)
+                etEditEmail.setText(user.Email)
+                etEditFirstName.setText(user.FirstName)
+                etEditLastName.setText(user.LastName)
+
+                androidx.appcompat.app.AlertDialog.Builder(this@MainActivity)
+                    .setTitle("Edit Profile")
+                    .setView(dialogView)
+                    .setPositiveButton("Save") { _, _ ->
+                        val newUsername = etEditUsername.text?.toString()?.trim().orEmpty()
+                        val newEmail = etEditEmail.text?.toString()?.trim().orEmpty()
+                        val newFirstName = etEditFirstName.text?.toString()?.trim().orEmpty()
+                        val newLastName = etEditLastName.text?.toString()?.trim().orEmpty()
+
+                        // Validate inputs
+                        if (newUsername.isEmpty()) {
+                            Toast.makeText(this@MainActivity, "Username cannot be empty", Toast.LENGTH_SHORT).show()
+                            return@setPositiveButton
+                        }
+
+                        if (!com.example.cheermateapp.util.InputValidationUtil.isValidUsername(newUsername)) {
+                            Toast.makeText(
+                                this@MainActivity,
+                                "Username must be 3-20 characters, letters, numbers, and underscore only",
+                                Toast.LENGTH_LONG
+                            ).show()
+                            return@setPositiveButton
+                        }
+
+                        if (newEmail.isNotEmpty() && !com.example.cheermateapp.util.InputValidationUtil.isValidEmail(newEmail)) {
+                            Toast.makeText(this@MainActivity, "Invalid email format", Toast.LENGTH_SHORT).show()
+                            return@setPositiveButton
+                        }
+
+                        // Save changes
+                        saveProfileChanges(user, newUsername, newEmail, newFirstName, newLastName)
+                    }
+                    .setNeutralButton("Change Password") { _, _ ->
+                        showChangePasswordDialog(user)
+                    }
+                    .setNegativeButton("Cancel", null)
+                    .show()
+
+            } catch (e: Exception) {
+                android.util.Log.e("MainActivity", "Error showing profile edit dialog", e)
+                Toast.makeText(this@MainActivity, "Error loading profile", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    /**
+     * Save profile changes to the database
+     */
+    private fun saveProfileChanges(
+        user: User,
+        newUsername: String,
+        newEmail: String,
+        newFirstName: String,
+        newLastName: String
+    ) {
+        uiScope.launch {
+            try {
+                withContext(Dispatchers.IO) {
+                    val db = AppDb.get(this@MainActivity)
+
+                    // Check if new username already exists (if changed)
+                    if (newUsername != user.Username) {
+                        val existingUser = db.userDao().findByUsername(newUsername)
+                        if (existingUser != null && existingUser.User_ID != user.User_ID) {
+                            withContext(Dispatchers.Main) {
+                                Toast.makeText(
+                                    this@MainActivity,
+                                    "Username already exists",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                            return@withContext
+                        }
+                    }
+
+                    // Update user
+                    val updatedUser = user.copy(
+                        Username = newUsername,
+                        Email = newEmail,
+                        FirstName = newFirstName,
+                        LastName = newLastName,
+                        UpdatedAt = System.currentTimeMillis()
+                    )
+                    db.userDao().update(updatedUser)
+                }
+
+                Toast.makeText(this@MainActivity, "Profile updated successfully", Toast.LENGTH_SHORT).show()
+                
+                // Reload settings fragment to show updated info
+                loadSettingsFragmentData()
+
+            } catch (e: Exception) {
+                android.util.Log.e("MainActivity", "Error saving profile changes", e)
+                Toast.makeText(this@MainActivity, "Error updating profile: ${e.message}", Toast.LENGTH_LONG).show()
+            }
+        }
+    }
+
+    /**
+     * Show dialog to change password
+     */
+    private fun showChangePasswordDialog(user: User) {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_change_password, null)
+        val etCurrentPassword = dialogView.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.etCurrentPassword)
+        val etNewPassword = dialogView.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.etNewPassword)
+        val etConfirmPassword = dialogView.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.etConfirmPassword)
+
+        androidx.appcompat.app.AlertDialog.Builder(this@MainActivity)
+            .setTitle("Change Password")
+            .setView(dialogView)
+            .setPositiveButton("Change") { _, _ ->
+                val currentPassword = etCurrentPassword.text?.toString()?.trim().orEmpty()
+                val newPassword = etNewPassword.text?.toString()?.trim().orEmpty()
+                val confirmPassword = etConfirmPassword.text?.toString()?.trim().orEmpty()
+
+                // Validate inputs
+                if (currentPassword.isEmpty() || newPassword.isEmpty() || confirmPassword.isEmpty()) {
+                    Toast.makeText(this@MainActivity, "Please fill in all fields", Toast.LENGTH_SHORT).show()
+                    return@setPositiveButton
+                }
+
+                if (newPassword != confirmPassword) {
+                    Toast.makeText(this@MainActivity, "New passwords do not match", Toast.LENGTH_SHORT).show()
+                    return@setPositiveButton
+                }
+
+                if (!com.example.cheermateapp.util.InputValidationUtil.isValidPassword(newPassword)) {
+                    Toast.makeText(this@MainActivity, "Password must be at least 6 characters", Toast.LENGTH_SHORT).show()
+                    return@setPositiveButton
+                }
+
+                // Change password
+                changePassword(user, currentPassword, newPassword)
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
+    /**
+     * Change user password in the database
+     */
+    private fun changePassword(user: User, currentPassword: String, newPassword: String) {
+        uiScope.launch {
+            try {
+                val success = withContext(Dispatchers.IO) {
+                    val db = AppDb.get(this@MainActivity)
+
+                    // Verify current password
+                    val isCurrentPasswordValid = com.example.cheermateapp.util.PasswordHashUtil.verifyPassword(
+                        currentPassword,
+                        user.PasswordHash
+                    )
+
+                    if (!isCurrentPasswordValid) {
+                        return@withContext false
+                    }
+
+                    // Hash new password
+                    val newHashedPassword = com.example.cheermateapp.util.PasswordHashUtil.hashPassword(newPassword)
+
+                    // Update user
+                    val updatedUser = user.copy(
+                        PasswordHash = newHashedPassword,
+                        UpdatedAt = System.currentTimeMillis()
+                    )
+                    db.userDao().update(updatedUser)
+                    
+                    return@withContext true
+                }
+
+                if (success) {
+                    Toast.makeText(this@MainActivity, "Password changed successfully", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(this@MainActivity, "Current password is incorrect", Toast.LENGTH_SHORT).show()
+                }
+
+            } catch (e: Exception) {
+                android.util.Log.e("MainActivity", "Error changing password", e)
+                Toast.makeText(this@MainActivity, "Error changing password: ${e.message}", Toast.LENGTH_LONG).show()
+            }
+        }
     }
 
     private fun showPersonalitySelectionDialog() {
