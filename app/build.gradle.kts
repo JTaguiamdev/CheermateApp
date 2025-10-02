@@ -61,6 +61,9 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.9.4")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.9.4")
 
+    // BCrypt for password hashing
+    implementation(libs.bcrypt)
+
     // ✅ GSON IS ALREADY HERE! (Version 2.13.2 is newer than 2.10.1)
     implementation("com.google.code.gson:gson:2.13.2")
 
