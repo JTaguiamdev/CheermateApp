@@ -309,7 +309,7 @@ class FragmentTaskActivity : AppCompatActivity() {
                 layoutNavigation.visibility = View.VISIBLE
 
                 // Update counter
-                tvTaskCounter.text = "${currentTaskIndex + 1} / ${filteredTasks.size}"
+                tvTaskCounter.text = "${currentTaskIndex + 1}/${filteredTasks.size}"
 
                 // Enable/disable buttons based on position
                 btnPreviousTask.alpha = if (currentTaskIndex > 0) 1.0f else 0.5f
