@@ -459,30 +459,12 @@
                     android:orientation="horizontal">
 
                     <TextView
-                        android:layout_width="0dp"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
                         android:fontFamily="@font/sf_pro_rounded_bold"
                         android:text="Recent Tasks"
                         android:textColor="@android:color/white"
                         android:textSize="16sp" />
-
-                    <TextView
-                        android:id="@+id/btnAddTaskChip"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:background="@drawable/bg_chip_glass"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:fontFamily="@font/sf_pro_rounded_bold"
-                        android:foreground="?attr/selectableItemBackground"
-                        android:paddingStart="15dp"
-                        android:paddingTop="4dp"
-                        android:paddingEnd="15dp"
-                        android:paddingBottom="4dp"
-                        android:text="@string/addTask"
-                        android:textColor="@android:color/white"
-                        android:textSize="14sp" />
                 </LinearLayout>
 
                 <!-- Content area for dynamically loaded tasks from item_task.xml -->
