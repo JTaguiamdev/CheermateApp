@@ -1090,10 +1090,6 @@ class MainActivity : AppCompatActivity() {
                 navigateToTasks() // Navigate to full task management
             }
 
-            findViewById<TextView>(R.id.btnAddTaskChip)?.setOnClickListener {
-                showQuickAddTaskDialog()
-            }
-
         } catch (e: Exception) {
             android.util.Log.e("MainActivity", "Error setting up home interactions", e)
         }

@@ -8,6 +8,8 @@ import android.text.TextWatcher
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.cheermateapp.data.model.Status
 import androidx.lifecycle.lifecycleScope
 import com.example.cheermateapp.data.db.AppDb
@@ -15,6 +17,7 @@ import com.example.cheermateapp.data.model.Task
 import com.example.cheermateapp.data.model.Priority
 import com.example.cheermateapp.data.model.*
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -28,9 +31,8 @@ class FragmentTaskActivity : AppCompatActivity() {
         const val EXTRA_SHOW_DASHBOARD = "SHOW_DASHBOARD"
     }
 
-    // ✅ Original Variables
+    // UI Components
     private lateinit var tvTasksTitle: TextView
-    private lateinit var btnAddTask: TextView
     private lateinit var tvTasksSub: TextView
     private lateinit var etSearch: EditText
     private lateinit var btnSort: TextView
@@ -39,31 +41,16 @@ class FragmentTaskActivity : AppCompatActivity() {
     private lateinit var tabToday: TextView
     private lateinit var tabPending: TextView
     private lateinit var tabDone: TextView
-    private lateinit var cardEmpty: LinearLayout
+    private lateinit var recyclerViewTasks: RecyclerView
+    private lateinit var tvEmptyState: TextView
+    private lateinit var fabAddTask: FloatingActionButton
 
-    // ✅ NEW: Task display elements
-    private lateinit var tvTaskTitle: TextView
-    private lateinit var tvTaskDescription: TextView
-    private lateinit var tvTaskPriority: TextView
-    private lateinit var tvTaskStatus: TextView
-    private lateinit var tvTaskDueDate: TextView
-    private lateinit var layoutPriority: LinearLayout
-    private lateinit var layoutStatus: LinearLayout
-    private lateinit var layoutDueDate: LinearLayout
-    private lateinit var btnMarkDone: TextView
-
-    // ✅ Navigation elements
-    private lateinit var layoutNavigation: LinearLayout
-    private lateinit var btnPreviousTask: TextView
-    private lateinit var btnNextTask: TextView
-    private lateinit var tvTaskCounter: TextView
-
+    // Data & Adapter
+    private lateinit var taskAdapter: TaskAdapter
     private var currentFilter = FilterType.ALL
     private var userId: Int = 0
     private var currentTasks = mutableListOf<Task>()
     private var allTasks = mutableListOf<Task>()
-    private var currentDisplayedTask: Task? = null
-    private var currentTaskIndex: Int = 0
     private var filteredTasks: List<Task> = emptyList()
 
     enum class FilterType {
@@ -78,6 +65,7 @@ class FragmentTaskActivity : AppCompatActivity() {
         android.util.Log.d("FragmentTaskActivity", "🔍 onCreate: userId = $userId")
 
         initializeViews()
+        setupRecyclerView()
         loadTasks()
         debugAllTasks()
         debugTaskLoading()
@@ -149,12 +137,10 @@ class FragmentTaskActivity : AppCompatActivity() {
         }
     }
 
-    // ✅ UPDATED: Initialize all views including new task display elements
     private fun initializeViews() {
         try {
             // Original views
             tvTasksTitle = findViewById(R.id.tvTasksTitle)
-            btnAddTask = findViewById(R.id.btnAddTask)
             tvTasksSub = findViewById(R.id.tvTasksSub)
             etSearch = findViewById(R.id.etSearch)
             btnSort = findViewById(R.id.btnSort)
@@ -163,24 +149,11 @@ class FragmentTaskActivity : AppCompatActivity() {
             tabToday = findViewById(R.id.tabToday)
             tabPending = findViewById(R.id.tabPending)
             tabDone = findViewById(R.id.tabDone)
-            cardEmpty = findViewById(R.id.cardEmpty)
-
-            // NEW: Initialize task display elements
-            tvTaskTitle = findViewById(R.id.tvTaskTitle)
-            tvTaskDescription = findViewById(R.id.tvTaskDescription)
-            tvTaskPriority = findViewById(R.id.tvTaskPriority)
-            tvTaskStatus = findViewById(R.id.tvTaskStatus)
-            tvTaskDueDate = findViewById(R.id.tvTaskDueDate)
-            layoutPriority = findViewById(R.id.layoutPriority)
-            layoutStatus = findViewById(R.id.layoutStatus)
-            layoutDueDate = findViewById(R.id.layoutDueDate)
-            btnMarkDone = findViewById(R.id.btnMarkDone)
-
-            // ✅ ADD: Navigation elements
-            layoutNavigation = findViewById(R.id.layoutNavigation)
-            btnPreviousTask = findViewById(R.id.btnPreviousTask)
-            btnNextTask = findViewById(R.id.btnNextTask)
-            tvTaskCounter = findViewById(R.id.tvTaskCounter)
+            
+            // NEW: RecyclerView and FAB
+            recyclerViewTasks = findViewById(R.id.recyclerViewTasks)
+            tvEmptyState = findViewById(R.id.tvEmptyState)
+            fabAddTask = findViewById(R.id.fabAddTask)
 
             setupInteractions()
 
@@ -191,10 +164,30 @@ class FragmentTaskActivity : AppCompatActivity() {
         }
     }
 
-    // ✅ FIXED: Setup interactions with proper navigation
+    // ✅ NEW: Setup RecyclerView with adapter
+    private fun setupRecyclerView() {
+        try {
+            taskAdapter = TaskAdapter(
+                tasks = mutableListOf(),
+                onTaskClick = { task -> showTaskDetailsDialog(task) },
+                onTaskComplete = { task -> markTaskAsDone(task) },
+                onTaskEdit = { task -> showTaskQuickActions(task) },
+                onTaskDelete = { task -> deleteTask(task) }
+            )
+            
+            recyclerViewTasks.layoutManager = LinearLayoutManager(this)
+            recyclerViewTasks.adapter = taskAdapter
+            
+            android.util.Log.d("FragmentTaskActivity", "✅ RecyclerView setup complete")
+        } catch (e: Exception) {
+            android.util.Log.e("FragmentTaskActivity", "Error setting up RecyclerView", e)
+        }
+    }
+
+    // ✅ FIXED: Setup interactions with FAB
     private fun setupInteractions() {
         try {
-            btnAddTask.setOnClickListener {
+            fabAddTask.setOnClickListener {
                 showAddTaskDialog()
             }
 
@@ -233,29 +226,6 @@ class FragmentTaskActivity : AppCompatActivity() {
                 android.util.Log.d("FragmentTaskActivity", "🔍 DONE tab clicked")
                 setFilter(FilterType.DONE)
                 updateTabSelection(tabDone)
-            }
-
-            // NEW: Mark as Done button click
-            btnMarkDone.setOnClickListener {
-                currentDisplayedTask?.let { task ->
-                    markTaskAsDone(task)
-                }
-            }
-
-            // ✅ FIXED: Navigation button interactions
-            btnPreviousTask.setOnClickListener {
-                navigateToPreviousTask()
-            }
-
-            btnNextTask.setOnClickListener {
-                navigateToNextTask()
-            }
-
-            // ✅ ADD: Card click to show task details
-            cardEmpty.setOnClickListener {
-                currentDisplayedTask?.let { task ->
-                    showTaskDetailDialog(task)
-                }
             }
 
             updateTabSelection(tabAll)
@@ -329,13 +299,16 @@ class FragmentTaskActivity : AppCompatActivity() {
             filteredTasks = tasks
             currentTasks.clear()
             currentTasks.addAll(tasks)
-            currentTaskIndex = 0 // Reset to first task
 
             if (tasks.isEmpty()) {
                 showEmptyState()
             } else {
-                showTaskInCard(tasks[currentTaskIndex])
-                updateNavigationState()
+                // Update RecyclerView with filtered tasks
+                taskAdapter.updateTasks(tasks)
+                recyclerViewTasks.visibility = View.VISIBLE
+                tvEmptyState.visibility = View.GONE
+                
+                android.util.Log.d("FragmentTaskActivity", "✅ Displayed ${tasks.size} tasks in RecyclerView")
             }
         } catch (e: Exception) {
             android.util.Log.e("FragmentTaskActivity", "Error displaying task in card", e)
@@ -503,31 +476,23 @@ class FragmentTaskActivity : AppCompatActivity() {
     // ✅ FIXED: Corrected showEmptyState method
     private fun showEmptyState() {
         try {
-            currentDisplayedTask = null
             filteredTasks = emptyList()
-            currentTaskIndex = 0
 
             // Show appropriate empty message based on current filter
             val emptyMessage = when (currentFilter) {
-                FilterType.ALL -> "No task available"
-                FilterType.TODAY -> "No task available"
-                FilterType.PENDING -> "No task available"
-                FilterType.DONE -> "No task available"
+                FilterType.ALL -> "📋 No tasks available\n\nTap + to add a new task!"
+                FilterType.TODAY -> "📅 No tasks due today"
+                FilterType.PENDING -> "⏳ No pending tasks"
+                FilterType.DONE -> "✅ No completed tasks"
             }
 
-            // Show title with empty message (centered) and hide all task detail views
-            tvTaskTitle.text = emptyMessage
-            tvTaskTitle.visibility = View.VISIBLE
-            tvTaskTitle.gravity = android.view.Gravity.CENTER
-            tvTaskDescription.visibility = View.GONE
-            layoutPriority.visibility = View.GONE
-            layoutStatus.visibility = View.GONE
-            layoutDueDate.visibility = View.GONE
-            btnMarkDone.visibility = View.GONE
-            layoutNavigation.visibility = View.GONE
+            // Hide RecyclerView and show empty state
+            recyclerViewTasks.visibility = View.GONE
+            tvEmptyState.visibility = View.VISIBLE
+            tvEmptyState.text = emptyMessage
             
-            // ✅ Ensure card is visible even in empty state
-            cardEmpty.visibility = View.VISIBLE
+            // Clear the adapter
+            taskAdapter.updateTasks(emptyList())
 
             android.util.Log.d("FragmentTaskActivity", "📋 Showing empty state: $emptyMessage")
 
