@@ -1829,81 +1829,140 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-    // ✅ FIXED - Declare topRow before using it
+    // ✅ ENHANCED - Use item_task.xml layout instead of programmatic views
     private fun createTaskCard(task: Task, container: LinearLayout?) {
         try {
-            val cardView = LinearLayout(this).apply {
-                orientation = LinearLayout.VERTICAL
-                setPadding(16, 12, 16, 12)
-                background = createRoundedDrawable(android.graphics.Color.parseColor("#2A2A3A"))
-                layoutParams = LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT,
-                    LinearLayout.LayoutParams.WRAP_CONTENT
-                ).apply {
-                    setMargins(0, 0, 0, 12)
-                }
-            }
+            // Inflate the item_task.xml layout
+            val inflater = android.view.LayoutInflater.from(this)
+            val taskItemView = inflater.inflate(R.layout.item_task, container, false)
 
-            // ✅ DECLARE topRow here
-            val topRow = LinearLayout(this).apply {
-                orientation = LinearLayout.HORIZONTAL
-                gravity = android.view.Gravity.CENTER_VERTICAL
-            }
+            // ✅ FIND ALL VIEWS FROM item_task.xml
+            val layoutPriorityIndicator = taskItemView.findViewById<View>(R.id.layoutPriorityIndicator)
+            val tvTaskTitle = taskItemView.findViewById<TextView>(R.id.tvTaskTitle)
+            val tvTaskDescription = taskItemView.findViewById<TextView>(R.id.tvTaskDescription)
+            val tvTaskPriority = taskItemView.findViewById<TextView>(R.id.tvTaskPriority)
+            val tvTaskStatus = taskItemView.findViewById<TextView>(R.id.tvTaskStatus)
+            val tvTaskDueDate = taskItemView.findViewById<TextView>(R.id.tvTaskDueDate)
+            val tvTaskProgress = taskItemView.findViewById<TextView>(R.id.tvTaskProgress)
+            val progressBar = taskItemView.findViewById<android.widget.ProgressBar>(R.id.progressBar)
+            val btnComplete = taskItemView.findViewById<TextView>(R.id.btnComplete)
+            val btnEdit = taskItemView.findViewById<TextView>(R.id.btnEdit)
+            val btnDelete = taskItemView.findViewById<TextView>(R.id.btnDelete)
 
-            // ✅ Now you can use topRow (line 1653 equivalent)
-            val statusEmoji = TextView(this).apply {
-                text = task.getStatusEmoji()
-                textSize = 16f
-                setPadding(0, 0, 12, 0)
-            }
-            topRow.addView(statusEmoji)
+            // ✅ POPULATE VIEWS WITH TASK DATA
+            
+            // 1. Priority Indicator Color
+            layoutPriorityIndicator?.setBackgroundColor(task.getPriorityColor())
 
-            val titleText = TextView(this).apply {
-                text = task.Title
-                textSize = 16f
-                setTextColor(android.graphics.Color.WHITE)
-                setTypeface(null, android.graphics.Typeface.BOLD)
-                layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
-            }
-            topRow.addView(titleText)
+            // 2. Task Title
+            tvTaskTitle.text = task.Title
 
-            val priorityChip = TextView(this).apply {
-                text = task.Priority.toString()
-                textSize = 10f
-                setTextColor(android.graphics.Color.WHITE)
-                setPadding(8, 4, 8, 4)
-                background = createRoundedDrawable(task.getPriorityColor())
-            }
-            topRow.addView(priorityChip)
-
-            // Add topRow to cardView
-            cardView.addView(topRow)
-
-            // Add other elements to cardView...
+            // 3. Task Description
             if (!task.Description.isNullOrBlank()) {
-                val descriptionText = TextView(this).apply {
-                    text = task.Description
-                    textSize = 14f
-                    setTextColor(resources.getColor(android.R.color.darker_gray))
-                    setPadding(0, 8, 0, 0)
+                tvTaskDescription.text = task.Description
+                tvTaskDescription.visibility = View.VISIBLE
+            } else {
+                tvTaskDescription.visibility = View.GONE
+            }
+
+            // 4. Priority with emoji
+            tvTaskPriority.text = when (task.Priority) {
+                com.example.cheermateapp.data.model.Priority.High -> "🔴 High"
+                com.example.cheermateapp.data.model.Priority.Medium -> "🟡 Medium"
+                com.example.cheermateapp.data.model.Priority.Low -> "🟢 Low"
+            }
+
+            // 5. Status with emoji
+            tvTaskStatus.text = when (task.Status) {
+                com.example.cheermateapp.data.model.Status.Pending -> "⏳ Pending"
+                com.example.cheermateapp.data.model.Status.InProgress -> "🔄 In Progress"
+                com.example.cheermateapp.data.model.Status.Completed -> "✅ Completed"
+                com.example.cheermateapp.data.model.Status.OverDue -> "🔴 Overdue"
+                com.example.cheermateapp.data.model.Status.Cancelled -> "❌ Cancelled"
+            }
+
+            // 6. Progress
+            if (tvTaskProgress != null && progressBar != null) {
+                tvTaskProgress.text = "${task.TaskProgress}%"
+                progressBar.progress = task.TaskProgress
+                
+                // Show progress bar for in-progress tasks
+                if (task.Status == com.example.cheermateapp.data.model.Status.InProgress || task.TaskProgress > 0) {
+                    tvTaskProgress.visibility = View.VISIBLE
+                    progressBar.visibility = View.VISIBLE
+                    progressBar.parent?.let { parent ->
+                        (parent as? View)?.visibility = View.VISIBLE
+                    }
+                } else {
+                    tvTaskProgress.visibility = View.GONE
+                    progressBar.visibility = View.GONE
+                    progressBar.parent?.let { parent ->
+                        (parent as? View)?.visibility = View.GONE
+                    }
                 }
-                cardView.addView(descriptionText)
             }
 
-            val dueDateText = TextView(this).apply {
-                text = "📅 ${task.getFormattedDueDateTime()}"
-                textSize = 12f
-                setTextColor(resources.getColor(android.R.color.darker_gray))
-                setPadding(0, 8, 0, 0)
-            }
-            cardView.addView(dueDateText)
+            // 7. Due Date
+            tvTaskDueDate.text = "📅 Due: ${task.getFormattedDueDateTime()}"
 
-            // Add click listener
-            cardView.setOnClickListener {
+            // 8. Button States based on Task Status
+            when (task.Status) {
+                com.example.cheermateapp.data.model.Status.Completed -> {
+                    btnComplete.text = "✅ Completed"
+                    btnComplete.isClickable = false
+                    btnComplete.alpha = 0.6f
+                }
+                com.example.cheermateapp.data.model.Status.Pending -> {
+                    btnComplete.text = "✅ Complete"
+                    btnComplete.isClickable = true
+                    btnComplete.alpha = 1.0f
+                }
+                com.example.cheermateapp.data.model.Status.InProgress -> {
+                    btnComplete.text = "✅ Finish"
+                    btnComplete.isClickable = true
+                    btnComplete.alpha = 1.0f
+                }
+                com.example.cheermateapp.data.model.Status.OverDue -> {
+                    btnComplete.text = "🔴 Complete"
+                    btnComplete.isClickable = true
+                    btnComplete.alpha = 1.0f
+                }
+                com.example.cheermateapp.data.model.Status.Cancelled -> {
+                    btnComplete.text = "❌ Cancelled"
+                    btnComplete.isClickable = false
+                    btnComplete.alpha = 0.6f
+                }
+            }
+
+            // ✅ SET UP CLICK LISTENERS FOR ACTION BUTTONS
+
+            // Complete Button
+            btnComplete.setOnClickListener {
+                if (task.Status != com.example.cheermateapp.data.model.Status.Completed && 
+                    task.Status != com.example.cheermateapp.data.model.Status.Cancelled) {
+                    markTaskAsDone(task)
+                }
+            }
+
+            // Edit Button
+            btnEdit.setOnClickListener {
+                showTaskQuickActions(task)
+            }
+
+            // Delete Button
+            btnDelete.setOnClickListener {
+                deleteTask(task)
+            }
+
+            // ✅ ADD MAIN CARD CLICK LISTENER
+            taskItemView.setOnClickListener {
                 showTaskDetailsDialog(task)
             }
 
-            container?.addView(cardView)
+            // ✅ ADD THE INFLATED VIEW TO CONTAINER
+            container?.addView(taskItemView)
+
+            android.util.Log.d("MainActivity", "✅ Successfully inflated and populated item_task.xml")
 
         } catch (e: Exception) {
             android.util.Log.e("MainActivity", "Error creating task card", e)
