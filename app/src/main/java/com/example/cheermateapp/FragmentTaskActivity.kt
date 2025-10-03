@@ -358,12 +358,15 @@ class FragmentTaskActivity : AppCompatActivity() {
             tvTaskTitle.visibility = View.VISIBLE
             tvTaskTitle.gravity = android.view.Gravity.START // Reset to left alignment for tasks
             
-            // Show or hide description based on whether it exists
+            // Show description if it exists, otherwise show placeholder
             if (!task.Description.isNullOrBlank()) {
                 tvTaskDescription.text = task.Description
                 tvTaskDescription.visibility = View.VISIBLE
+                tvTaskDescription.alpha = 0.8f
             } else {
-                tvTaskDescription.visibility = View.GONE
+                tvTaskDescription.text = "No description available"
+                tvTaskDescription.visibility = View.VISIBLE
+                tvTaskDescription.alpha = 0.5f // Lower opacity for placeholder
             }
             
             // Display priority with emoji and color
