@@ -1,6 +1,8 @@
 package com.example.cheermateapp.data.model
 
 import androidx.room.*
+import com.example.cheermateapp.data.model.Priority
+import com.example.cheermateapp.data.model.Status
 
 /**
  * TaskTemplate model for reusable task templates
