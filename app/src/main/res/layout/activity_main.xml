@@ -507,7 +507,7 @@
     <!-- Bottom navigation (3 items) -->
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNav"
-        android:layout_width="320dp"
+        android:layout_width="312dp"
         android:layout_height="60dp"
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="1dp"

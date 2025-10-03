@@ -60,6 +60,8 @@
     <string name="overdue">● Overdue</string>
     <string name="pending">● Pending</string>
     <string name="addTask">+</string>
+    <string name="task_title">Task Title</string>
+    <string name="avatar">Avatar</string>
 
 
 </resources>

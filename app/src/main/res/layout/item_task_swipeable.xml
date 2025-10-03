@@ -3,9 +3,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="16dp"
-    android:background="@drawable/gradient_background"
-    android:layout_margin="8dp"
     android:elevation="4dp">
 
     <!-- Priority indicator bar -->
@@ -22,7 +19,7 @@
         android:id="@+id/tvTaskTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Task Title"
+        android:text="@string/task_title"
         android:textColor="@android:color/white"
         android:textSize="18sp"
         android:fontFamily="@font/sf_pro_rounded_bold"/>

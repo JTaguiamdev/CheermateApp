@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="12dp">
+    android:padding="20dp">
 
 
     <LinearLayout
@@ -66,8 +66,8 @@
                     android:layout_width="42dp"
                     android:layout_height="42dp"
                     android:background="@drawable/bg_avatar_ring"
-                    android:contentDescription="Avatar"
-                    android:src="@android:drawable/ic_menu_myplaces" />
+                    android:contentDescription="@string/avatar"
+                    android:src="@drawable/ic_avatar_sample"  />
 
                 <LinearLayout
                     android:layout_width="0dp"
