@@ -12,12 +12,12 @@
     <!-- Top app bar -->
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
-        android:layout_width="370dp"
+        android:layout_width="350dp"
         android:layout_height="?attr/actionBarSize"
         android:layout_gravity="center"
-        android:layout_marginBottom="5dp"
+        android:layout_marginBottom="1dp"
         android:background="@drawable/bg_card_glass"
-        android:elevation="4dp"
+        android:elevation="0dp"
         android:theme="@style/ThemeOverlay.MaterialComponents.Dark.ActionBar">
 
         <!--  Toolbar -->
@@ -90,7 +90,7 @@
             <LinearLayout
                 android:id="@+id/cardCalendar"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:background="@drawable/bg_card_glass_hover"
                 android:clickable="true"
                 android:elevation="2dp"
@@ -112,7 +112,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:fontFamily="@font/sf_pro_rounded_bold"
-                        android:text="Quick Schedule"
+                        android:text="@string/quick_schedule"
                         android:textColor="@android:color/white"
                         android:textSize="14sp" />
 
@@ -126,7 +126,7 @@
                         android:paddingTop="4dp"
                         android:paddingRight="10dp"
                         android:paddingBottom="4dp"
-                        android:text="Tap to add"
+                        android:text="@string/tap_to_add"
                         android:textColor="@android:color/white"
                         android:textSize="12sp" />
                 </LinearLayout>
@@ -135,12 +135,10 @@
                 <LinearLayout
                     android:id="@+id/calendarPlaceholder"
                     android:layout_width="match_parent"
-                    android:layout_height="315dp"
-                    android:layout_marginTop="10dp"
-                    android:layout_marginBottom="8dp"
-
+                    android:layout_height="290dp"
                     android:orientation="vertical"
-                    android:layout_margin="10dp">
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="10dp">
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -148,7 +146,7 @@
                         android:layout_marginTop="130dp"
                         android:layout_gravity="center"
                         android:fontFamily="@font/sf_pro_rounded_bold"
-                        android:text="Calendar"
+                        android:text="@string/calendar"
                         android:textColor="@android:color/white"
                         android:textSize="20sp" />
                 </LinearLayout>
@@ -156,7 +154,7 @@
                 <!-- Legend row (Done | Pending | Overdue) -->
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:gravity="center"
                     android:orientation="horizontal"
                     android:layout_margin="10dp">
@@ -165,8 +163,8 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:fontFamily="@font/sf_pro_rounded_bold"
-                        android:paddingRight="12dp"
-                        android:text="● Done"
+                        android:paddingEnd="12dp"
+                        android:text="@string/done"
                         android:textColor="#52E39E"
                         android:textSize="12sp" />
 
@@ -174,8 +172,8 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:fontFamily="@font/sf_pro_rounded_bold"
-                        android:paddingRight="12dp"
-                        android:text="● Pending"
+                        android:paddingEnd="12dp"
+                        android:text="@string/pending"
                         android:textColor="#6BB6FF"
                         android:textSize="12sp" />
 
@@ -183,7 +181,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:fontFamily="@font/sf_pro_rounded_bold"
-                        android:text="● Overdue"
+                        android:text="@string/overdue"
                         android:textColor="#FF6B6B"
                         android:textSize="12sp" />
                 </LinearLayout>
@@ -478,11 +476,11 @@
                         android:focusable="true"
                         android:fontFamily="@font/sf_pro_rounded_bold"
                         android:foreground="?attr/selectableItemBackground"
-                        android:paddingLeft="10dp"
+                        android:paddingStart="15dp"
                         android:paddingTop="4dp"
-                        android:paddingRight="10dp"
+                        android:paddingEnd="15dp"
                         android:paddingBottom="4dp"
-                        android:text="+"
+                        android:text="@string/addTask"
                         android:textColor="@android:color/white"
                         android:textSize="14sp" />
                 </LinearLayout>
@@ -509,7 +507,7 @@
     <!-- Bottom navigation (3 items) -->
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNav"
-        android:layout_width="wrap_content"
+        android:layout_width="320dp"
         android:layout_height="60dp"
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="1dp"
@@ -517,6 +515,6 @@
         app:itemGravity="center"
         app:itemIconTint="@android:color/white"
         app:itemTextColor="@android:color/white"
-        app:labelVisibilityMode="unlabeled"
+        app:labelVisibilityMode="selected"
         app:menu="@menu/menu_bottom_nav" />
 </LinearLayout>

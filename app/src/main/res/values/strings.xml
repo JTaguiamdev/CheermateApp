@@ -53,6 +53,13 @@
     <string name="enter_username">Enter Username</string>
     <string name="select_security_question">Select Security Question</string>
     <string name="enter_security_answer">Enter Security Answer</string>
+    <string name="tap_to_add">Tap to add</string>
+    <string name="quick_schedule">Quick Schedule</string>
+    <string name="calendar">Calendar</string>
+    <string name="done">● Done</string>
+    <string name="overdue">● Overdue</string>
+    <string name="pending">● Pending</string>
+    <string name="addTask">+</string>
 
 
 </resources>
