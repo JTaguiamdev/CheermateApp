@@ -41,7 +41,7 @@ data class TaskTemplate(
     val TaskDescription: String? = null,
 
     @ColumnInfo(name = "Priority")
-    val Priority: Priority = Priority.Medium,
+    val Priority: Priority = com.example.cheermateapp.data.model.Priority.Medium,
 
     @ColumnInfo(name = "EstimatedDuration")
     val EstimatedDuration: Int? = null, // Duration in minutes

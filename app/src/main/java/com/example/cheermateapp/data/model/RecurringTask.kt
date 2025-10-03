@@ -44,7 +44,7 @@ data class RecurringTask(
     val Description: String? = null,
 
     @ColumnInfo(name = "Priority")
-    val Priority: Priority = Priority.Medium,
+    val Priority: Priority = com.example.cheermateapp.data.model.Priority.Medium,
 
     @ColumnInfo(name = "Frequency")
     val Frequency: RecurringFrequency = RecurringFrequency.DAILY,
