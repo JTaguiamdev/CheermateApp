@@ -308,8 +308,8 @@ class FragmentTaskActivity : AppCompatActivity() {
                 // Show navigation if multiple tasks
                 layoutNavigation.visibility = View.VISIBLE
 
-                // Update counter
-                tvTaskCounter.text = "${currentTaskIndex + 1}/${filteredTasks.size}"
+                // Update counter with space for better readability
+                tvTaskCounter.text = "${currentTaskIndex + 1} / ${filteredTasks.size}"
 
                 // Enable/disable buttons based on position
                 btnPreviousTask.alpha = if (currentTaskIndex > 0) 1.0f else 0.5f
@@ -358,12 +358,15 @@ class FragmentTaskActivity : AppCompatActivity() {
             tvTaskTitle.visibility = View.VISIBLE
             tvTaskTitle.gravity = android.view.Gravity.START // Reset to left alignment for tasks
             
-            // Show or hide description based on whether it exists
+            // Show description if it exists, otherwise show placeholder
             if (!task.Description.isNullOrBlank()) {
                 tvTaskDescription.text = task.Description
                 tvTaskDescription.visibility = View.VISIBLE
+                tvTaskDescription.alpha = 0.8f
             } else {
-                tvTaskDescription.visibility = View.GONE
+                tvTaskDescription.text = "No description available"
+                tvTaskDescription.visibility = View.VISIBLE
+                tvTaskDescription.alpha = 0.5f // Lower opacity for placeholder
             }
             
             // Display priority with emoji and color
@@ -442,26 +445,32 @@ class FragmentTaskActivity : AppCompatActivity() {
         }
     }
 
-    private fun Task.getFormattedDueDateTime(): String? {
+    private fun Task.getFormattedDueDateTime(): String {
         return try {
             if (DueAt != null) {
                 val dateStr = DueAt
-                val timeStr = DueTime ?: "00:00"
-
+                val timeStr = DueTime
+                
+                // Parse and format the date
                 val inputFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
                 val outputFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
                 val date = inputFormat.parse(dateStr)
-
                 val formattedDate = if (date != null) outputFormat.format(date) else dateStr
-                val formattedTime = if (timeStr != "00:00") " at $timeStr" else ""
-
+                
+                // Format time if available
+                val formattedTime = if (!timeStr.isNullOrBlank() && timeStr != "00:00") {
+                    " at $timeStr"
+                } else {
+                    ""
+                }
+                
                 "$formattedDate$formattedTime"
             } else {
-                null
+                "No due date"
             }
         } catch (e: Exception) {
-            android.util.Log.e("Task", "Error formatting date: ${e.message}")
-            null
+            android.util.Log.e("Task", "Error formatting date: ${e.message}", e)
+            "Date not available"
         }
     }
 
