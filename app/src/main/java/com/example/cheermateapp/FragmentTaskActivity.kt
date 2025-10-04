@@ -153,6 +153,7 @@ class FragmentTaskActivity : AppCompatActivity() {
             // NEW: RecyclerView and related views
             recyclerViewTasks = findViewById(R.id.recyclerViewTasks)
             tvEmptyState = findViewById(R.id.tvEmptyState)
+            fabAddTask = findViewById(R.id.fabAddTask)
 
             // Setup RecyclerView
             recyclerViewTasks.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(this)

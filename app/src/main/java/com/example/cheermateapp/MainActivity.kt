@@ -696,9 +696,217 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun onTaskEdit(task: Task) {
-        // Navigate to edit task screen or show edit dialog
-        Toast.makeText(this, "Edit task: ${task.Title}", Toast.LENGTH_SHORT).show()
-        // TODO: Implement edit functionality
+        try {
+            val dialogLayout = LinearLayout(this).apply {
+                orientation = LinearLayout.VERTICAL
+                setPadding(60, 40, 60, 20)
+            }
+
+            // Title Input (pre-filled)
+            val etTitle = EditText(this).apply {
+                hint = "Task Title (Required)"
+                inputType = android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_FLAG_CAP_SENTENCES
+                setText(task.Title)
+                setPadding(20, 20, 20, 20)
+                setBackgroundResource(android.R.drawable.edit_text)
+            }
+
+            // Description Input (pre-filled)
+            val etDescription = EditText(this).apply {
+                hint = "Description (Optional)"
+                inputType = android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_FLAG_MULTI_LINE or android.text.InputType.TYPE_TEXT_FLAG_CAP_SENTENCES
+                setText(task.Description ?: "")
+                setPadding(20, 20, 20, 20)
+                setBackgroundResource(android.R.drawable.edit_text)
+                minLines = 3
+            }
+
+            // Priority Spinner
+            val tvPriorityLabel = TextView(this).apply {
+                text = "Priority:"
+                setPadding(0, 20, 0, 10)
+                textSize = 14f
+            }
+
+            val spinnerPriority = Spinner(this).apply {
+                adapter = ArrayAdapter(
+                    this@MainActivity,
+                    android.R.layout.simple_spinner_dropdown_item,
+                    arrayOf("Low", "Medium", "High")
+                )
+                // Set current priority
+                setSelection(when (task.Priority) {
+                    Priority.Low -> 0
+                    Priority.Medium -> 1
+                    Priority.High -> 2
+                })
+                setPadding(20, 10, 20, 10)
+            }
+
+            // Status Spinner
+            val tvStatusLabel = TextView(this).apply {
+                text = "Status:"
+                setPadding(0, 20, 0, 10)
+                textSize = 14f
+            }
+
+            val spinnerStatus = Spinner(this).apply {
+                adapter = ArrayAdapter(
+                    this@MainActivity,
+                    android.R.layout.simple_spinner_dropdown_item,
+                    arrayOf("Pending", "In Progress", "Completed", "Cancelled")
+                )
+                // Set current status
+                setSelection(when (task.Status) {
+                    Status.Pending -> 0
+                    Status.InProgress -> 1
+                    Status.Completed -> 2
+                    Status.Cancelled -> 3
+                    Status.OverDue -> 0 // Default to Pending
+                })
+                setPadding(20, 10, 20, 10)
+            }
+
+            // Progress Slider
+            val tvProgressLabel = TextView(this).apply {
+                text = "Progress: ${task.TaskProgress}%"
+                setPadding(0, 20, 0, 10)
+                textSize = 14f
+            }
+
+            val seekBarProgress = SeekBar(this).apply {
+                max = 100
+                progress = task.TaskProgress
+                setPadding(20, 10, 20, 10)
+                setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+                    override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                        tvProgressLabel.text = "Progress: $progress%"
+                    }
+                    override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+                    override fun onStopTrackingTouch(seekBar: SeekBar?) {}
+                })
+            }
+
+            // Date and Time Layout
+            val dateTimeLayout = LinearLayout(this).apply {
+                orientation = LinearLayout.HORIZONTAL
+                setPadding(0, 20, 0, 0)
+            }
+
+            val etDueDate = EditText(this).apply {
+                hint = "Due Date"
+                isFocusable = false
+                isClickable = true
+                setText(task.DueAt ?: "")
+                setPadding(20, 20, 20, 20)
+                setBackgroundResource(android.R.drawable.edit_text)
+                layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f).apply {
+                    setMargins(0, 0, 10, 0)
+                }
+                setOnClickListener { showDatePicker(this) }
+            }
+
+            val etDueTime = EditText(this).apply {
+                hint = "Due Time"
+                isFocusable = false
+                isClickable = true
+                setText(task.DueTime ?: "")
+                setPadding(20, 20, 20, 20)
+                setBackgroundResource(android.R.drawable.edit_text)
+                layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f).apply {
+                    setMargins(10, 0, 0, 0)
+                }
+                setOnClickListener { showTimePicker(this) }
+            }
+
+            dateTimeLayout.addView(etDueDate)
+            dateTimeLayout.addView(etDueTime)
+
+            // Add all views to dialog
+            dialogLayout.addView(etTitle)
+            dialogLayout.addView(etDescription)
+            dialogLayout.addView(tvPriorityLabel)
+            dialogLayout.addView(spinnerPriority)
+            dialogLayout.addView(tvStatusLabel)
+            dialogLayout.addView(spinnerStatus)
+            dialogLayout.addView(tvProgressLabel)
+            dialogLayout.addView(seekBarProgress)
+            dialogLayout.addView(dateTimeLayout)
+
+            val dialog = AlertDialog.Builder(this)
+                .setTitle("Edit Task")
+                .setView(dialogLayout)
+                .setPositiveButton("Update Task", null)
+                .setNegativeButton("Cancel", null)
+                .create()
+
+            dialog.setOnShowListener {
+                val updateButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+                updateButton.setOnClickListener {
+                    val title = etTitle.text.toString().trim()
+                    val description = etDescription.text.toString().trim()
+                    val dueDate = etDueDate.text.toString().trim()
+                    val dueTime = etDueTime.text.toString().trim()
+
+                    if (title.isEmpty()) {
+                        etTitle.error = "Title is required"
+                        Toast.makeText(this, "Please enter a task title", Toast.LENGTH_SHORT).show()
+                        return@setOnClickListener
+                    }
+
+                    val priority = when (spinnerPriority.selectedItemPosition) {
+                        0 -> Priority.Low
+                        1 -> Priority.Medium
+                        2 -> Priority.High
+                        else -> Priority.Medium
+                    }
+
+                    val status = when (spinnerStatus.selectedItemPosition) {
+                        0 -> Status.Pending
+                        1 -> Status.InProgress
+                        2 -> Status.Completed
+                        3 -> Status.Cancelled
+                        else -> Status.Pending
+                    }
+
+                    val progress = seekBarProgress.progress
+
+                    // Update task in database
+                    uiScope.launch {
+                        try {
+                            val db = AppDb.get(this@MainActivity)
+                            withContext(Dispatchers.IO) {
+                                val updatedTask = task.copy(
+                                    Title = title,
+                                    Description = description.ifEmpty { null },
+                                    Priority = priority,
+                                    Status = status,
+                                    TaskProgress = progress,
+                                    DueAt = dueDate.ifEmpty { null },
+                                    DueTime = dueTime.ifEmpty { null },
+                                    UpdatedAt = System.currentTimeMillis()
+                                )
+                                db.taskDao().update(updatedTask)
+                            }
+
+                            Toast.makeText(this@MainActivity, "✅ Task updated successfully!", Toast.LENGTH_SHORT).show()
+                            loadTasksFragmentData() // Refresh the task list
+                            dialog.dismiss()
+
+                        } catch (e: Exception) {
+                            android.util.Log.e("MainActivity", "Error updating task", e)
+                            Toast.makeText(this@MainActivity, "Failed to update task", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }
+            }
+
+            dialog.show()
+
+        } catch (e: Exception) {
+            android.util.Log.e("MainActivity", "Error showing edit dialog", e)
+            Toast.makeText(this, "Error opening edit dialog", Toast.LENGTH_SHORT).show()
+        }
     }
 
     private fun onTaskDelete(task: Task) {
