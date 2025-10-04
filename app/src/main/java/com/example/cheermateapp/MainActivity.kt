@@ -371,7 +371,6 @@ class MainActivity : AppCompatActivity() {
         try {
             // Initialize all task fragment components
             val tvTasksTitle = findViewById<TextView>(R.id.tvTasksTitle)
-            val btnAddTask = findViewById<TextView>(R.id.btnAddTask)
             val tvTasksSub = findViewById<TextView>(R.id.tvTasksSub)
             val etSearch = findViewById<EditText>(R.id.etSearch)
             val btnSort = findViewById<TextView>(R.id.btnSort)
@@ -380,12 +379,7 @@ class MainActivity : AppCompatActivity() {
             val tabToday = findViewById<TextView>(R.id.tabToday)
             val tabPending = findViewById<TextView>(R.id.tabPending)
             val tabDone = findViewById<TextView>(R.id.tabDone)
-            val cardEmpty = findViewById<LinearLayout>(R.id.cardEmpty)
 
-            // Setup task fragment interactions
-            btnAddTask?.setOnClickListener {
-                showQuickAddTaskDialog()
-            }
 
             btnSort?.setOnClickListener {
                 showSortOptionsDialog()
@@ -555,10 +549,6 @@ class MainActivity : AppCompatActivity() {
                 findViewById<TextView>(R.id.tabToday)?.text = "Today (${counts["today"]})"
                 findViewById<TextView>(R.id.tabPending)?.text = "Pending (${counts["pending"]})"
                 findViewById<TextView>(R.id.tabDone)?.text = "Done (${counts["done"]})"
-
-                // Update empty state
-                val cardEmpty = findViewById<LinearLayout>(R.id.cardEmpty)
-                cardEmpty?.visibility = if (currentTasks.isEmpty()) View.VISIBLE else View.GONE
 
                 // Show task list (simplified - you can enhance this)
                 displayTasksList()
@@ -1090,11 +1080,7 @@ class MainActivity : AppCompatActivity() {
                 navigateToTasks() // Navigate to full task management
             }
 
-            findViewById<TextView>(R.id.btnAddTaskChip)?.setOnClickListener {
-                showQuickAddTaskDialog()
-            }
-
-        } catch (e: Exception) {
+           } catch (e: Exception) {
             android.util.Log.e("MainActivity", "Error setting up home interactions", e)
         }
     }
