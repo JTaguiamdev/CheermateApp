@@ -521,6 +521,5 @@
         android:backgroundTint="#6B48FF"
         android:elevation="6dp"
         android:src="@android:drawable/ic_input_add"
-        android:tint="@android:color/background_dark"
         app:borderWidth="0dp" />
 </FrameLayout>
