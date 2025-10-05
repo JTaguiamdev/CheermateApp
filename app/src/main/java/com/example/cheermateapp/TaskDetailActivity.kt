@@ -185,7 +185,7 @@ class TaskDetailActivity : AppCompatActivity() {
                     try {
                         val db = AppDb.get(this@TaskDetailActivity)
                         withContext(Dispatchers.IO) {
-                            db.taskDao().updateTaskStatus(task.Task_ID, Status.Completed)
+                            db.taskDao().updateTaskStatus(task.User_ID, task.Task_ID, "Completed")
                         }
                         Toast.makeText(this@TaskDetailActivity, "✅ Task marked as done!", Toast.LENGTH_SHORT).show()
                         
