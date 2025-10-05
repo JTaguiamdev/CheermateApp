@@ -15,6 +15,7 @@
         android:id="@+id/priorityIndicator"
         android:layout_width="4dp"
         android:layout_height="match_parent"
+        android:layout_marginStart="10dp"
         android:layout_marginEnd="12dp"
         android:background="#FFE53E3E" />
 
