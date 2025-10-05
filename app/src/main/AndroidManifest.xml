@@ -52,6 +52,12 @@
             android:exported="false"
             android:theme="@style/Theme.Material3.DayNight.NoActionBar" />
 
+        <!-- Task Detail Activity -->
+        <activity
+            android:name=".TaskDetailActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Material3.DayNight.NoActionBar" />
+
         <!-- Reminder Broadcast Receiver -->
         <receiver
             android:name=".receiver.ReminderReceiver"

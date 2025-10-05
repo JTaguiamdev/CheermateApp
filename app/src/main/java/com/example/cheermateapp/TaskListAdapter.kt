@@ -1,6 +1,7 @@
 package com.example.cheermateapp
 
 import android.app.DatePickerDialog
+import android.content.Intent
 import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
@@ -102,94 +103,18 @@ class TaskListAdapter(
             holder.tvDueDate.visibility = View.GONE
         }
 
-        // Handle expand/collapse
-        holder.layoutCollapsed.visibility = if (isExpanded) View.GONE else View.VISIBLE
-        holder.layoutExpanded.visibility = if (isExpanded) View.VISIBLE else View.GONE
+        // Handle expand/collapse (disabled - no longer used)
+        holder.layoutCollapsed.visibility = View.VISIBLE
+        holder.layoutExpanded.visibility = View.GONE
 
-        // Click on item view to toggle expand/collapse
+        // Click on item view to open TaskDetailActivity
         holder.itemView.setOnClickListener {
-            val previousExpandedPosition = expandedPosition
-            if (isExpanded) {
-                expandedPosition = -1
-            } else {
-                expandedPosition = holder.adapterPosition
+            val context = holder.itemView.context
+            val intent = Intent(context, TaskDetailActivity::class.java).apply {
+                putExtra(TaskDetailActivity.EXTRA_TASK_ID, task.Task_ID)
+                putExtra(TaskDetailActivity.EXTRA_USER_ID, task.User_ID)
             }
-            
-            notifyItemChanged(previousExpandedPosition)
-            notifyItemChanged(holder.adapterPosition)
-        }
-
-        if (isExpanded) {
-            // Track selected values
-            var selectedCategory = task.Category
-            var selectedPriority = task.Priority
-            var selectedDueDate = task.DueAt
-
-            // Highlight current selections
-            highlightCategoryButton(holder, selectedCategory)
-            highlightPriorityButton(holder, selectedPriority)
-
-            // Category selection
-            holder.btnCategoryWork.setOnClickListener {
-                selectedCategory = Category.Work
-                highlightCategoryButton(holder, selectedCategory)
-            }
-            holder.btnCategoryPersonal.setOnClickListener {
-                selectedCategory = Category.Personal
-                highlightCategoryButton(holder, selectedCategory)
-            }
-            holder.btnCategoryShopping.setOnClickListener {
-                selectedCategory = Category.Shopping
-                highlightCategoryButton(holder, selectedCategory)
-            }
-            holder.btnCategoryOthers.setOnClickListener {
-                selectedCategory = Category.Others
-                highlightCategoryButton(holder, selectedCategory)
-            }
-
-            // Priority selection
-            holder.btnPriorityLow.setOnClickListener {
-                selectedPriority = Priority.Low
-                highlightPriorityButton(holder, selectedPriority)
-            }
-            holder.btnPriorityMedium.setOnClickListener {
-                selectedPriority = Priority.Medium
-                highlightPriorityButton(holder, selectedPriority)
-            }
-            holder.btnPriorityHigh.setOnClickListener {
-                selectedPriority = Priority.High
-                highlightPriorityButton(holder, selectedPriority)
-            }
-
-            // Due date selection
-            holder.btnDueDateToday.setOnClickListener {
-                val today = Calendar.getInstance()
-                val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-                selectedDueDate = dateFormat.format(today.time)
-                highlightDueDateButton(holder, "today")
-            }
-
-            holder.btnDueDateTomorrow.setOnClickListener {
-                val tomorrow = Calendar.getInstance()
-                tomorrow.add(Calendar.DAY_OF_YEAR, 1)
-                val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-                selectedDueDate = dateFormat.format(tomorrow.time)
-                highlightDueDateButton(holder, "tomorrow")
-            }
-
-            holder.btnDueDateCustom.setOnClickListener {
-                showCustomDatePicker(holder, task) { date ->
-                    selectedDueDate = date
-                    highlightDueDateButton(holder, "custom")
-                }
-            }
-
-            // Save changes
-            holder.btnSaveChanges.setOnClickListener {
-                onTaskUpdate(task, selectedCategory, selectedPriority, selectedDueDate)
-                expandedPosition = -1
-                notifyItemChanged(holder.adapterPosition)
-            }
+            context.startActivity(intent)
         }
     }
 
