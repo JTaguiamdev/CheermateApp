@@ -1763,7 +1763,7 @@ class MainActivity : AppCompatActivity() {
 
                 if (tasks.isEmpty()) {
                     val emptyText = TextView(this)
-                    emptyText.text = "🎉 No pending tasks!\nTap + to create your first task!"
+                    emptyText.text = "🎉 No pending tasks!\nTap to create your first task!"
                     emptyText.textSize = 14f
                     emptyText.setTextColor(resources.getColor(android.R.color.white))
                     emptyText.gravity = android.view.Gravity.CENTER
