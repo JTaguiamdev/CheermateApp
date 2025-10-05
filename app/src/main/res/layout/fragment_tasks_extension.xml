@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <!-- Overdue Badge and Postpone Button Row -->
+    <LinearLayout
+        android:id="@+id/overdue_row"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="8dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:background="@drawable/overdue_bg"
+        android:layout_marginBottom="16dp">
+
+        <TextView
+            android:id="@+id/overdue_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Overdue by 11 days"
+            android:textColor="#D0021B"
+            android:textStyle="bold"
+            android:drawableLeft="@drawable/ic_clock"
+            android:drawablePadding="8dp"
+            android:paddingEnd="16dp"/>
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1"/>
+
+        <Button
+            android:id="@+id/postpone_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Postpone"
+            android:textColor="#D0021B"
+            android:background="@android:color/transparent"/>
+    </LinearLayout>
+
+    <!-- Task Card -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/task_card"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:cardCornerRadius="16dp"
+        app:layout_constraintTop_toBottomOf="@id/overdue_row"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <TextView
+                android:id="@+id/task_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Tasks Title"
+                android:fontFamily="@font/sf_pro_rounded_regular"
+                android:textSize="18sp"
+                android:textColor="#222222"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/task_desc"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Tasks Description"
+                android:fontFamily="@font/sf_pro_rounded_regular"
+                android:textSize="14sp"
+                android:textColor="#555555"
+                android:layout_marginTop="8dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="16dp">
+
+                <!-- Category -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Others"
+                    android:textColor="#D49BF8"
+                    android:background="@drawable/category_bg"
+                    android:padding="4dp"
+                    android:layout_marginEnd="8dp"/>
+
+                <!-- Priority -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Medium"
+                    android:textColor="#D49BF8"
+                    android:background="@drawable/category_bg"
+                    android:padding="4dp"
+                    android:layout_marginEnd="8dp"/>
+
+                <!-- Date -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="9/24/2025"
+                    android:textColor="#D49BF8"
+                    android:background="@drawable/category_bg"
+                    android:padding="4dp"/>
+            </LinearLayout>
+
+            <!-- Reminder (disabled) -->
+            <TextView
+                android:id="@+id/reminder_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Reminder"
+                android:textColor="#DDDDEE"
+                android:background="@drawable/reminder_bg"
+                android:padding="4dp"
+                android:layout_marginTop="8dp"
+                android:enabled="false"/>
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+    <!-- Subtasks Section -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/subtask_card"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:cardCornerRadius="16dp"
+        app:layout_constraintTop_toBottomOf="@id/task_card"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="16dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Subtasks"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="#222222" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Subtask title"
+                android:textSize="14sp"
+                android:textColor="#888888"
+                android:layout_marginTop="8dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="No subtasks yet"
+                android:textSize="14sp"
+                android:textColor="#888888"
+                android:layout_marginTop="8dp" />
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
