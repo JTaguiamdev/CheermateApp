@@ -23,7 +23,6 @@ import com.example.cheermateapp.data.model.Task
 import com.example.cheermateapp.data.model.Priority
 import com.example.cheermateapp.data.model.User
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -318,9 +317,6 @@ class MainActivity : AppCompatActivity() {
             container?.removeAllViews()
             container?.visibility = View.GONE
             
-            // Hide FAB when not on tasks fragment
-            findViewById<FloatingActionButton>(R.id.fabAddTaskMain)?.visibility = View.GONE
-            
         } catch (e: Exception) {
             android.util.Log.e("MainActivity", "Error showing home screen", e)
         }
@@ -361,9 +357,6 @@ class MainActivity : AppCompatActivity() {
             val container = findViewById<FrameLayout>(R.id.contentContainer)
             container?.removeAllViews()
             container?.visibility = View.VISIBLE
-
-            // Hide FAB when not on tasks fragment
-            findViewById<FloatingActionButton>(R.id.fabAddTaskMain)?.visibility = View.GONE
 
             // Inflate settings fragment layout into the container
             LayoutInflater.from(this).inflate(R.layout.fragment_settings, container, true)
@@ -407,14 +400,6 @@ class MainActivity : AppCompatActivity() {
                 onTaskDelete = { task -> onTaskDelete(task) }
             )
             taskRecyclerView?.adapter = taskAdapter
-
-
-            // ✅ Show FAB in activity_main when on tasks fragment
-            val fabAddTaskMain = findViewById<FloatingActionButton>(R.id.fabAddTaskMain)
-            fabAddTaskMain?.visibility = View.VISIBLE
-            fabAddTaskMain?.setOnClickListener {
-                showQuickAddTaskDialog()
-            }
 
             btnSort?.setOnClickListener {
                 showSortOptionsDialog()

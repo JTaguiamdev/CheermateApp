@@ -45,6 +45,9 @@ class FragmentTaskActivity : AppCompatActivity() {
     private lateinit var recyclerViewTasks: RecyclerView
     private lateinit var tvEmptyState: TextView
     private lateinit var taskListAdapter: TaskListAdapter
+    
+    // FAB button
+    private lateinit var fabAddTask: com.google.android.material.floatingactionbutton.FloatingActionButton
 
     private var currentFilter = FilterType.ALL
     private var userId: Int = 0
@@ -153,6 +156,9 @@ class FragmentTaskActivity : AppCompatActivity() {
             recyclerViewTasks = findViewById(R.id.recyclerViewTasks)
             tvEmptyState = findViewById(R.id.tvEmptyState)
 
+            // FAB button
+            fabAddTask = findViewById(R.id.fabAddTask)
+
             // Setup RecyclerView
             recyclerViewTasks.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(this)
             taskListAdapter = TaskListAdapter(emptyList()) { task ->
@@ -172,6 +178,11 @@ class FragmentTaskActivity : AppCompatActivity() {
     // ✅ FIXED: Setup interactions with proper navigation
     private fun setupInteractions() {
         try {
+            // FAB click listener
+            fabAddTask.setOnClickListener {
+                showAddTaskDialog()
+            }
+
             btnSort.setOnClickListener {
                 showSortOptionsDialog()
             }
