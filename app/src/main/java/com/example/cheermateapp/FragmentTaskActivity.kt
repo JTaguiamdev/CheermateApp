@@ -48,6 +48,11 @@ class FragmentTaskActivity : AppCompatActivity() {
     
     // FAB button
     private lateinit var fabAddTask: com.google.android.material.floatingactionbutton.FloatingActionButton
+    
+    // Progress card elements
+    private var progressSubtitle: TextView? = null
+    private var progressPercent: TextView? = null
+    private var progressFill: View? = null
 
     private var currentFilter = FilterType.ALL
     private var userId: Int = 0
@@ -158,6 +163,11 @@ class FragmentTaskActivity : AppCompatActivity() {
 
             // FAB button
             fabAddTask = findViewById(R.id.fabAddTask)
+            
+            // Progress card elements (optional - may not exist in all layouts)
+            progressSubtitle = findViewById(R.id.progressSubtitle)
+            progressPercent = findViewById(R.id.progressPercent)
+            progressFill = findViewById(R.id.progressFill)
 
             // Setup RecyclerView
             recyclerViewTasks.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(this)
@@ -623,10 +633,35 @@ class FragmentTaskActivity : AppCompatActivity() {
 
                 val totalTasks = counts["all"] ?: 0
                 tvTasksSub.text = "$totalTasks total tasks"
+                
+                // ✅ Update progress card
+                updateProgressCard(counts["done"] ?: 0, counts["all"] ?: 0)
 
             } catch (e: Exception) {
                 android.util.Log.e("FragmentTaskActivity", "Error updating tab counts", e)
             }
+        }
+    }
+    
+    // ✅ NEW: Update progress card with completion percentage
+    private fun updateProgressCard(completed: Int, total: Int) {
+        try {
+            val percentage = if (total > 0) (completed * 100) / total else 0
+            
+            progressSubtitle?.text = "$completed of $total tasks completed"
+            progressPercent?.text = "$percentage%"
+            
+            // Update progress bar fill using weight
+            progressFill?.layoutParams?.let { params ->
+                if (params is LinearLayout.LayoutParams) {
+                    params.weight = percentage.coerceAtLeast(0).toFloat()
+                    progressFill?.layoutParams = params
+                }
+            }
+            
+            android.util.Log.d("FragmentTaskActivity", "✅ Progress updated: $percentage% ($completed/$total)")
+        } catch (e: Exception) {
+            android.util.Log.e("FragmentTaskActivity", "Error updating progress card", e)
         }
     }
 

@@ -2307,15 +2307,28 @@ class MainActivity : AppCompatActivity() {
                 val formattedDate = dateFormat.format(calendar.time)
 
                 if (tasksForDate.isNotEmpty()) {
-                    val taskTitles = tasksForDate.take(3).joinToString("\n") { "• ${it.Title}" }
-                    val message = if (tasksForDate.size > 3) {
-                        "$taskTitles\n...and ${tasksForDate.size - 3} more tasks"
+                    // ✅ ENHANCED: Show tasks with priority colored dots
+                    val taskDetails = tasksForDate.joinToString("\n") { task ->
+                        val priorityDot = when (task.Priority) {
+                            Priority.High -> "🔴"
+                            Priority.Medium -> "🟠"
+                            Priority.Low -> "🟢"
+                        }
+                        "$priorityDot ${task.Title}"
+                    }
+
+                    // Get highest priority for the date
+                    val highestPriority = com.example.cheermateapp.util.CalendarDecorator.getHighestPriority(tasksForDate)
+                    val priorityIndicator = com.example.cheermateapp.util.CalendarDecorator.getPriorityDot(highestPriority)
+                    
+                    val message = if (tasksForDate.size > 5) {
+                        "${taskDetails.split("\n").take(5).joinToString("\n")}\n...and ${tasksForDate.size - 5} more tasks"
                     } else {
-                        taskTitles
+                        taskDetails
                     }
 
                     AlertDialog.Builder(this@MainActivity)
-                        .setTitle("Tasks for $formattedDate")
+                        .setTitle("$priorityIndicator Tasks for $formattedDate")
                         .setMessage(message)
                         .setPositiveButton("View All") { _, _ -> navigateToTasks() }
                         .setNegativeButton("Close", null)

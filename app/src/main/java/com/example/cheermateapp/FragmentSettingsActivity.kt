@@ -334,7 +334,94 @@ class FragmentSettingsActivity : AppCompatActivity() {
     }
 
     private fun showProfileEditDialog() {
-        Toast.makeText(this, "👤 Profile editing coming soon!", Toast.LENGTH_SHORT).show()
+        val options = arrayOf("Change Profile Picture", "Edit Name", "Cancel")
+        
+        android.app.AlertDialog.Builder(this)
+            .setTitle("Edit Profile")
+            .setItems(options) { _, which ->
+                when (which) {
+                    0 -> showProfilePictureOptions()
+                    1 -> showEditNameDialog()
+                    2 -> {} // Cancel - do nothing
+                }
+            }
+            .show()
+    }
+    
+    private fun showProfilePictureOptions() {
+        val options = arrayOf("Take Photo", "Choose from Gallery", "Remove Picture", "Cancel")
+        
+        android.app.AlertDialog.Builder(this)
+            .setTitle("Profile Picture")
+            .setItems(options) { _, which ->
+                when (which) {
+                    0 -> {
+                        // Take photo functionality
+                        Toast.makeText(this, "📸 Camera feature coming soon!", Toast.LENGTH_SHORT).show()
+                    }
+                    1 -> {
+                        // Choose from gallery functionality
+                        Toast.makeText(this, "🖼️ Gallery picker coming soon!", Toast.LENGTH_SHORT).show()
+                    }
+                    2 -> {
+                        // Remove picture - set to default
+                        com.example.cheermateapp.util.ProfileImageManager.deleteProfileImage(this, userId)
+                        Toast.makeText(this, "✅ Profile picture reset to default", Toast.LENGTH_SHORT).show()
+                        loadSettingsUserData() // Reload to show default
+                    }
+                    3 -> {} // Cancel
+                }
+            }
+            .show()
+    }
+    
+    private fun showEditNameDialog() {
+        val editText = android.widget.EditText(this)
+        editText.inputType = android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_FLAG_CAP_WORDS
+        editText.hint = "Enter new name"
+        
+        lifecycleScope.launch {
+            try {
+                val db = AppDb.get(this@FragmentSettingsActivity)
+                val currentUser = withContext(Dispatchers.IO) {
+                    db.userDao().getById(userId)
+                }
+                editText.setText(currentUser?.Username ?: "")
+            } catch (e: Exception) {
+                android.util.Log.e("FragmentSettingsActivity", "Error loading current username", e)
+            }
+        }
+        
+        android.app.AlertDialog.Builder(this)
+            .setTitle("Edit Name")
+            .setView(editText)
+            .setPositiveButton("Save") { _, _ ->
+                val newName = editText.text.toString().trim()
+                if (newName.isNotEmpty()) {
+                    updateUserName(newName)
+                } else {
+                    Toast.makeText(this, "Name cannot be empty", Toast.LENGTH_SHORT).show()
+                }
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+    
+    private fun updateUserName(newName: String) {
+        lifecycleScope.launch {
+            try {
+                val db = AppDb.get(this@FragmentSettingsActivity)
+                withContext(Dispatchers.IO) {
+                    db.userDao().updateUsername(userId, newName)
+                }
+                
+                Toast.makeText(this@FragmentSettingsActivity, "✅ Name updated!", Toast.LENGTH_SHORT).show()
+                loadSettingsUserData()
+                
+            } catch (e: Exception) {
+                Toast.makeText(this@FragmentSettingsActivity, "❌ Error updating name", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
     private fun showPersonalitySelectionDialog() {
