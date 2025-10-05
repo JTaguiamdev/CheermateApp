@@ -107,12 +107,12 @@ class TaskListAdapter(
         holder.layoutCollapsed.visibility = View.VISIBLE
         holder.layoutExpanded.visibility = View.GONE
 
-        // Click on item view to open TaskDetailActivity
+        // Click on item view to open FragmentTaskExtensionActivity
         holder.itemView.setOnClickListener {
             val context = holder.itemView.context
-            val intent = Intent(context, TaskDetailActivity::class.java).apply {
-                putExtra(TaskDetailActivity.EXTRA_TASK_ID, task.Task_ID)
-                putExtra(TaskDetailActivity.EXTRA_USER_ID, task.User_ID)
+            val intent = Intent(context, FragmentTaskExtensionActivity::class.java).apply {
+                putExtra(FragmentTaskExtensionActivity.EXTRA_TASK_ID, task.Task_ID)
+                putExtra(FragmentTaskExtensionActivity.EXTRA_USER_ID, task.User_ID)
             }
             context.startActivity(intent)
         }

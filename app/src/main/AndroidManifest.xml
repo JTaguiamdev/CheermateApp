@@ -58,6 +58,12 @@
             android:exported="false"
             android:theme="@style/Theme.Material3.DayNight.NoActionBar" />
 
+        <!-- Fragment Task Extension Activity -->
+        <activity
+            android:name=".FragmentTaskExtensionActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Material3.DayNight.NoActionBar" />
+
         <!-- Reminder Broadcast Receiver -->
         <receiver
             android:name=".receiver.ReminderReceiver"
