@@ -470,7 +470,6 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupSettingsFragment() {
         try {
-            // Initialize all settings fragment components
             val tvProfileName = findViewById<TextView>(R.id.tvProfileName)
             val tvProfileEmail = findViewById<TextView>(R.id.tvProfileEmail)
             val tvCurrentPersona = findViewById<TextView>(R.id.tvCurrentPersona)
