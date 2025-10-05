@@ -39,6 +39,9 @@ interface UserDao {
 
     @Query("UPDATE User SET Personality_ID = :personalityId WHERE User_ID = :userId")
     suspend fun updatePersonality(userId: Int, personalityId: Int)
+    
+    @Query("UPDATE User SET Username = :username WHERE User_ID = :userId")
+    suspend fun updateUsername(userId: Int, username: String)
 
     @Query("SELECT COUNT(*) FROM User")
     suspend fun getUserCount(): Int

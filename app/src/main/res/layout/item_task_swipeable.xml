@@ -6,6 +6,7 @@
     android:elevation="4dp"
     android:background="@drawable/gradient_background">
 
+
     <!-- Priority indicator bar -->
     <View
         android:id="@+id/layoutPriorityIndicator"
