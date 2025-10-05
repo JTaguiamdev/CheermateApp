@@ -475,8 +475,10 @@
                     android:minHeight="120dp"
                     android:gravity="center" />
             </LinearLayout>
+
         </LinearLayout>
     </ScrollView>
+
 
     <!-- SECONDARY SCREENS: container for Tasks/Settings -->
     <FrameLayout
