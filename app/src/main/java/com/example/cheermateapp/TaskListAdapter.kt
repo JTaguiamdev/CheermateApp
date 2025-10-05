@@ -253,7 +253,7 @@ class TaskListAdapter(
 
         val datePickerDialog = DatePickerDialog(
             context,
-            R.style.CustomCalendarTheme,
+            R.style.CustomDatePickerTheme,
             { _, year, month, dayOfMonth ->
                 val selectedCalendar = Calendar.getInstance()
                 selectedCalendar.set(year, month, dayOfMonth)

@@ -171,9 +171,15 @@ class FragmentTaskActivity : AppCompatActivity() {
 
             // Setup RecyclerView
             recyclerViewTasks.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(this)
-            taskListAdapter = TaskListAdapter(emptyList()) { task ->
-                showTaskDetailsDialog(task)
-            }
+            taskListAdapter = TaskListAdapter(
+                emptyList(),
+                onTaskClick = { task ->
+                    showTaskDetailsDialog(task)
+                },
+                onTaskUpdate = { task, category, priority, dueDate ->
+                    updateTask(task, category, priority, dueDate)
+                }
+            )
             recyclerViewTasks.adapter = taskListAdapter
 
             setupInteractions()
@@ -269,6 +275,36 @@ class FragmentTaskActivity : AppCompatActivity() {
 
 
     // ✅ NEW: Mark task as done (UPDATE OPERATION)
+    // ✅ UPDATE TASK WITH CATEGORY, PRIORITY, AND DUE DATE
+    private fun updateTask(task: Task, category: Category?, priority: Priority?, dueDate: String?) {
+        lifecycleScope.launch {
+            try {
+                val db = AppDb.get(this@FragmentTaskActivity)
+                withContext(Dispatchers.IO) {
+                    // Create updated task
+                    val updatedTask = task.copy(
+                        Category = category ?: task.Category,
+                        Priority = priority ?: task.Priority,
+                        DueAt = dueDate ?: task.DueAt,
+                        UpdatedAt = System.currentTimeMillis()
+                    )
+                    
+                    // Update in database
+                    db.taskDao().update(updatedTask)
+                }
+
+                Toast.makeText(this@FragmentTaskActivity, "✅ Task '${task.Title}' updated!", Toast.LENGTH_SHORT).show()
+
+                // Reload current filter to refresh display
+                filterTasks(currentFilter)
+
+            } catch (e: Exception) {
+                android.util.Log.e("FragmentTaskActivity", "Error updating task", e)
+                Toast.makeText(this@FragmentTaskActivity, "Error updating task", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
     private fun markTaskAsDone(task: Task) {
         lifecycleScope.launch {
             try {
