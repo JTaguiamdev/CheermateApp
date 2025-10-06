@@ -14,9 +14,11 @@ import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.core.view.WindowCompat
 import androidx.lifecycle.lifecycleScope
 import com.example.cheermateapp.data.db.AppDb
 import com.example.cheermateapp.data.model.*
+import com.example.cheermateapp.util.WindowInsetsUtil
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -56,6 +58,10 @@ class FragmentTaskExtensionActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        
+        // Enable edge-to-edge display
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        
         setContentView(R.layout.fragment_tasks_extension)
 
         // Get data from intent
@@ -69,9 +75,26 @@ class FragmentTaskExtensionActivity : AppCompatActivity() {
         }
 
         initializeViews()
+        setupWindowInsets()
         setupListeners()
         loadTaskDetails()
         loadSubtasks()
+    }
+
+    /**
+     * Setup WindowInsets for edge-to-edge display
+     */
+    private fun setupWindowInsets() {
+        // Apply status bar insets to the root container
+        val rootView = findViewById<LinearLayout>(R.id.fragmentTaskExtensionRoot)
+        rootView?.let {
+            WindowInsetsUtil.applyStatusBarInsets(it)
+        }
+        
+        // Alternative: Apply to toolbar if preferred
+        toolbar?.let {
+            WindowInsetsUtil.applyStatusBarInsets(it)
+        }
     }
 
     private fun initializeViews() {

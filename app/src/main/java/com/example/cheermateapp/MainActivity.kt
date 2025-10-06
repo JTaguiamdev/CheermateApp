@@ -15,6 +15,8 @@ import android.widget.*
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
@@ -23,6 +25,7 @@ import com.example.cheermateapp.data.model.Personality
 import com.example.cheermateapp.data.model.Task
 import com.example.cheermateapp.data.model.Priority
 import com.example.cheermateapp.data.model.User
+import com.example.cheermateapp.util.WindowInsetsUtil
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -54,12 +57,18 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // Enable edge-to-edge display
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+
         try {
             val showDashboard = intent?.getBooleanExtra(EXTRA_SHOW_DASHBOARD, false) == true
             userId = intent?.getStringExtra(EXTRA_USER_ID)?.toIntOrNull() ?: 0
 
             if (showDashboard && userId != 0) {
                 setContentView(R.layout.activity_main)
+
+                // Apply WindowInsets for edge-to-edge support
+                setupWindowInsets()
 
                 setupToolbar()
                 setupGreeting()
@@ -87,6 +96,32 @@ class MainActivity : AppCompatActivity() {
             android.util.Log.e("MainActivity", "Critical error in onCreate", e)
             Toast.makeText(this, "Loading dashboard...", Toast.LENGTH_SHORT).show()
             createFallbackLayout()
+        }
+    }
+
+    /**
+     * Setup WindowInsets for edge-to-edge display
+     * Applies dynamic padding for status bar and navigation bar
+     */
+    private fun setupWindowInsets() {
+        val mainContainer = findViewById<LinearLayout>(R.id.mainContainer)
+        
+        // Apply status bar insets to the toolbar
+        val toolbar = findViewById<Toolbar>(R.id.toolbar)
+        toolbar?.let {
+            WindowInsetsUtil.applyStatusBarInsets(it)
+        }
+        
+        // Apply navigation bar insets to the bottom navigation
+        val bottomNav = findViewById<BottomNavigationView>(R.id.bottomNav)
+        bottomNav?.let {
+            WindowInsetsUtil.applyNavigationBarInsets(it)
+        }
+        
+        // Apply insets to FAB so it doesn't overlap navigation bar
+        val fab = findViewById<com.google.android.material.floatingactionbutton.FloatingActionButton>(R.id.fabAddTask)
+        fab?.let {
+            WindowInsetsUtil.applyNavigationBarInsets(it)
         }
     }
 
