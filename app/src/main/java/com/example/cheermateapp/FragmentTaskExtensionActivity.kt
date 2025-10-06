@@ -238,7 +238,7 @@ class FragmentTaskExtensionActivity : AppCompatActivity() {
                 )
                 
                 withContext(Dispatchers.IO) {
-                    db.taskDao().updateTask(updatedTask)
+                    db.taskDao().update(updatedTask)
                 }
                 
                 currentTask = updatedTask
