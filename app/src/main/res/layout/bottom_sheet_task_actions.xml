@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:background="@drawable/bg_card_glass"
+    android:background="@drawable/bg_card_glass_hover"
     android:padding="16dp">
 
     <!-- Bottom Sheet Header -->
@@ -30,7 +30,7 @@
         android:gravity="center_vertical"
         android:paddingStart="16dp"
         android:paddingEnd="16dp"
-        android:background="?attr/selectableItemBackground"
+        android:background="@drawable/bg_card_glass_hover"
         android:clickable="true"
         android:focusable="true">
 
@@ -61,7 +61,7 @@
         android:gravity="center_vertical"
         android:paddingStart="16dp"
         android:paddingEnd="16dp"
-        android:background="?attr/selectableItemBackground"
+        android:background="@drawable/bg_card_glass_hover"
         android:clickable="true"
         android:focusable="true">
 
@@ -92,7 +92,7 @@
         android:gravity="center_vertical"
         android:paddingStart="16dp"
         android:paddingEnd="16dp"
-        android:background="?attr/selectableItemBackground"
+        android:background="@drawable/bg_card_glass_hover"
         android:clickable="true"
         android:focusable="true">
 
