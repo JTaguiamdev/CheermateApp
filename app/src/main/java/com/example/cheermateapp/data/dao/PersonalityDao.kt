@@ -2,6 +2,8 @@ package com.example.cheermateapp.data.dao
 
 import androidx.room.*
 import com.example.cheermateapp.data.model.Personality
+import androidx.room.Dao
+import androidx.room.Query
 
 @Dao
 interface PersonalityDao {
@@ -31,7 +33,7 @@ interface PersonalityDao {
 
     // ✅ USER-BASED QUERIES
     @Query("SELECT * FROM Personality WHERE User_ID = :userId LIMIT 1")
-    suspend fun getByUserId(userId: Int): Personality?
+    suspend fun getByUser(userId: Int): Personality?
 
     // ✅ JOIN QUERY FOR PERSONALITY VIA USER TABLE
     @Query("""

@@ -32,7 +32,7 @@ class TaskHelper(private val taskDao: TaskDao) {
 
     suspend fun getOverdueTasksForUser(userId: Int): Int {
         val today = getCurrentDateString()
-        return taskDao.getOverdueTasksCount(userId, today)
+        return taskDao.getOverdueTasksCount(userId)
     }
 
     suspend fun getCompletedTodayTasksForUser(userId: Int): Int {

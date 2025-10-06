@@ -30,15 +30,15 @@ class TaskAdapter(
         val tvDueDate: TextView = itemView.findViewById(R.id.tvTaskDueDate)
         val tvProgress: TextView? = itemView.findViewById(R.id.tvTaskProgress)
         val progressBar: ProgressBar? = itemView.findViewById(R.id.progressBar)
-        val btnComplete: View = itemView.findViewById(R.id.btnComplete) // Can be TextView or ImageView
-        val btnEdit: View = itemView.findViewById(R.id.btnEdit)
-        val btnDelete: View = itemView.findViewById(R.id.btnDelete)
-        val layoutPriorityIndicator: View? = itemView.findViewById(R.id.layoutPriorityIndicator)
+        val btnComplete: View? = itemView.findViewById(R.id.btnComplete) // Can be TextView or ImageView
+        val btnEdit: View? = itemView.findViewById(R.id.btnEdit)
+        val btnDelete: View? = itemView.findViewById(R.id.btnDelete)
+        val layoutPriorityIndicator: View? = itemView.findViewById(R.id.priorityIndicator)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TaskViewHolder {
         val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.item_task, parent, false)
+            .inflate(R.layout.item_task_list, parent, false)
         return TaskViewHolder(view)
     }
 
@@ -84,22 +84,22 @@ class TaskAdapter(
         // Set up click listeners
         holder.itemView.setOnClickListener { onTaskClick(task) }
 
-        holder.btnComplete.setOnClickListener {
+        holder.btnComplete?.setOnClickListener {
             if (task.Status != Status.Completed) {
                 onTaskComplete(task)
             }
         }
 
-        holder.btnEdit.setOnClickListener { onTaskEdit(task) }
-        holder.btnDelete.setOnClickListener { onTaskDelete(task) }
+        holder.btnEdit?.setOnClickListener { onTaskEdit(task) }
+        holder.btnDelete?.setOnClickListener { onTaskDelete(task) }
 
         // Update button states for completed tasks
         if (task.Status == Status.Completed) {
-            holder.btnComplete.alpha = 0.3f
-            holder.btnComplete.isEnabled = false
+            holder.btnComplete?.alpha = 0.3f
+            holder.btnComplete?.isEnabled = false
         } else {
-            holder.btnComplete.alpha = 1.0f
-            holder.btnComplete.isEnabled = true
+            holder.btnComplete?.alpha = 1.0f
+            holder.btnComplete?.isEnabled = true
         }
     }
 

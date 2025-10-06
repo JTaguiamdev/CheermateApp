@@ -13,10 +13,45 @@
     </style>
 
     <!-- Custom Calendar Theme -->
-    <style name="CustomCalendarTheme" parent="ThemeOverlay.MaterialComponents.Light">
-        <item name="colorAccent">@android:color/holo_blue_bright</item>
-        <item name="colorPrimary">@android:color/white</item>
+    <style name="CustomCalendarTheme" parent="ThemeOverlay.MaterialComponents.MaterialCalendar">
+        <item name="colorPrimary">@color/calendar_today</item>
+        <item name="colorOnPrimary">@android:color/white</item>
+        <item name="colorSurface">@color/gradient_start</item>
+        <item name="colorOnSurface">@android:color/white</item>
+        <item name="materialCalendarStyle">@style/CustomMaterialCalendarStyle</item>
+        <item name="materialCalendarHeaderConfirmButton">@style/CustomCalendarButton</item>
+        <item name="materialCalendarHeaderCancelButton">@style/CustomCalendarButton</item>
+    </style>
+
+    <style name="CustomMaterialCalendarStyle" parent="Widget.MaterialComponents.MaterialCalendar">
+        <item name="daySelectedStyle">@style/CustomDaySelected</item>
+        <item name="dayTodayStyle">@style/CustomDayToday</item>
+    </style>
+
+    <style name="CustomDaySelected" parent="Widget.MaterialComponents.MaterialCalendar.Day.Selected">
+        <item name="itemFillColor">@color/calendar_selected</item>
+        <item name="itemTextColor">@android:color/white</item>
+        <item name="itemStrokeColor">@color/calendar_selected</item>
+        <item name="itemStrokeWidth">2dp</item>
+    </style>
+
+    <style name="CustomDayToday" parent="Widget.MaterialComponents.MaterialCalendar.Day.Today">
+        <item name="itemFillColor">@color/calendar_today</item>
+        <item name="itemTextColor">@android:color/white</item>
+        <item name="itemStrokeColor">@color/calendar_today</item>
+        <item name="itemStrokeWidth">2dp</item>
+    </style>
+
+    <style name="CustomCalendarButton" parent="Widget.MaterialComponents.Button.TextButton">
+        <item name="android:textColor">@android:color/white</item>
+    </style>
+
+    <!-- Custom Date Picker Style for DatePickerDialog -->
+    <style name="CustomDatePickerTheme" parent="Theme.MaterialComponents.Light.Dialog">
+        <item name="colorPrimary">@color/calendar_today</item>
+        <item name="colorAccent">@color/calendar_selected</item>
         <item name="android:textColorPrimary">@android:color/white</item>
+        <item name="android:windowBackground">@drawable/gradient_background</item>
         <item name="android:datePickerStyle">@style/CustomDatePickerStyle</item>
     </style>
 

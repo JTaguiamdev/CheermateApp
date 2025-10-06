@@ -7,7 +7,8 @@ import com.example.cheermateapp.data.model.DataManagement
 import com.example.cheermateapp.data.model.NotificationPref
 import com.example.cheermateapp.data.model.StatisticsPref
 import com.example.cheermateapp.data.model.Priority
-import com.example.cheermateapp.data.model.Status  // ✅ ADD THIS IMPORT
+import com.example.cheermateapp.data.model.Status
+import com.example.cheermateapp.data.model.Category  // ✅ ADD THIS IMPORT
 import com.google.gson.Gson
 import java.util.Date
 
@@ -52,6 +53,21 @@ class AppTypeConverters(private val gson: Gson) {
             status?.let { Status.valueOf(it) }
         } catch (e: IllegalArgumentException) {
             Status.Pending // Default fallback
+        }
+    }
+
+    // ✅ CATEGORY ENUM CONVERTERS
+    @TypeConverter
+    fun fromTaskCategory(category: Category?): String? {
+        return category?.name
+    }
+
+    @TypeConverter
+    fun toTaskCategory(category: String?): Category? {
+        return try {
+            category?.let { Category.valueOf(it) }
+        } catch (e: IllegalArgumentException) {
+            Category.Work // Default fallback
         }
     }
 

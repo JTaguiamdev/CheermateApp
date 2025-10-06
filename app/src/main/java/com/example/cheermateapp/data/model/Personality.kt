@@ -5,6 +5,7 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import com.example.cheermateapp.data.model.Personality
 
 @Entity(
     tableName = "Personality",

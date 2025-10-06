@@ -1,7 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+<LinearLayout
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/gradient_background"
@@ -12,15 +17,15 @@
     <!-- Top app bar -->
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
-        android:layout_width="370dp"
+        android:layout_width="350dp"
         android:layout_height="?attr/actionBarSize"
         android:layout_gravity="center"
-        android:layout_marginBottom="5dp"
+        android:layout_marginBottom="1dp"
         android:background="@drawable/bg_card_glass"
-        android:elevation="4dp"
-        android:theme="@style/ThemeOverlay.MaterialComponents.Dark.ActionBar">
+        android:elevation="0dp"
+        android:theme="@style/ThemeOverlay.Material3.ActionBar">
 
-        <!-- Custom content inside the Toolbar -->
+        <!--  Toolbar -->
         <LinearLayout
             android:id="@+id/toolbarContent"
             android:layout_width="match_parent"
@@ -90,7 +95,7 @@
             <LinearLayout
                 android:id="@+id/cardCalendar"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:background="@drawable/bg_card_glass_hover"
                 android:clickable="true"
                 android:elevation="2dp"
@@ -104,7 +109,7 @@
                     android:layout_height="wrap_content"
                     android:gravity="center_vertical"
                     android:orientation="horizontal"
-                    android:padding="10dp">
+                    android:padding="20dp">
 
                     <TextView
                         android:id="@+id/quickScheduleTitle"
@@ -112,7 +117,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:fontFamily="@font/sf_pro_rounded_bold"
-                        android:text="Quick Schedule"
+                        android:text="@string/quick_schedule"
                         android:textColor="@android:color/white"
                         android:textSize="14sp" />
 
@@ -126,7 +131,7 @@
                         android:paddingTop="4dp"
                         android:paddingRight="10dp"
                         android:paddingBottom="4dp"
-                        android:text="Tap to add"
+                        android:text="@string/tap_to_add"
                         android:textColor="@android:color/white"
                         android:textSize="12sp" />
                 </LinearLayout>
@@ -135,12 +140,10 @@
                 <LinearLayout
                     android:id="@+id/calendarPlaceholder"
                     android:layout_width="match_parent"
-                    android:layout_height="315dp"
-                    android:layout_marginTop="10dp"
-                    android:layout_marginBottom="8dp"
-                    android:background="#1AFFFFFF"
+                    android:layout_height="290dp"
                     android:orientation="vertical"
-                    android:layout_margin="10dp">
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginRight="20dp">
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -148,7 +151,7 @@
                         android:layout_marginTop="130dp"
                         android:layout_gravity="center"
                         android:fontFamily="@font/sf_pro_rounded_bold"
-                        android:text="Calendar"
+                        android:text="@string/calendar"
                         android:textColor="@android:color/white"
                         android:textSize="20sp" />
                 </LinearLayout>
@@ -156,17 +159,17 @@
                 <!-- Legend row (Done | Pending | Overdue) -->
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:gravity="center"
                     android:orientation="horizontal"
-                    android:layout_margin="10dp">
+                    android:layout_margin="20dp">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:fontFamily="@font/sf_pro_rounded_bold"
-                        android:paddingRight="12dp"
-                        android:text="● Done"
+                        android:paddingEnd="20dp"
+                        android:text="@string/done"
                         android:textColor="#52E39E"
                         android:textSize="12sp" />
 
@@ -174,8 +177,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:fontFamily="@font/sf_pro_rounded_bold"
-                        android:paddingRight="12dp"
-                        android:text="● Pending"
+                        android:text="@string/pending"
                         android:textColor="#6BB6FF"
                         android:textSize="12sp" />
 
@@ -183,8 +185,9 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:fontFamily="@font/sf_pro_rounded_bold"
-                        android:text="● Overdue"
+                        android:text="@string/overdue"
                         android:textColor="#FF6B6B"
+                        android:paddingStart="20dp"
                         android:textSize="12sp" />
                 </LinearLayout>
             </LinearLayout>
@@ -209,7 +212,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/sf_pro_rounded_bold"
-                    android:text="Kalog Vibes"
+                    android:text="@string/personality_type"
                     android:textColor="@android:color/white"
                     android:textSize="16sp" />
 
@@ -220,7 +223,7 @@
                     android:fontFamily="@font/sf_pro_rounded_regular"
                     android:paddingTop="2dp"
                     android:paddingBottom="10dp"
-                    android:text="The funny friend who makes everything entertaining!"
+                    android:text="@string/personality_description_goes_here"
                     android:textColor="@color/text_secondary_white_70"
                     android:textSize="12sp" />
 
@@ -401,7 +404,7 @@
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/sf_pro_rounded_regular"
                     android:paddingTop="6dp"
-                    android:text="0 of 0 tasks completed"
+                    android:text="@string/_0_of_0_tasks_completed"
                     android:textColor="@color/text_secondary_white_70"
                     android:textSize="12sp" />
 
@@ -417,15 +420,15 @@
                         android:id="@+id/progressFill"
                         android:layout_width="0dp"
                         android:layout_height="match_parent"
-                        android:layout_weight="25"
+                        android:layout_weight="0"
                         android:background="#A686F5FF" />
-                </LinearLayout>
 
-                <!-- remainder (transparent spacer) -->
-                <View
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="75" />
+                    <!-- remainder (transparent spacer) -->
+                    <View
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="100" />
+                </LinearLayout>
 
                 <TextView
                     android:id="@+id/progressPercent"
@@ -461,48 +464,26 @@
                     android:orientation="horizontal">
 
                     <TextView
-                        android:layout_width="0dp"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
                         android:fontFamily="@font/sf_pro_rounded_bold"
-                        android:text="Recent Tasks"
+                        android:text="@string/recent_tasks"
                         android:textColor="@android:color/white"
                         android:textSize="16sp" />
-
-                    <TextView
-                        android:id="@+id/btnAddTaskChip"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:background="@drawable/bg_chip_glass"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:fontFamily="@font/sf_pro_rounded_bold"
-                        android:foreground="?attr/selectableItemBackground"
-                        android:paddingLeft="10dp"
-                        android:paddingTop="4dp"
-                        android:paddingRight="10dp"
-                        android:paddingBottom="4dp"
-                        android:text="+"
-                        android:textColor="@android:color/white"
-                        android:textSize="14sp" />
                 </LinearLayout>
 
+                <!-- Content area for dynamically loaded tasks from item_task.xml -->
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="120dp"
-                    android:gravity="center">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="@font/sf_pro_rounded_regular"
-                        android:text="No tasks yet. Create your first task to get started!"
-                        android:textColor="@color/text_secondary_white_70"
-                        android:textSize="12sp" />
-                </LinearLayout>
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:minHeight="120dp"
+                    android:gravity="center" />
             </LinearLayout>
+
         </LinearLayout>
     </ScrollView>
+
 
     <!-- SECONDARY SCREENS: container for Tasks/Settings -->
     <FrameLayout
@@ -512,10 +493,12 @@
         android:layout_weight="1"
         android:visibility="gone" />
 
+
+
     <!-- Bottom navigation (3 items) -->
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNav"
-        android:layout_width="wrap_content"
+        android:layout_width="312dp"
         android:layout_height="60dp"
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="1dp"
@@ -523,6 +506,21 @@
         app:itemGravity="center"
         app:itemIconTint="@android:color/white"
         app:itemTextColor="@android:color/white"
-        app:labelVisibilityMode="unlabeled"
+        app:labelVisibilityMode="selected"
         app:menu="@menu/menu_bottom_nav" />
 </LinearLayout>
+
+    <!-- Floating Action Button for adding tasks -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabAddTask"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_marginEnd="20dp"
+        android:layout_marginBottom="100dp"
+        android:backgroundTint="#6B48FF"
+        android:elevation="6dp"
+        android:src="@android:drawable/ic_input_add"
+        android:tint="@android:color/background_dark"
+        app:borderWidth="0dp" />
+</FrameLayout>

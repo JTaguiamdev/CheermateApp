@@ -1,13 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@drawable/gradient_background"
-    android:orientation="vertical"
-    android:padding="12dp">
+    android:layout_height="match_parent">
 
-    <!-- Header row: Title + add button -->
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:paddingLeft="20dp"
+    android:paddingRight="20dp">
+
+    <!-- Header row: Title only (add button removed, now using FAB) -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -17,26 +21,13 @@
 
         <TextView
             android:id="@+id/tvTasksTitle"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:fontFamily="@font/sf_pro_rounded_bold"
             android:text="@string/tasks"
+            android:paddingStart="10dp"
             android:textColor="@android:color/white"
             android:textSize="18sp" />
-
-        <TextView
-            android:id="@+id/btnAddTask"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            android:background="@drawable/bg_chip_glass"
-            android:clickable="true"
-            android:focusable="true"
-            android:fontFamily="@font/sf_pro_rounded_bold"
-            android:gravity="center"
-            android:text="@string/add"
-            android:textColor="@android:color/white"
-            android:textSize="16sp" />
     </LinearLayout>
 
     <!-- Sub line: total tasks -->
@@ -46,10 +37,13 @@
         android:layout_height="wrap_content"
         android:fontFamily="@font/sf_pro_rounded_regular"
         android:paddingTop="2dp"
+        android:paddingStart="10dp"
         android:paddingBottom="6dp"
         android:text="@string/_0_total_tasks"
         android:textColor="@color/text_secondary_white_70"
         android:textSize="12sp" />
+
+    <!-- Daily Progress Card -->
 
     <!-- Search + sort glass card -->
     <LinearLayout
@@ -65,7 +59,6 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="40dp"
-            android:background="#1AFFFFFF"
             android:gravity="center_vertical"
             android:orientation="horizontal"
             android:paddingHorizontal="10dp">
@@ -182,228 +175,35 @@
         </LinearLayout>
     </HorizontalScrollView>
 
-    <!-- Task Display Card (replaces empty state) -->
-    <LinearLayout
-        android:id="@+id/cardEmpty"
+    <!-- Tasks RecyclerView -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerViewTasks"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="90dp"
+        android:layout_weight="1"/>
+
+    <!-- Empty State TextView -->
+    <TextView
+        android:id="@+id/tvEmptyState"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_marginTop="10dp"
         android:layout_weight="1"
-        android:background="@drawable/bg_card_glass_hover"
         android:elevation="2dp"
-        android:orientation="vertical"
+        android:fontFamily="@font/sf_pro_rounded_regular"
+        android:gravity="center"
         android:padding="20dp"
-        android:stateListAnimator="@animator/card_elevation_state"
-        android:visibility="visible">
+        android:layout_marginBottom="60dp"
+        android:text="@string/no_tasks_available_n_ntap_the_button_to_create_your_first_task"
+        android:textAlignment="center"
+        android:textColor="@color/text_secondary_white_70"
+        android:textSize="14sp"
+        android:visibility="gone" />
 
-        <!-- Task Title -->
-        <TextView
-            android:id="@+id/tvTaskTitle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            android:fontFamily="@font/sf_pro_rounded_bold"
-            android:text="No tasks available"
-            android:textColor="@android:color/white"
-            android:textSize="18sp" />
 
-        <!-- Task Description -->
-        <TextView
-            android:id="@+id/tvTaskDescription"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="12dp"
-            android:fontFamily="@font/sf_pro_rounded_regular"
-            android:text="Select a filter to view your tasks"
-            android:textColor="@android:color/white"
-            android:textSize="14sp"
-            android:alpha="0.8"
-            android:visibility="gone" />
 
-        <!-- Priority Row -->
-        <LinearLayout
-            android:id="@+id/layoutPriority"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            android:orientation="horizontal"
-            android:visibility="gone">
-
-            <TextView
-                android:id="@+id/tvPriorityLabel"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/sf_pro_rounded_regular"
-                android:text="Priority: "
-                android:textColor="@android:color/white"
-                android:textSize="14sp"
-                android:alpha="0.7" />
-
-            <TextView
-                android:id="@+id/tvTaskPriority"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/sf_pro_rounded_bold"
-                android:text="🟡 Medium"
-                android:textColor="@android:color/white"
-                android:textSize="14sp" />
-        </LinearLayout>
-
-        <!-- Status Row -->
-        <LinearLayout
-            android:id="@+id/layoutStatus"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            android:orientation="horizontal"
-            android:visibility="gone">
-
-            <TextView
-                android:id="@+id/tvStatusLabel"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/sf_pro_rounded_regular"
-                android:text="Status: "
-                android:textColor="@android:color/white"
-                android:textSize="14sp"
-                android:alpha="0.7" />
-
-            <TextView
-                android:id="@+id/tvTaskStatus"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/sf_pro_rounded_bold"
-                android:text="⏳ Pending"
-                android:textColor="@android:color/white"
-                android:textSize="14sp" />
-        </LinearLayout>
-
-        <!-- Due Date Row -->
-        <LinearLayout
-            android:id="@+id/layoutDueDate"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            android:orientation="horizontal"
-            android:visibility="gone">
-
-            <TextView
-                android:id="@+id/tvDueDateLabel"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/sf_pro_rounded_regular"
-                android:text="Due: "
-                android:textColor="@android:color/white"
-                android:textSize="14sp"
-                android:alpha="0.7" />
-
-            <TextView
-                android:id="@+id/tvTaskDueDate"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/sf_pro_rounded_bold"
-                android:text="Sep 29, 2025 at 2:30 PM"
-                android:textColor="@android:color/white"
-                android:textSize="14sp" />
-        </LinearLayout>
-
-        <!-- Progress Row -->
-        <LinearLayout
-            android:id="@+id/layoutProgress"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            android:orientation="horizontal"
-            android:visibility="gone">
-
-            <TextView
-                android:id="@+id/tvProgressLabel"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/sf_pro_rounded_regular"
-                android:text="Progress: "
-                android:textColor="@android:color/white"
-                android:textSize="14sp"
-                android:alpha="0.7" />
-
-            <TextView
-                android:id="@+id/tvTaskProgress"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/sf_pro_rounded_bold"
-                android:text="75%"
-                android:textColor="@android:color/white"
-                android:textSize="14sp" />
-        </LinearLayout>
-
-        <!-- ✅ NAVIGATION BUTTONS FOR MULTIPLE TASKS -->
-        <LinearLayout
-            android:id="@+id/layoutNavigation"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="8dp"
-            android:orientation="horizontal"
-            android:visibility="gone">
-
-            <TextView
-                android:id="@+id/btnPreviousTask"
-                android:layout_width="0dp"
-                android:layout_height="40dp"
-                android:layout_weight="1"
-                android:layout_marginEnd="8dp"
-                android:background="@drawable/bg_chip_glass"
-                android:fontFamily="@font/sf_pro_rounded_bold"
-                android:gravity="center"
-                android:text="◀ Previous"
-                android:textColor="@android:color/white"
-                android:textSize="14sp"
-                android:clickable="true"
-                android:focusable="true" />
-
-            <TextView
-                android:id="@+id/tvTaskCounter"
-                android:layout_width="wrap_content"
-                android:layout_height="40dp"
-                android:layout_marginHorizontal="8dp"
-                android:fontFamily="@font/sf_pro_rounded_bold"
-                android:gravity="center"
-                android:text="1 / 3"
-                android:textColor="@android:color/white"
-                android:textSize="14sp" />
-
-            <TextView
-                android:id="@+id/btnNextTask"
-                android:layout_width="0dp"
-                android:layout_height="40dp"
-                android:layout_weight="1"
-                android:layout_marginStart="8dp"
-                android:background="@drawable/bg_chip_glass"
-                android:fontFamily="@font/sf_pro_rounded_bold"
-                android:gravity="center"
-                android:text="Next ▶"
-                android:textColor="@android:color/white"
-                android:textSize="14sp"
-                android:clickable="true"
-                android:focusable="true" />
-
-        </LinearLayout>
-
-        <!-- Action Button (Mark as Done) -->
-        <TextView
-            android:id="@+id/btnMarkDone"
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:layout_marginTop="8dp"
-            android:background="@drawable/bg_chip_glass"
-            android:fontFamily="@font/sf_pro_rounded_bold"
-            android:gravity="center"
-            android:text="✅ Mark as Done"
-            android:textColor="@android:color/white"
-            android:textSize="16sp"
-            android:clickable="true"
-            android:focusable="true"
-            android:visibility="gone" />
-
-    </LinearLayout>
 </LinearLayout>
+
+</FrameLayout>

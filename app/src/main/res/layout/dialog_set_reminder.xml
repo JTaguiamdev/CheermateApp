@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <!-- Reminder Time Picker -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/set_reminder_time"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="12dp" />
+
+    <!-- Date Picker Button -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnPickDate"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="12dp"
+        android:text="Select Date"
+        android:textAllCaps="false"
+        app:icon="@android:drawable/ic_menu_my_calendar"
+        app:iconGravity="start" />
+
+    <!-- Time Picker Button -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnPickTime"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="12dp"
+        android:text="Select Time"
+        android:textAllCaps="false"
+        app:icon="@android:drawable/ic_menu_recent_history"
+        app:iconGravity="start" />
+
+    <!-- Quick Options -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/or_choose_a_quick_option"
+        android:textSize="14sp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp" />
+
+    <!-- Quick reminder options -->
+    <RadioGroup
+        android:id="@+id/rgQuickOptions"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <RadioButton
+            android:id="@+id/rb15Minutes"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/_15_minutes_before_due_time"
+            android:padding="8dp" />
+
+        <RadioButton
+            android:id="@+id/rb30Minutes"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/_30_minutes_before_due_time"
+            android:padding="8dp" />
+
+        <RadioButton
+            android:id="@+id/rb1Hour"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/_1_hour_before_due_time"
+            android:padding="8dp" />
+
+        <RadioButton
+            android:id="@+id/rb1Day"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/_1_day_before_due_time"
+            android:padding="8dp" />
+
+        <RadioButton
+            android:id="@+id/rbCustom"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/custom_use_date_time_above"
+            android:padding="8dp"
+            android:checked="true" />
+
+    </RadioGroup>
+
+    <!-- Selected reminder time display -->
+    <TextView
+        android:id="@+id/tvSelectedReminderTime"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="@string/no_reminder_time_selected"
+        android:textSize="12sp"
+        android:textColor="?android:attr/textColorSecondary"
+        android:gravity="center" />
+
+</LinearLayout>

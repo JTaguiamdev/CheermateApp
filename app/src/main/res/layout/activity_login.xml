@@ -11,7 +11,7 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
         android:layout_gravity="center_vertical"
         android:layout_weight="1"
         android:gravity="center_horizontal"
@@ -71,7 +71,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@null"
-                android:hint="Username"
+                android:hint="@string/username"
                 android:textColor="@color/white"
                 android:textColorHint="@color/white"
                 android:inputType="textEmailAddress" />
@@ -152,7 +152,7 @@
                     android:id="@+id/tvDontHave"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Don't have an account? "
+                    android:text="@string/don_t_have_an_account"
                     android:textColor="@android:color/white"
                     android:textSize="14sp"
                     android:fontFamily="@font/sf_pro_rounded_regular"/>
@@ -161,7 +161,7 @@
                     android:id="@+id/signUpLine"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Sign up"
+                    android:text="@string/sign_up"
                     android:textColor="@android:color/white"
                     android:textSize="14sp"
                     android:fontFamily="@font/sf_pro_rounded_bold"

@@ -21,6 +21,13 @@ enum class Status {
     OverDue
 }
 
+enum class Category {
+    Work,
+    Personal,
+    Shopping,
+    Others
+}
+
 @Entity(
     tableName = "Task",
     primaryKeys = ["Task_ID", "User_ID"],
@@ -46,6 +53,10 @@ data class Task(
 
     @ColumnInfo(name = "Description")
     val Description: String? = null,
+
+    // ✅ Category field
+    @ColumnInfo(name = "Category")
+    val Category: com.example.cheermateapp.data.model.Category = com.example.cheermateapp.data.model.Category.Work,
 
     // ✅ LINE 43: This should now work with the enum defined above
     @ColumnInfo(name = "Priority")
@@ -78,6 +89,7 @@ data class Task(
             userId: Int,
             title: String,
             description: String? = null,
+            category: com.example.cheermateapp.data.model.Category = com.example.cheermateapp.data.model.Category.Work,
             priority: com.example.cheermateapp.data.model.Priority = com.example.cheermateapp.data.model.Priority.Medium,
             dueAt: String? = null,
             dueTime: String? = null,
@@ -91,6 +103,7 @@ data class Task(
             User_ID = userId,
             Title = title,
             Description = description,
+            Category = category,
             Priority = priority,
             DueAt = dueAt,
             DueTime = dueTime,

@@ -9,6 +9,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.RecyclerView
 import com.example.cheermateapp.data.model.Status
 import androidx.lifecycle.lifecycleScope
 import com.example.cheermateapp.data.db.AppDb
@@ -31,7 +32,6 @@ class FragmentTaskActivity : AppCompatActivity() {
 
     // ✅ Original Variables
     private lateinit var tvTasksTitle: TextView
-    private lateinit var btnAddTask: TextView
     private lateinit var tvTasksSub: TextView
     private lateinit var etSearch: EditText
     private lateinit var btnSort: TextView
@@ -40,23 +40,24 @@ class FragmentTaskActivity : AppCompatActivity() {
     private lateinit var tabToday: TextView
     private lateinit var tabPending: TextView
     private lateinit var tabDone: TextView
-    private lateinit var cardEmpty: LinearLayout
-
-    // ✅ Task description display (from fragment_tasks.xml)
-    private lateinit var tvTaskDescription: TextView
-
-    // ✅ Navigation elements
-    private lateinit var layoutNavigation: LinearLayout
-    private lateinit var btnPreviousTask: TextView
-    private lateinit var btnNextTask: TextView
-    private lateinit var tvTaskCounter: TextView
+    
+    // NEW: RecyclerView and adapter
+    private lateinit var recyclerViewTasks: RecyclerView
+    private lateinit var tvEmptyState: TextView
+    private lateinit var taskListAdapter: TaskListAdapter
+    
+    // FAB button
+    private lateinit var fabAddTask: com.google.android.material.floatingactionbutton.FloatingActionButton
+    
+    // Progress card elements
+    private var progressSubtitle: TextView? = null
+    private var progressPercent: TextView? = null
+    private var progressFill: View? = null
 
     private var currentFilter = FilterType.ALL
     private var userId: Int = 0
     private var currentTasks = mutableListOf<Task>()
     private var allTasks = mutableListOf<Task>()
-    private var currentDisplayedTask: Task? = null
-    private var currentTaskIndex: Int = 0
     private var filteredTasks: List<Task> = emptyList()
 
     enum class FilterType {
@@ -103,12 +104,50 @@ class FragmentTaskActivity : AppCompatActivity() {
         }
     }
 
-    // ✅ UPDATED: Initialize views
+    // ✅ ADD: Debug method
+    private fun debugTaskLoading() {
+        lifecycleScope.launch {
+            try {
+                android.util.Log.d("DEBUG", "=== TASK LOADING DEBUG ===")
+                android.util.Log.d("DEBUG", "User ID: $userId")
+
+                val db = AppDb.get(this@FragmentTaskActivity)
+
+                // Check if database exists
+                android.util.Log.d("DEBUG", "Database created successfully: ${db != null}")
+
+                // Check all tasks in database
+                val allTasksInDb = withContext(Dispatchers.IO) {
+                    db.taskDao().getAllTasks() // Get ALL tasks regardless of user
+                }
+                android.util.Log.d("DEBUG", "Total tasks in entire database: ${allTasksInDb.size}")
+
+                // Check tasks for this user
+                val userTasks = withContext(Dispatchers.IO) {
+                    db.taskDao().getAllTasksForUser(userId)
+                }
+                android.util.Log.d("DEBUG", "Tasks for user $userId: ${userTasks.size}")
+
+                // List each task
+                userTasks.forEachIndexed { index, task ->
+                    android.util.Log.d("DEBUG", "Task $index: ${task.Title} (ID: ${task.Task_ID}, UserID: ${task.User_ID})")
+                }
+
+                android.util.Log.d("DEBUG", "Current tasks list size: ${currentTasks.size}")
+                android.util.Log.d("DEBUG", "Filtered tasks list size: ${filteredTasks.size}")
+                android.util.Log.d("DEBUG", "=== END DEBUG ===")
+
+            } catch (e: Exception) {
+                android.util.Log.e("DEBUG", "Debug error: ${e.message}", e)
+            }
+        }
+    }
+
+    // ✅ UPDATED: Initialize all views including RecyclerView
     private fun initializeViews() {
         try {
             // Original views
             tvTasksTitle = findViewById(R.id.tvTasksTitle)
-            btnAddTask = findViewById(R.id.btnAddTask)
             tvTasksSub = findViewById(R.id.tvTasksSub)
             etSearch = findViewById(R.id.etSearch)
             btnSort = findViewById(R.id.btnSort)
@@ -117,16 +156,31 @@ class FragmentTaskActivity : AppCompatActivity() {
             tabToday = findViewById(R.id.tabToday)
             tabPending = findViewById(R.id.tabPending)
             tabDone = findViewById(R.id.tabDone)
-            cardEmpty = findViewById(R.id.cardEmpty)
 
-            // Task description display (from fragment_tasks.xml)
-            tvTaskDescription = findViewById(R.id.tvTaskDescription)
+            // NEW: RecyclerView and related views
+            recyclerViewTasks = findViewById(R.id.recyclerViewTasks)
+            tvEmptyState = findViewById(R.id.tvEmptyState)
 
-            // Navigation elements
-            layoutNavigation = findViewById(R.id.layoutNavigation)
-            btnPreviousTask = findViewById(R.id.btnPreviousTask)
-            btnNextTask = findViewById(R.id.btnNextTask)
-            tvTaskCounter = findViewById(R.id.tvTaskCounter)
+            // FAB button
+            fabAddTask = findViewById(R.id.fabAddTask)
+            
+            // Progress card elements (optional - may not exist in all layouts)
+            progressSubtitle = findViewById(R.id.progressSubtitle)
+            progressPercent = findViewById(R.id.progressPercent)
+            progressFill = findViewById(R.id.progressFill)
+
+            // Setup RecyclerView
+            recyclerViewTasks.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(this)
+            taskListAdapter = TaskListAdapter(
+                emptyList(),
+                onTaskClick = { task ->
+                    showTaskDetailsDialog(task)
+                },
+                onTaskUpdate = { task, category, priority, dueDate ->
+                    updateTask(task, category, priority, dueDate)
+                }
+            )
+            recyclerViewTasks.adapter = taskListAdapter
 
             setupInteractions()
 
@@ -137,10 +191,11 @@ class FragmentTaskActivity : AppCompatActivity() {
         }
     }
 
-    // ✅ FIXED: Setup interactions
+    // ✅ FIXED: Setup interactions with proper navigation
     private fun setupInteractions() {
         try {
-            btnAddTask.setOnClickListener {
+            // FAB click listener
+            fabAddTask.setOnClickListener {
                 showAddTaskDialog()
             }
 
@@ -181,15 +236,6 @@ class FragmentTaskActivity : AppCompatActivity() {
                 updateTabSelection(tabDone)
             }
 
-            // Navigation button interactions
-            btnPreviousTask.setOnClickListener {
-                navigateToPreviousTask()
-            }
-
-            btnNextTask.setOnClickListener {
-                navigateToNextTask()
-            }
-
             updateTabSelection(tabAll)
 
             android.util.Log.d("FragmentTaskActivity", "✅ Interactions setup complete")
@@ -198,215 +244,67 @@ class FragmentTaskActivity : AppCompatActivity() {
         }
     }
 
-    // ✅ NAVIGATION METHODS
-    private fun navigateToPreviousTask() {
-        if (filteredTasks.isNotEmpty() && currentTaskIndex > 0) {
-            currentTaskIndex--
-            displaySingleTask(filteredTasks[currentTaskIndex])
-            updateNavigationState()
-            Toast.makeText(this, "◀ Previous task", Toast.LENGTH_SHORT).show()
-        }
-    }
+    // ✅ FIXED: All navigation methods at class level
 
-    private fun navigateToNextTask() {
-        if (filteredTasks.isNotEmpty() && currentTaskIndex < filteredTasks.size - 1) {
-            currentTaskIndex++
-            displaySingleTask(filteredTasks[currentTaskIndex])
-            updateNavigationState()
-            Toast.makeText(this, "Next task ▶", Toast.LENGTH_SHORT).show()
-        }
-    }
 
-    private fun updateNavigationState() {
-        try {
-            if (filteredTasks.size <= 1) {
-                layoutNavigation.visibility = View.GONE
-            } else {
-                layoutNavigation.visibility = View.VISIBLE
 
-                // Update counter
-                tvTaskCounter.text = "${currentTaskIndex + 1} / ${filteredTasks.size}"
-
-                // Enable/disable buttons based on position
-                btnPreviousTask.alpha = if (currentTaskIndex > 0) 1.0f else 0.5f
-                btnPreviousTask.isClickable = currentTaskIndex > 0
-
-                btnNextTask.alpha = if (currentTaskIndex < filteredTasks.size - 1) 1.0f else 0.5f
-                btnNextTask.isClickable = currentTaskIndex < filteredTasks.size - 1
-            }
-        } catch (e: Exception) {
-            android.util.Log.e("FragmentTaskActivity", "Error updating navigation state", e)
-        }
-    }
-
-    // ✅ MAIN DISPLAY METHOD
+    // ✅ UPDATED: Display tasks with navigation support
     private fun displayTaskInCard(tasks: List<Task>) {
         try {
             filteredTasks = tasks
-            currentTaskIndex = 0
+            currentTasks.clear()
+            currentTasks.addAll(tasks)
 
             if (tasks.isEmpty()) {
                 showEmptyState()
             } else {
-                displaySingleTask(tasks[currentTaskIndex])
-                updateNavigationState()
+                showTasksList(tasks)
             }
         } catch (e: Exception) {
-            android.util.Log.e("FragmentTaskActivity", "Error displaying task in card", e)
+            android.util.Log.e("FragmentTaskActivity", "Error displaying tasks", e)
             showEmptyState()
         }
     }
 
-    // ✅ DISPLAY SINGLE TASK USING item_task.xml LAYOUT
-    private fun displaySingleTask(task: Task) {
-        try {
-            android.util.Log.d("DEBUG", "🎯 displaySingleTask called with task: ${task.Title}")
-
-            currentDisplayedTask = task
-
-            // Hide tvTaskDescription and show task in cardEmpty
-            tvTaskDescription.visibility = View.GONE
-            cardEmpty.visibility = View.VISIBLE
-
-            // Clear cardEmpty and inflate item_task.xml
-            cardEmpty.removeAllViews()
-            inflateTaskItemLayout(task, cardEmpty)
-
-            android.util.Log.d("DEBUG", "✅ Task displayed using item_task.xml layout")
-
-        } catch (e: Exception) {
-            android.util.Log.e("DEBUG", "❌ Error in displaySingleTask: ${e.message}", e)
-            showEmptyState()
-        }
+    // NEW: Show tasks in RecyclerView
+    private fun showTasksList(tasks: List<Task>) {
+        recyclerViewTasks.visibility = View.VISIBLE
+        tvEmptyState.visibility = View.GONE
+        taskListAdapter.updateTasks(tasks)
     }
 
-    // ✅ INFLATE AND POPULATE item_task.xml LAYOUT
-    private fun inflateTaskItemLayout(task: Task, container: LinearLayout) {
-        try {
-            // Inflate the item_task.xml layout
-            val inflater = LayoutInflater.from(this)
-            val taskItemView = inflater.inflate(R.layout.item_task, container, false)
 
-            // ✅ FIND ALL VIEWS FROM item_task.xml
-            val layoutPriorityIndicator = taskItemView.findViewById<View>(R.id.layoutPriorityIndicator)
-            val tvTaskTitle = taskItemView.findViewById<TextView>(R.id.tvTaskTitle)
-            val tvTaskDescriptionItem = taskItemView.findViewById<TextView>(R.id.tvTaskDescription)
-            val tvTaskPriority = taskItemView.findViewById<TextView>(R.id.tvTaskPriority)
-            val tvTaskStatus = taskItemView.findViewById<TextView>(R.id.tvTaskStatus)
-            val progressBarLayout = taskItemView.findViewById<LinearLayout>(R.id.progressBar)?.parent as? LinearLayout
-            val progressBar = taskItemView.findViewById<ProgressBar>(R.id.progressBar)
-            val tvTaskProgress = taskItemView.findViewById<TextView>(R.id.tvTaskProgress)
-            val tvTaskDueDate = taskItemView.findViewById<TextView>(R.id.tvTaskDueDate)
-            val btnComplete = taskItemView.findViewById<TextView>(R.id.btnComplete)
-            val btnEdit = taskItemView.findViewById<TextView>(R.id.btnEdit)
-            val btnDelete = taskItemView.findViewById<TextView>(R.id.btnDelete)
-
-            // ✅ POPULATE ALL FIELDS WITH TASK DATA
-
-            // 1. Priority Indicator Bar Color
-            val priorityColor = when (task.Priority) {
-                Priority.High -> android.graphics.Color.RED
-                Priority.Medium -> android.graphics.Color.parseColor("#FFA500") // Orange
-                Priority.Low -> android.graphics.Color.GREEN
-            }
-            layoutPriorityIndicator.setBackgroundColor(priorityColor)
-
-            // 2. Task Title
-            tvTaskTitle.text = task.Title
-
-            // 3. Task Description
-            if (!task.Description.isNullOrBlank()) {
-                tvTaskDescriptionItem.text = task.Description
-                tvTaskDescriptionItem.visibility = View.VISIBLE
-            } else {
-                tvTaskDescriptionItem.visibility = View.GONE
-            }
-
-            // 4. Priority Text
-            tvTaskPriority.text = task.getPriorityText()
-
-            // 5. Status Text
-            tvTaskStatus.text = task.getStatusText()
-
-            // 6. Progress Bar and Percentage
-            if (task.TaskProgress > 0) {
-                progressBarLayout?.visibility = View.VISIBLE
-                progressBar?.progress = task.TaskProgress
-                tvTaskProgress.text = "${task.TaskProgress}%"
-            } else {
-                progressBarLayout?.visibility = View.GONE
-            }
-
-            // 7. Due Date
-            tvTaskDueDate.text = "📅 Due: ${task.getFormattedDueDateTime()}"
-
-            // 8. Button States based on Task Status
-            when (task.Status) {
-                Status.Completed -> {
-                    btnComplete.text = "✅ Completed"
-                    btnComplete.isClickable = false
-                    btnComplete.alpha = 0.6f
-                }
-                Status.Pending -> {
-                    btnComplete.text = "✅ Complete"
-                    btnComplete.isClickable = true
-                    btnComplete.alpha = 1.0f
-                }
-                Status.InProgress -> {
-                    btnComplete.text = "✅ Finish"
-                    btnComplete.isClickable = true
-                    btnComplete.alpha = 1.0f
-                }
-                Status.OverDue -> {
-                    btnComplete.text = "🔴 Complete"
-                    btnComplete.isClickable = true
-                    btnComplete.alpha = 1.0f
-                }
-                Status.Cancelled -> {
-                    btnComplete.text = "❌ Cancelled"
-                    btnComplete.isClickable = false
-                    btnComplete.alpha = 0.6f
-                }
-            }
-
-            // ✅ SET UP CLICK LISTENERS FOR ACTION BUTTONS
-
-            // Complete Button
-            btnComplete.setOnClickListener {
-                if (task.Status != Status.Completed && task.Status != Status.Cancelled) {
-                    markTaskAsDone(task)
-                }
-            }
-
-            // Edit Button
-            btnEdit.setOnClickListener {
-                showTaskQuickActions(task)
-            }
-
-            // Delete Button
-            btnDelete.setOnClickListener {
-                deleteTask(task)
-            }
-
-            // ✅ ADD MAIN CARD CLICK LISTENER
-            taskItemView.setOnClickListener {
-                showTaskDetailsDialog(task)
-            }
-
-            // ✅ ADD THE INFLATED VIEW TO CONTAINER
-            container.addView(taskItemView)
-
-            android.util.Log.d("FragmentTaskActivity", "✅ Successfully inflated and populated item_task.xml")
-
-        } catch (e: Exception) {
-            android.util.Log.e("FragmentTaskActivity", "❌ Error inflating task item layout: ${e.message}", e)
-        }
-    }
-
-<<<<<<< HEAD
-    // ✅ EXTENSION METHODS FROM MAINACTIVITY
-=======
     // ✅ NEW: Mark task as done (UPDATE OPERATION)
+    // ✅ UPDATE TASK WITH CATEGORY, PRIORITY, AND DUE DATE
+    private fun updateTask(task: Task, category: Category?, priority: Priority?, dueDate: String?) {
+        lifecycleScope.launch {
+            try {
+                val db = AppDb.get(this@FragmentTaskActivity)
+                withContext(Dispatchers.IO) {
+                    // Create updated task
+                    val updatedTask = task.copy(
+                        Category = category ?: task.Category,
+                        Priority = priority ?: task.Priority,
+                        DueAt = dueDate ?: task.DueAt,
+                        UpdatedAt = System.currentTimeMillis()
+                    )
+                    
+                    // Update in database
+                    db.taskDao().update(updatedTask)
+                }
+
+                Toast.makeText(this@FragmentTaskActivity, "✅ Task '${task.Title}' updated!", Toast.LENGTH_SHORT).show()
+
+                // Reload current filter to refresh display
+                filterTasks(currentFilter)
+
+            } catch (e: Exception) {
+                android.util.Log.e("FragmentTaskActivity", "Error updating task", e)
+                Toast.makeText(this@FragmentTaskActivity, "Error updating task", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
     private fun markTaskAsDone(task: Task) {
         lifecycleScope.launch {
             try {
@@ -429,7 +327,6 @@ class FragmentTaskActivity : AppCompatActivity() {
     }
 
     // ✅ FIXED: Extension methods with proper private modifier
->>>>>>> b582208d4bfc69a21fee7e40a0c472413368035c
     private fun Task.getPriorityText(): String {
         return when (this.Priority) {
             com.example.cheermateapp.data.model.Priority.High -> "🔴 High"
@@ -445,6 +342,35 @@ class FragmentTaskActivity : AppCompatActivity() {
             com.example.cheermateapp.data.model.Status.OverDue -> "🔴 Overdue"
             com.example.cheermateapp.data.model.Status.Completed -> "✅ Completed"
             com.example.cheermateapp.data.model.Status.Cancelled -> "❌ Cancelled"
+        }
+    }
+
+    private fun Task.getFormattedDueDateTime(): String {
+        return try {
+            if (DueAt != null) {
+                val dateStr = DueAt
+                val timeStr = DueTime
+                
+                // Parse and format the date
+                val inputFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                val outputFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
+                val date = inputFormat.parse(dateStr)
+                val formattedDate = if (date != null) outputFormat.format(date) else dateStr
+                
+                // Format time if available
+                val formattedTime = if (!timeStr.isNullOrBlank() && timeStr != "00:00") {
+                    " at $timeStr"
+                } else {
+                    ""
+                }
+                
+                "$formattedDate$formattedTime"
+            } else {
+                "No due date"
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("Task", "Error formatting date: ${e.message}", e)
+            "Date not available"
         }
     }
 
@@ -466,15 +392,48 @@ class FragmentTaskActivity : AppCompatActivity() {
         }
     }
 
-    private fun Task.getFormattedDueDateTime(): String {
-        val dueDate = this.DueAt ?: return "No due date"
-        val dueTime = this.DueTime
-
-        return if (dueTime.isNullOrBlank()) {
-            dueDate
-        } else {
-            "$dueDate at $dueTime"
+    private fun createRoundedDrawable(color: Int): android.graphics.drawable.GradientDrawable {
+        return android.graphics.drawable.GradientDrawable().apply {
+            shape = android.graphics.drawable.GradientDrawable.RECTANGLE
+            setColor(color)
+            cornerRadius = 12f
         }
+    }
+
+    // ✅ FIXED: Corrected showEmptyState method
+    private fun showEmptyState() {
+        try {
+            filteredTasks = emptyList()
+            currentTasks.clear()
+
+            recyclerViewTasks.visibility = View.GONE
+            tvEmptyState.visibility = View.VISIBLE
+
+            val emptyMessage = when (currentFilter) {
+                FilterType.ALL -> "📋 No tasks available\n\nTap the + button to create your first task!"
+                FilterType.TODAY -> "📅 No tasks due today\n\nGreat! You're all caught up for today!"
+                FilterType.PENDING -> "⏳ No pending tasks\n\nAll taskgit s are either completed or not yet assigned!"
+                FilterType.DONE -> "✅ No completed tasks yet\n\nStart completing tasks to see them here!"
+            }
+
+            tvEmptyState.text = emptyMessage
+
+            android.util.Log.d("FragmentTaskActivity", "📋 Showing empty state")
+
+        } catch (e: Exception) {
+            android.util.Log.e("FragmentTaskActivity", "Error showing empty state", e)
+        }
+    }
+
+    // ✅ EXTENSION METHODS
+    private fun Task.getSummary(): String {
+        val statusEmoji = this.getStatusEmoji()
+        val priorityEmoji = when (this.Priority) {
+            com.example.cheermateapp.data.model.Priority.High -> "🔴"
+            com.example.cheermateapp.data.model.Priority.Medium -> "🟡"
+            com.example.cheermateapp.data.model.Priority.Low -> "🟢"
+        }
+        return "$statusEmoji $priorityEmoji ${this.Title}"
     }
 
     private fun Task.isOverdue(): Boolean {
@@ -494,168 +453,7 @@ class FragmentTaskActivity : AppCompatActivity() {
         }
     }
 
-    // ✅ EMPTY STATE
-    private fun showEmptyState() {
-        try {
-            currentDisplayedTask = null
-            filteredTasks = emptyList()
-            currentTaskIndex = 0
-
-            // Show empty message in tvTaskDescription
-            tvTaskDescription.text = "📋 No tasks available\n\nSelect a filter to view your tasks or add a new task to get started!"
-            tvTaskDescription.visibility = View.VISIBLE
-
-            // Clear cardEmpty
-            cardEmpty.removeAllViews()
-            cardEmpty.visibility = View.GONE
-
-            // Hide navigation
-            layoutNavigation.visibility = View.GONE
-
-            android.util.Log.d("FragmentTaskActivity", "📋 Showing empty state")
-
-        } catch (e: Exception) {
-            android.util.Log.e("FragmentTaskActivity", "Error showing empty state", e)
-        }
-    }
-
-    // ✅ IMPLEMENT showTaskDetailsDialog FROM MAINACTIVITY
-    private fun showTaskDetailsDialog(task: Task) {
-        val message = buildString {
-            append("📝 Title: ${task.Title}\n")
-            if (!task.Description.isNullOrBlank()) {
-                append("📄 Description: ${task.Description}\n")
-            }
-            append("🎯 Priority: ${task.Priority}\n")
-            append("📊 Status: ${task.Status}\n")
-            append("📈 Progress: ${task.TaskProgress}%\n")
-            append("📅 Due Date: ${task.DueAt ?: "Not set"}\n")
-            if (!task.DueTime.isNullOrBlank()) {
-                append("⏰ Due Time: ${task.DueTime}\n")
-            }
-            append("📅 Created: ${formatTimestamp(task.CreatedAt)}")
-        }
-
-        AlertDialog.Builder(this)
-            .setTitle("Task Details")
-            .setMessage(message)
-            .setPositiveButton("Mark as Done") { _, _ ->
-                markTaskAsDone(task)
-            }
-            .setNeutralButton("Edit") { _, _ ->
-                showTaskQuickActions(task)
-            }
-            .setNegativeButton("Close", null)
-            .show()
-    }
-
-    // ✅ IMPLEMENT showTaskQuickActions FROM MAINACTIVITY
-    private fun showTaskQuickActions(task: Task) {
-        val actions = arrayOf(
-            "✅ Mark as Done",
-            "🔄 Mark as In Progress",
-            "⏳ Mark as Pending",
-            "✏️ Edit Task",
-            "🗑️ Delete Task"
-        )
-
-        AlertDialog.Builder(this)
-            .setTitle("Quick Actions: ${task.Title}")
-            .setItems(actions) { _, which ->
-                when (which) {
-                    0 -> markTaskAsDone(task)
-                    1 -> markTaskAsInProgress(task)
-                    2 -> markTaskAsPending(task)
-                    3 -> showEditTaskDialog(task)
-                    4 -> deleteTask(task)
-                }
-            }
-            .setNegativeButton("Cancel", null)
-            .show()
-    }
-
-    // ✅ TASK ACTION METHODS
-    private fun markTaskAsDone(task: Task) {
-        lifecycleScope.launch {
-            try {
-                val db = AppDb.get(this@FragmentTaskActivity)
-                withContext(Dispatchers.IO) {
-                    db.taskDao().updateTaskStatus(task.Task_ID, task.User_ID, "Completed")
-                    db.taskDao().updateTaskProgress(task.User_ID, task.Task_ID, 100)
-                }
-
-                Toast.makeText(this@FragmentTaskActivity, "✅ Task '${task.Title}' marked as done!", Toast.LENGTH_SHORT).show()
-                loadTasks()
-
-            } catch (e: Exception) {
-                android.util.Log.e("FragmentTaskActivity", "Error marking task as done", e)
-                Toast.makeText(this@FragmentTaskActivity, "❌ Error updating task", Toast.LENGTH_SHORT).show()
-            }
-        }
-    }
-
-    private fun markTaskAsInProgress(task: Task) {
-        lifecycleScope.launch {
-            try {
-                val db = AppDb.get(this@FragmentTaskActivity)
-                withContext(Dispatchers.IO) {
-                    db.taskDao().updateTaskStatus(task.Task_ID, task.User_ID, "InProgress")
-                }
-
-                Toast.makeText(this@FragmentTaskActivity, "🔄 Task '${task.Title}' is in progress!", Toast.LENGTH_SHORT).show()
-                loadTasks()
-
-            } catch (e: Exception) {
-                android.util.Log.e("FragmentTaskActivity", "Error marking task as in progress", e)
-                Toast.makeText(this@FragmentTaskActivity, "❌ Error updating task", Toast.LENGTH_SHORT).show()
-            }
-        }
-    }
-
-    private fun markTaskAsPending(task: Task) {
-        lifecycleScope.launch {
-            try {
-                val db = AppDb.get(this@FragmentTaskActivity)
-                withContext(Dispatchers.IO) {
-                    db.taskDao().updateTaskStatus(task.Task_ID, task.User_ID, "Pending")
-                }
-
-                Toast.makeText(this@FragmentTaskActivity, "⏳ Task '${task.Title}' marked as pending!", Toast.LENGTH_SHORT).show()
-                loadTasks()
-
-            } catch (e: Exception) {
-                android.util.Log.e("FragmentTaskActivity", "Error marking task as pending", e)
-                Toast.makeText(this@FragmentTaskActivity, "❌ Error updating task", Toast.LENGTH_SHORT).show()
-            }
-        }
-    }
-
-    // ✅ HELPER METHOD: Format timestamps
-    private fun formatTimestamp(timestamp: Long): String {
-        return try {
-            val date = Date(timestamp)
-            val format = SimpleDateFormat("MMM dd, yyyy 'at' hh:mm a", Locale.getDefault())
-            format.format(date)
-        } catch (e: Exception) {
-            "Unknown date"
-        }
-    }
-
-    // ✅ DEBUG METHODS - (abbreviated for space)
-    private fun debugTaskLoading() {
-        lifecycleScope.launch {
-            try {
-                val db = AppDb.get(this@FragmentTaskActivity)
-                val userTasks = withContext(Dispatchers.IO) {
-                    db.taskDao().getAllTasksForUser(userId)
-                }
-                android.util.Log.d("DEBUG", "Tasks for user $userId: ${userTasks.size}")
-            } catch (e: Exception) {
-                android.util.Log.e("DEBUG", "Debug error: ${e.message}", e)
-            }
-        }
-    }
-
+    // ✅ DEBUG METHODS
     private fun debugAllTasks() {
         lifecycleScope.launch {
             try {
@@ -663,7 +461,20 @@ class FragmentTaskActivity : AppCompatActivity() {
                 val allTasks = withContext(Dispatchers.IO) {
                     db.taskDao().getAllTasksForUser(userId)
                 }
+
+                android.util.Log.d("FragmentTaskActivity", "🔍 === DATABASE DEBUG ===")
+                android.util.Log.d("FragmentTaskActivity", "🔍 User ID: $userId")
                 android.util.Log.d("FragmentTaskActivity", "🔍 Total tasks in DB: ${allTasks.size}")
+
+                allTasks.forEachIndexed { index, task ->
+                    android.util.Log.d("FragmentTaskActivity", "🔍 Task $index: ${task.Title}")
+                    android.util.Log.d("FragmentTaskActivity", "   - Status: ${task.Status}")
+                    android.util.Log.d("FragmentTaskActivity", "   - User_ID: ${task.User_ID}")
+                    android.util.Log.d("FragmentTaskActivity", "   - DueAt: ${task.DueAt}")
+                    android.util.Log.d("FragmentTaskActivity", "   - DeletedAt: ${task.DeletedAt}")
+                }
+                android.util.Log.d("FragmentTaskActivity", "🔍 === END DEBUG ===")
+
             } catch (e: Exception) {
                 android.util.Log.e("FragmentTaskActivity", "❌ Debug error", e)
             }
@@ -676,49 +487,82 @@ class FragmentTaskActivity : AppCompatActivity() {
             val allTasks = withContext(Dispatchers.IO) {
                 db.taskDao().getAllTasksForUser(userId)
             }
+
+            android.util.Log.d("FragmentTaskActivity", "=== DATABASE DEBUG ===")
+            android.util.Log.d("FragmentTaskActivity", "User ID: $userId")
             android.util.Log.d("FragmentTaskActivity", "Total tasks in DB: ${allTasks.size}")
+
+            allTasks.forEachIndexed { index, task ->
+                android.util.Log.d("FragmentTaskActivity", "Task $index: ${task.Title} (Status: ${task.Status}, DeletedAt: ${task.DeletedAt})")
+            }
+            android.util.Log.d("FragmentTaskActivity", "=== END DEBUG ===")
+
         } catch (e: Exception) {
             android.util.Log.e("FragmentTaskActivity", "Debug error", e)
         }
     }
 
-    // ✅ CREATE TEST TASKS
+    // ✅ CRUD OPERATION: CREATE - Create test tasks
     private suspend fun createTestTasks() {
         try {
             val db = AppDb.get(this)
+
             val existingTasks = withContext(Dispatchers.IO) {
                 db.taskDao().getAllTasksForUser(userId)
             }
 
+            android.util.Log.d("FragmentTaskActivity", "Existing tasks for user $userId: ${existingTasks.size}")
+
             if (existingTasks.isEmpty()) {
+                android.util.Log.d("FragmentTaskActivity", "Creating test tasks for user $userId")
+
                 withContext(Dispatchers.IO) {
                     val currentTime = System.currentTimeMillis()
 
+                    // ✅ FIXED: Use Long timestamps instead of String dates
                     val task1 = Task(
-                        Task_ID = 1, User_ID = userId,
+                        Task_ID = 1,
+                        User_ID = userId,
                         Title = "Complete Android App",
-                        Description = "Finish the CheermateApp project with all CRUD operations",
-                        Priority = Priority.High, Status = Status.Pending, TaskProgress = 75,
-                        DueAt = "2025-09-29", DueTime = "14:30",
-                        CreatedAt = currentTime, UpdatedAt = currentTime, DeletedAt = null
+                        Description = "Finish the CheermateApp project",
+                        Priority = Priority.High,
+                        Status = Status.Pending,
+                        TaskProgress = 75,
+                        DueAt = "2025-09-29",
+                        DueTime = "14:30",
+                        CreatedAt = currentTime,  // ✅ Long timestamp
+                        UpdatedAt = currentTime,  // ✅ Long timestamp
+                        DeletedAt = null
                     )
 
                     val task2 = Task(
-                        Task_ID = 2, User_ID = userId,
+                        Task_ID = 2,
+                        User_ID = userId,
                         Title = "Study for Exam",
-                        Description = "Computer Science midterm exam preparation",
-                        Priority = Priority.Medium, Status = Status.InProgress, TaskProgress = 50,
-                        DueAt = "2025-09-30", DueTime = "10:00",
-                        CreatedAt = currentTime, UpdatedAt = currentTime, DeletedAt = null
+                        Description = "Computer Science midterm exam",
+                        Priority = Priority.Medium,
+                        Status = Status.InProgress,
+                        TaskProgress = 50,
+                        DueAt = "2025-09-30",
+                        DueTime = "10:00",
+                        CreatedAt = currentTime,  // ✅ Long timestamp
+                        UpdatedAt = currentTime,  // ✅ Long timestamp
+                        DeletedAt = null
                     )
 
                     val task3 = Task(
-                        Task_ID = 3, User_ID = userId,
+                        Task_ID = 3,
+                        User_ID = userId,
                         Title = "Buy Groceries",
-                        Description = "Weekly shopping list for household items",
-                        Priority = Priority.Low, Status = Status.Completed, TaskProgress = 100,
-                        DueAt = "2025-09-28", DueTime = "16:00",
-                        CreatedAt = currentTime - 86400000L, UpdatedAt = currentTime, DeletedAt = null
+                        Description = "Weekly shopping list",
+                        Priority = Priority.Low,
+                        Status = Status.Completed,
+                        TaskProgress = 100,
+                        DueAt = "2025-09-28",
+                        DueTime = "16:00",
+                        CreatedAt = currentTime - 86400000L,  // ✅ 1 day ago (Long timestamp)
+                        UpdatedAt = currentTime,  // ✅ Long timestamp
+                        DeletedAt = null
                     )
 
                     db.taskDao().insert(task1)
@@ -728,18 +572,20 @@ class FragmentTaskActivity : AppCompatActivity() {
                     android.util.Log.d("FragmentTaskActivity", "✅ Created 3 test tasks successfully")
                 }
             }
+
         } catch (e: Exception) {
             android.util.Log.e("FragmentTaskActivity", "❌ Error creating test tasks: ${e.message}", e)
         }
     }
 
-    // ✅ FILTERING AND TAB MANAGEMENT
+    // ✅ FILTERING AND SEARCH METHODS
     private fun updateTabSelection(selectedTab: TextView) {
         try {
             listOf(tabAll, tabToday, tabPending, tabDone).forEach { tab ->
                 tab.setBackgroundResource(android.R.color.transparent)
                 tab.alpha = 0.7f
             }
+
             selectedTab.setBackgroundResource(R.drawable.bg_chip_glass)
             selectedTab.alpha = 1.0f
         } catch (e: Exception) {
@@ -752,25 +598,47 @@ class FragmentTaskActivity : AppCompatActivity() {
         filterTasks(currentFilter)
     }
 
+    // ✅ CRUD OPERATION: READ - Filter and display tasks
     private fun filterTasks(filterType: FilterType) {
+        android.util.Log.d("FragmentTaskActivity", "🔍 filterTasks called with: $filterType")
+        android.util.Log.d("FragmentTaskActivity", "🔍 Current userId: $userId")
+
         lifecycleScope.launch {
             try {
                 val db = AppDb.get(this@FragmentTaskActivity)
                 val tasks = withContext(Dispatchers.IO) {
                     when (filterType) {
-                        FilterType.ALL -> db.taskDao().getAllTasksForUser(userId)
+                        FilterType.ALL -> {
+                            android.util.Log.d("FragmentTaskActivity", "🔍 Getting ALL tasks...")
+                            db.taskDao().getAllTasksForUser(userId)
+                        }
                         FilterType.TODAY -> {
                             val todayStr = getCurrentDateString()
+                            android.util.Log.d("FragmentTaskActivity", "🔍 Getting TODAY tasks for date: $todayStr")
                             db.taskDao().getTodayTasks(userId, todayStr)
                         }
-                        FilterType.PENDING -> db.taskDao().getPendingTasks(userId)
-                        FilterType.DONE -> db.taskDao().getCompletedTasks(userId)
+                        FilterType.PENDING -> {
+                            android.util.Log.d("FragmentTaskActivity", "🔍 Getting PENDING tasks...")
+                            db.taskDao().getPendingTasks(userId)
+                        }
+                        FilterType.DONE -> {
+                            android.util.Log.d("FragmentTaskActivity", "🔍 Getting COMPLETED tasks...")
+                            db.taskDao().getCompletedTasks(userId)
+                        }
                     }
                 }
 
+                android.util.Log.d("FragmentTaskActivity", "🔍 Filter $filterType returned ${tasks.size} tasks")
+
                 allTasks.clear()
                 allTasks.addAll(tasks)
+
+                // ✅ Display filtered tasks in card
                 displayTaskInCard(tasks)
+                
+                // ✅ Update chipFound with the filtered count immediately
+                chipFound.text = "${tasks.size} found"
+                
                 updateTabCounts()
 
             } catch (e: Exception) {
@@ -798,41 +666,521 @@ class FragmentTaskActivity : AppCompatActivity() {
                 tabToday.text = "Today (${counts["today"]})"
                 tabPending.text = "Pending (${counts["pending"]})"
                 tabDone.text = "Done (${counts["done"]})"
-                tvTasksSub.text = "${counts["all"]} total tasks"
-                chipFound.text = "${currentTasks.size} found"
+
+                val totalTasks = counts["all"] ?: 0
+                tvTasksSub.text = "$totalTasks total tasks"
+                
+                // ✅ Update progress card
+                updateProgressCard(counts["done"] ?: 0, counts["all"] ?: 0)
 
             } catch (e: Exception) {
                 android.util.Log.e("FragmentTaskActivity", "Error updating tab counts", e)
             }
         }
     }
+    
+    // ✅ NEW: Update progress card with completion percentage
+    private fun updateProgressCard(completed: Int, total: Int) {
+        try {
+            val percentage = if (total > 0) (completed * 100) / total else 0
+            
+            progressSubtitle?.text = "$completed of $total tasks completed"
+            progressPercent?.text = "$percentage%"
+            
+            // Update progress bar fill using weight
+            progressFill?.layoutParams?.let { params ->
+                if (params is LinearLayout.LayoutParams) {
+                    params.weight = percentage.coerceAtLeast(0).toFloat()
+                    progressFill?.layoutParams = params
+                }
+            }
+            
+            android.util.Log.d("FragmentTaskActivity", "✅ Progress updated: $percentage% ($completed/$total)")
+        } catch (e: Exception) {
+            android.util.Log.e("FragmentTaskActivity", "Error updating progress card", e)
+        }
+    }
 
     private fun searchTasks(query: String?) {
         if (query.isNullOrBlank()) {
             displayTaskInCard(allTasks)
+            chipFound.text = "${allTasks.size} found"
         } else {
             val searchResults = allTasks.filter { task ->
                 task.Title.contains(query, ignoreCase = true) ||
                         (task.Description?.contains(query, ignoreCase = true) == true)
             }
             displayTaskInCard(searchResults)
+            
+            // Display task titles in chipFound
+            if (searchResults.isEmpty()) {
+                chipFound.text = "No tasks found"
+            } else if (searchResults.size == 1) {
+                chipFound.text = "Found: ${searchResults[0].Title}"
+            } else {
+                // Show first task title and count
+                chipFound.text = "Found: ${searchResults[0].Title} +${searchResults.size - 1} more"
+            }
         }
-        chipFound.text = "${filteredTasks.size} found"
     }
 
-    // ✅ MINIMAL IMPLEMENTATIONS OF REQUIRED METHODS
     private fun showSortOptionsDialog() {
-        Toast.makeText(this, "📊 Sort functionality coming soon!", Toast.LENGTH_SHORT).show()
+        val sortOptions = arrayOf(
+            "📅 Due Date",
+            "🎯 Priority",
+            "📝 Title",
+            "📊 Status",
+            "📈 Progress"
+        )
+
+        AlertDialog.Builder(this)
+            .setTitle("Sort Tasks By")
+            .setItems(sortOptions) { _, which ->
+                sortTasks(which)
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
     }
 
-    private fun showAddTaskDialog() {
-        Toast.makeText(this, "➕ Add task functionality coming soon!", Toast.LENGTH_SHORT).show()
+    private fun sortTasks(sortType: Int) {
+        try {
+            val sortedTasks: List<Task> = when (sortType) {
+                0 -> { // Due Date
+                    currentTasks.sortedWith { task1, task2 ->
+                        val date1 = task1.DueAt ?: ""
+                        val date2 = task2.DueAt ?: ""
+                        date1.compareTo(date2)
+                    }
+                }
+                1 -> { // Priority (High first)
+                    currentTasks.sortedWith { task1, task2 ->
+                        val priority1 = when (task1.Priority) {
+                            Priority.High -> 3
+                            Priority.Medium -> 2
+                            Priority.Low -> 1
+                        }
+                        val priority2 = when (task2.Priority) {
+                            Priority.High -> 3
+                            Priority.Medium -> 2
+                            Priority.Low -> 1
+                        }
+                        priority2.compareTo(priority1)
+                    }
+                }
+                2 -> { // Title A-Z
+                    currentTasks.sortedWith { task1, task2 ->
+                        task1.Title.compareTo(task2.Title, ignoreCase = true)
+                    }
+                }
+                3 -> { // Status
+                    currentTasks.sortedWith { task1, task2 ->
+                        val status1 = when (task1.Status) {
+                            Status.Pending -> 1
+                            Status.InProgress -> 2
+                            Status.OverDue -> 3
+                            Status.Completed -> 4
+                            Status.Cancelled -> 5
+                        }
+                        val status2 = when (task2.Status) {
+                            Status.Pending -> 1
+                            Status.InProgress -> 2
+                            Status.OverDue -> 3
+                            Status.Completed -> 4
+                            Status.Cancelled -> 5
+                        }
+                        status1.compareTo(status2)
+                    }
+                }
+                4 -> { // Progress (High first)
+                    currentTasks.sortedWith { task1, task2 ->
+                        task2.TaskProgress.compareTo(task1.TaskProgress)
+                    }
+                }
+                else -> currentTasks
+            }
+
+            displayTaskInCard(sortedTasks)
+
+            val sortNames = arrayOf("Due Date", "Priority", "Title", "Status", "Progress")
+            val sortName = if (sortType in sortNames.indices) sortNames[sortType] else "Unknown"
+            Toast.makeText(this, "📊 Sorted by $sortName", Toast.LENGTH_SHORT).show()
+
+        } catch (e: Exception) {
+            android.util.Log.e("FragmentTaskActivity", "Error sorting tasks", e)
+            Toast.makeText(this, "Error sorting tasks", Toast.LENGTH_SHORT).show()
+        }
     }
 
+    // ✅ CRUD OPERATION: READ - Show task details dialog
+    // Show task details in a dialog with custom layout
+    private fun showTaskDetailsDialog(task: Task) {
+        try {
+            val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_task_details, null)
+            
+            // Find views
+            val layoutPriorityIndicator = dialogView.findViewById<View>(R.id.layoutPriorityIndicator)
+            val tvTaskTitle = dialogView.findViewById<TextView>(R.id.tvTaskTitle)
+            val tvTaskDescription = dialogView.findViewById<TextView>(R.id.tvTaskDescription)
+            val tvTaskPriority = dialogView.findViewById<TextView>(R.id.tvTaskPriority)
+            val tvTaskStatus = dialogView.findViewById<TextView>(R.id.tvTaskStatus)
+            val tvTaskDueDate = dialogView.findViewById<TextView>(R.id.tvTaskDueDate)
+            val tvTaskProgress = dialogView.findViewById<TextView>(R.id.tvTaskProgress)
+            val progressBar = dialogView.findViewById<ProgressBar>(R.id.progressBar)
+            val progressBarLayout = dialogView.findViewById<LinearLayout>(R.id.progressBarLayout)
+            val btnComplete = dialogView.findViewById<TextView>(R.id.btnComplete)
+            val btnEdit = dialogView.findViewById<TextView>(R.id.btnEdit)
+            val btnDelete = dialogView.findViewById<TextView>(R.id.btnDelete)
+            
+            // Set priority indicator color
+            layoutPriorityIndicator.setBackgroundColor(task.getPriorityColor())
+            
+            // Set task title
+            tvTaskTitle.text = task.Title
+            
+            // Set description
+            if (!task.Description.isNullOrBlank()) {
+                tvTaskDescription.text = task.Description
+                tvTaskDescription.visibility = View.VISIBLE
+            } else {
+                tvTaskDescription.visibility = View.GONE
+            }
+            
+            // Set priority
+            tvTaskPriority.text = task.Priority.name
+            
+            // Set status
+            tvTaskStatus.text = "${task.getStatusEmoji()} ${task.Status.name}"
+            
+            // Set progress
+            if (task.TaskProgress > 0) {
+                progressBarLayout.visibility = View.VISIBLE
+                progressBar.progress = task.TaskProgress
+                tvTaskProgress.text = "${task.TaskProgress}%"
+            } else {
+                progressBarLayout.visibility = View.GONE
+            }
+            
+            // Set due date
+            tvTaskDueDate.text = task.getFormattedDueDateTime()
+            
+            // Create dialog
+            val dialog = AlertDialog.Builder(this)
+                .setView(dialogView)
+                .create()
+            
+            // Set up button click listeners
+            btnComplete.setOnClickListener {
+                dialog.dismiss()
+                markTaskAsDone(task)
+            }
+            
+            btnEdit.setOnClickListener {
+                dialog.dismiss()
+                showEditTaskDialog(task)
+            }
+            
+            btnDelete.setOnClickListener {
+                dialog.dismiss()
+                deleteTask(task)
+            }
+            
+            // Update button state based on task status
+            if (task.Status == Status.Completed) {
+                btnComplete.text = "✅ Completed"
+                btnComplete.alpha = 0.5f
+                btnComplete.isEnabled = false
+            }
+            
+            dialog.show()
+            
+        } catch (e: Exception) {
+            android.util.Log.e("FragmentTaskActivity", "Error showing task details", e)
+            // Fallback to simple dialog
+            showTaskDetailDialog(task)
+        }
+    }
+
+    // Fallback simple dialog
+    private fun showTaskDetailDialog(task: Task) {
+        val message = """
+        📋 ${task.Title}
+        
+        ${if (task.Description?.isNotBlank() == true) "📝 ${task.Description}\n" else ""}🎯 Priority: ${task.Priority}
+        📊 Status: ${task.Status}
+        📈 Progress: ${task.TaskProgress}%
+        ${if (task.DueAt != null) "📅 Due: ${task.getFormattedDueDateTime()}\n" else ""}
+        
+        ${task.getStatusEmoji()} ${task.Status}
+        ${if (task.isOverdue()) "🔴 OVERDUE" else ""}
+        ${if (task.isToday()) "📅 DUE TODAY" else ""}
+    """.trimIndent()
+
+        AlertDialog.Builder(this)
+            .setTitle("Task Details")
+            .setMessage(message)
+            .setPositiveButton("Edit") { _, _ -> showEditTaskDialog(task) }
+            .setNeutralButton("Close", null)
+            .setNegativeButton("Delete") { _, _ -> deleteTask(task) }
+            .show()
+    }
+
+    // ✅ CRUD OPERATION: UPDATE - Complete Edit Dialog with all fields
     private fun showEditTaskDialog(task: Task) {
-        Toast.makeText(this, "✏️ Edit task functionality coming soon!", Toast.LENGTH_SHORT).show()
+        try {
+            val builder = AlertDialog.Builder(this)
+            builder.setTitle("Edit Task")
+
+            val scrollView = ScrollView(this)
+            val container = LinearLayout(this)
+            container.orientation = LinearLayout.VERTICAL
+            container.setPadding(50, 20, 50, 20)
+
+            // Task Title (pre-filled)
+            val titleInput = EditText(this)
+            titleInput.hint = "Task title"
+            titleInput.setText(task.Title)
+            titleInput.setPadding(16, 16, 16, 16)
+            container.addView(titleInput)
+
+            // Description (pre-filled)
+            val descriptionInput = EditText(this)
+            descriptionInput.hint = "Description (optional)"
+            descriptionInput.setText(task.Description ?: "")
+            descriptionInput.setPadding(16, 16, 16, 16)
+            descriptionInput.minLines = 2
+            container.addView(descriptionInput)
+
+            // Priority Spinner (pre-selected)
+            val priorityLabel = TextView(this)
+            priorityLabel.text = "Priority:"
+            priorityLabel.setPadding(0, 16, 0, 8)
+            container.addView(priorityLabel)
+
+            val prioritySpinner = Spinner(this)
+            val priorities = arrayOf("Low", "Medium", "High")
+            val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, priorities)
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            prioritySpinner.adapter = adapter
+
+            // Set current priority selection
+            val currentPriorityIndex = when (task.Priority) {
+                Priority.Low -> 0
+                Priority.Medium -> 1
+                Priority.High -> 2
+            }
+            prioritySpinner.setSelection(currentPriorityIndex)
+            container.addView(prioritySpinner)
+
+            // Status Spinner (pre-selected)
+            val statusLabel = TextView(this)
+            statusLabel.text = "Status:"
+            statusLabel.setPadding(0, 16, 0, 8)
+            container.addView(statusLabel)
+
+            val statusSpinner = Spinner(this)
+            val statuses = arrayOf("Pending", "InProgress", "Completed", "Cancelled")
+            val statusAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, statuses)
+            statusAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            statusSpinner.adapter = statusAdapter
+
+            // Set current status selection
+            val currentStatusIndex = when (task.Status) {
+                Status.Pending -> 0
+                Status.InProgress -> 1
+                Status.Completed -> 2
+                Status.Cancelled -> 3
+                Status.OverDue -> 0 // Default to Pending for OverDue
+            }
+            statusSpinner.setSelection(currentStatusIndex)
+            container.addView(statusSpinner)
+
+            // Progress Slider
+            val progressLabel = TextView(this)
+            progressLabel.text = "Progress: ${task.TaskProgress}%"
+            progressLabel.setPadding(0, 16, 0, 8)
+            container.addView(progressLabel)
+
+            val progressSeekBar = SeekBar(this)
+            progressSeekBar.max = 100
+            progressSeekBar.progress = task.TaskProgress
+            progressSeekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+                override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                    progressLabel.text = "Progress: $progress%"
+                }
+                override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+                override fun onStopTrackingTouch(seekBar: SeekBar?) {}
+            })
+            container.addView(progressSeekBar)
+
+            // Date Selection (pre-filled)
+            val dateLabel = TextView(this)
+            dateLabel.text = "Due Date:"
+            dateLabel.setPadding(0, 16, 0, 8)
+            container.addView(dateLabel)
+
+            val dateButton = Button(this)
+            val calendar = Calendar.getInstance()
+            val dateFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
+
+            // Parse existing due date
+            var selectedDate: Date = try {
+                if (task.DueAt != null) {
+                    SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(task.DueAt) ?: Date()
+                } else {
+                    Date()
+                }
+            } catch (e: Exception) {
+                Date()
+            }
+            calendar.time = selectedDate
+            dateButton.text = "📅 ${dateFormat.format(selectedDate)}"
+
+            dateButton.setOnClickListener {
+                showDatePicker { year, month, day ->
+                    calendar.set(year, month, day)
+                    selectedDate = calendar.time
+                    dateButton.text = "📅 ${dateFormat.format(selectedDate)}"
+                }
+            }
+            container.addView(dateButton)
+
+            // Time Selection (pre-filled)
+            val timeLabel = TextView(this)
+            timeLabel.text = "Due Time:"
+            timeLabel.setPadding(0, 16, 0, 8)
+            container.addView(timeLabel)
+
+            val timeButton = Button(this)
+            val timeFormat = SimpleDateFormat("hh:mm a", Locale.getDefault())
+
+            // Parse existing due time
+            var selectedHour = 12
+            var selectedMinute = 0
+            try {
+                if (task.DueTime != null) {
+                    val timeParts = task.DueTime.split(":")
+                    selectedHour = timeParts[0].toInt()
+                    selectedMinute = timeParts[1].toInt()
+                }
+            } catch (e: Exception) {
+                selectedHour = 12
+                selectedMinute = 0
+            }
+
+            calendar.set(Calendar.HOUR_OF_DAY, selectedHour)
+            calendar.set(Calendar.MINUTE, selectedMinute)
+            timeButton.text = "🕐 ${timeFormat.format(calendar.time)}"
+
+            timeButton.setOnClickListener {
+                showTimePicker(selectedHour, selectedMinute) { hour, minute ->
+                    selectedHour = hour
+                    selectedMinute = minute
+                    calendar.set(Calendar.HOUR_OF_DAY, hour)
+                    calendar.set(Calendar.MINUTE, minute)
+                    timeButton.text = "🕐 ${timeFormat.format(calendar.time)}"
+                }
+            }
+            container.addView(timeButton)
+
+            scrollView.addView(container)
+            builder.setView(scrollView)
+
+            builder.setPositiveButton("Update Task", null)
+            builder.setNegativeButton("Cancel", null)
+
+            val dialog = builder.create()
+            dialog.show()
+
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
+                val title = titleInput.text.toString().trim()
+                if (title.isEmpty()) {
+                    titleInput.error = "Task title is required"
+                    titleInput.requestFocus()
+                    Toast.makeText(this@FragmentTaskActivity, "⚠️ Please enter a task title", Toast.LENGTH_SHORT).show()
+                } else {
+                    val priority = prioritySpinner.selectedItem.toString()
+                    val status = statusSpinner.selectedItem.toString()
+                    val description = descriptionInput.text.toString().trim()
+                    val progress = progressSeekBar.progress
+
+                    val finalCalendar = Calendar.getInstance()
+                    finalCalendar.time = selectedDate
+                    finalCalendar.set(Calendar.HOUR_OF_DAY, selectedHour)
+                    finalCalendar.set(Calendar.MINUTE, selectedMinute)
+
+                    updateTask(task, title, description, priority, status, progress, finalCalendar.time)
+                    dialog.dismiss()
+                }
+            }
+
+        } catch (e: Exception) {
+            android.util.Log.e("FragmentTaskActivity", "Error showing edit task dialog", e)
+            Toast.makeText(this, "✏️ Edit task dialog error", Toast.LENGTH_SHORT).show()
+        }
     }
 
+    // ✅ CRUD OPERATION: UPDATE - Update existing task
+    private fun updateTask(
+        originalTask: Task,
+        title: String,
+        description: String,
+        priority: String,
+        status: String,
+        progress: Int,
+        dueDate: Date
+    ) {
+        lifecycleScope.launch {
+            try {
+                val db = AppDb.get(this@FragmentTaskActivity)
+
+                val priorityEnum = when (priority.uppercase()) {
+                    "LOW" -> Priority.Low
+                    "HIGH" -> Priority.High
+                    else -> Priority.Medium
+                }
+
+                val statusEnum = when (status.uppercase()) {
+                    "PENDING" -> Status.Pending
+                    "INPROGRESS" -> Status.InProgress
+                    "COMPLETED" -> Status.Completed
+                    "CANCELLED" -> Status.Cancelled
+                    else -> Status.Pending
+                }
+
+                val updatedTask = originalTask.copy(
+                    Title = title,
+                    Description = if (description.isBlank()) null else description,
+                    Priority = priorityEnum,
+                    Status = statusEnum,
+                    TaskProgress = progress,
+                    DueAt = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(dueDate),
+                    DueTime = SimpleDateFormat("HH:mm", Locale.getDefault()).format(dueDate),
+                    UpdatedAt = System.currentTimeMillis()
+                )
+
+                withContext(Dispatchers.IO) {
+                    db.taskDao().update(updatedTask)
+                }
+
+                loadTasks()
+
+                val dateFormat = SimpleDateFormat("MMM dd, yyyy 'at' hh:mm a", Locale.getDefault())
+                val formattedDate = dateFormat.format(dueDate)
+
+                Toast.makeText(
+                    this@FragmentTaskActivity,
+                    "✅ Task '$title' updated!\n📅 Due: $formattedDate",
+                    Toast.LENGTH_LONG
+                ).show()
+
+            } catch (e: Exception) {
+                android.util.Log.e("FragmentTaskActivity", "Error updating task", e)
+                Toast.makeText(this@FragmentTaskActivity, "❌ Update Error: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    // ✅ CRUD OPERATION: DELETE - Delete task with confirmation
     private fun deleteTask(task: Task) {
         AlertDialog.Builder(this)
             .setTitle("Delete Task")
@@ -842,12 +1190,15 @@ class FragmentTaskActivity : AppCompatActivity() {
                     try {
                         val db = AppDb.get(this@FragmentTaskActivity)
                         withContext(Dispatchers.IO) {
-                            db.taskDao().softDelete(task.Task_ID, task.User_ID)
+                            db.taskDao().softDelete(task.User_ID, task.Task_ID)
                         }
-                        Toast.makeText(this@FragmentTaskActivity, "🗑️ Task deleted!", Toast.LENGTH_SHORT).show()
+
+                        Toast.makeText(this@FragmentTaskActivity, "🗑️ Task deleted", Toast.LENGTH_SHORT).show()
                         loadTasks()
+
                     } catch (e: Exception) {
-                        Toast.makeText(this@FragmentTaskActivity, "❌ Error deleting task", Toast.LENGTH_SHORT).show()
+                        android.util.Log.e("FragmentTaskActivity", "Error deleting task", e)
+                        Toast.makeText(this@FragmentTaskActivity, "Error deleting task", Toast.LENGTH_SHORT).show()
                     }
                 }
             }
@@ -855,13 +1206,307 @@ class FragmentTaskActivity : AppCompatActivity() {
             .show()
     }
 
-    // ✅ HELPER METHODS
-    private fun getCurrentDateString(): String {
-        val format = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-        return format.format(Date())
+    // ✅ CRUD OPERATION: CREATE - Add new task dialog
+    private fun showAddTaskDialog() {
+        try {
+            val builder = AlertDialog.Builder(this)
+            builder.setTitle("Add New Task")
+
+            val scrollView = ScrollView(this)
+            val container = LinearLayout(this)
+            container.orientation = LinearLayout.VERTICAL
+            container.setPadding(50, 20, 50, 20)
+
+            // Task Title
+            val titleInput = EditText(this)
+            titleInput.hint = "Task title"
+            titleInput.setPadding(16, 16, 16, 16)
+            container.addView(titleInput)
+
+            // Description (Optional)
+            val descriptionInput = EditText(this)
+            descriptionInput.hint = "Description (optional)"
+            descriptionInput.setPadding(16, 16, 16, 16)
+            descriptionInput.minLines = 2
+            container.addView(descriptionInput)
+
+            // Category Spinner
+            val categoryLabel = TextView(this)
+            categoryLabel.text = "Category:"
+            categoryLabel.setPadding(0, 16, 0, 8)
+            container.addView(categoryLabel)
+
+            val categorySpinner = Spinner(this)
+            val categories = arrayOf("Work", "Personal", "Shopping", "Others")
+            val categoryAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, categories)
+            categoryAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            categorySpinner.adapter = categoryAdapter
+            categorySpinner.setSelection(0) // Default to Work
+            container.addView(categorySpinner)
+
+            // Priority Spinner
+            val priorityLabel = TextView(this)
+            priorityLabel.text = "Priority:"
+            priorityLabel.setPadding(0, 16, 0, 8)
+            container.addView(priorityLabel)
+
+            val prioritySpinner = Spinner(this)
+            val priorities = arrayOf("Low", "Medium", "High")
+            val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, priorities)
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            prioritySpinner.adapter = adapter
+            prioritySpinner.setSelection(1) // Default to Medium
+            container.addView(prioritySpinner)
+
+            // Date Selection
+            val dateLabel = TextView(this)
+            dateLabel.text = "Due Date:"
+            dateLabel.setPadding(0, 16, 0, 8)
+            container.addView(dateLabel)
+
+            val dateButton = Button(this)
+            val calendar = Calendar.getInstance()
+            val dateFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
+            var selectedDate = calendar.time
+            dateButton.text = "📅 ${dateFormat.format(selectedDate)}"
+
+            dateButton.setOnClickListener {
+                showDatePicker { year, month, day ->
+                    calendar.set(year, month, day)
+                    selectedDate = calendar.time
+                    dateButton.text = "📅 ${dateFormat.format(selectedDate)}"
+                }
+            }
+            container.addView(dateButton)
+
+            // Time Selection
+            val timeLabel = TextView(this)
+            timeLabel.text = "Due Time:"
+            timeLabel.setPadding(0, 16, 0, 8)
+            container.addView(timeLabel)
+
+            val timeButton = Button(this)
+            val timeFormat = SimpleDateFormat("hh:mm a", Locale.getDefault())
+            var selectedHour = calendar.get(Calendar.HOUR_OF_DAY)
+            var selectedMinute = calendar.get(Calendar.MINUTE)
+            timeButton.text = "🕐 ${timeFormat.format(calendar.time)}"
+
+            timeButton.setOnClickListener {
+                showTimePicker(selectedHour, selectedMinute) { hour, minute ->
+                    selectedHour = hour
+                    selectedMinute = minute
+                    calendar.set(Calendar.HOUR_OF_DAY, hour)
+                    calendar.set(Calendar.MINUTE, minute)
+                    timeButton.text = "🕐 ${timeFormat.format(calendar.time)}"
+                }
+            }
+            container.addView(timeButton)
+
+            // Reminder Spinner
+            val reminderLabel = TextView(this)
+            reminderLabel.text = "Reminder:"
+            reminderLabel.setPadding(0, 16, 0, 8)
+            container.addView(reminderLabel)
+
+            val reminderSpinner = Spinner(this)
+            val reminders = arrayOf("None", "10 minutes before", "30 minutes before", "At specific time")
+            val reminderAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, reminders)
+            reminderAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            reminderSpinner.adapter = reminderAdapter
+            reminderSpinner.setSelection(0) // Default to None
+            container.addView(reminderSpinner)
+
+            scrollView.addView(container)
+            builder.setView(scrollView)
+
+            builder.setPositiveButton("Add Task", null)
+            builder.setNegativeButton("Cancel", null)
+
+            val dialog = builder.create()
+            dialog.show()
+
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
+                val title = titleInput.text.toString().trim()
+                if (title.isEmpty()) {
+                    titleInput.error = "Task title is required"
+                    titleInput.requestFocus()
+                    Toast.makeText(this@FragmentTaskActivity, "⚠️ Please enter a task title", Toast.LENGTH_SHORT).show()
+                } else {
+                    val category = categorySpinner.selectedItem.toString()
+                    val priority = prioritySpinner.selectedItem.toString()
+                    val description = descriptionInput.text.toString().trim()
+                    val reminderOption = reminderSpinner.selectedItem.toString()
+
+                    val finalCalendar = Calendar.getInstance()
+                    finalCalendar.time = selectedDate
+                    finalCalendar.set(Calendar.HOUR_OF_DAY, selectedHour)
+                    finalCalendar.set(Calendar.MINUTE, selectedMinute)
+
+                    createNewTask(title, description, category, priority, finalCalendar.time, reminderOption)
+                    dialog.dismiss()
+                }
+            }
+
+        } catch (e: Exception) {
+            android.util.Log.e("FragmentTaskActivity", "Error showing add task dialog", e)
+            Toast.makeText(this, "📝 Task creation dialog error", Toast.LENGTH_SHORT).show()
+        }
     }
 
-    // ✅ NAVIGATION
+    // ✅ DIALOG HELPER METHODS
+    private fun showDatePicker(onDateSelected: (year: Int, month: Int, day: Int) -> Unit) {
+        val calendar = Calendar.getInstance()
+        val datePickerDialog = android.app.DatePickerDialog(
+            this,
+            { _, year, month, dayOfMonth ->
+                onDateSelected(year, month, dayOfMonth)
+            },
+            calendar.get(Calendar.YEAR),
+            calendar.get(Calendar.MONTH),
+            calendar.get(Calendar.DAY_OF_MONTH)
+        )
+        datePickerDialog.datePicker.minDate = System.currentTimeMillis()
+        datePickerDialog.show()
+    }
+
+    private fun showTimePicker(currentHour: Int, currentMinute: Int, onTimeSelected: (hour: Int, minute: Int) -> Unit) {
+        val timePickerDialog = android.app.TimePickerDialog(
+            this,
+            { _, hourOfDay, minute ->
+                onTimeSelected(hourOfDay, minute)
+            },
+            currentHour,
+            currentMinute,
+            false
+        )
+        timePickerDialog.show()
+    }
+
+    // ✅ CRUD OPERATION: CREATE - Create new task
+    private fun createNewTask(title: String, description: String, category: String, priority: String, dueDate: Date, reminderOption: String) {
+        lifecycleScope.launch {
+            try {
+                val db = AppDb.get(this@FragmentTaskActivity)
+
+                val taskId = withContext(Dispatchers.IO) {
+                    db.taskDao().getNextTaskIdForUser(userId)
+                }
+
+                val categoryEnum = when (category) {
+                    "Work" -> Category.Work
+                    "Personal" -> Category.Personal
+                    "Shopping" -> Category.Shopping
+                    "Others" -> Category.Others
+                    else -> Category.Work
+                }
+
+                val priorityEnum = when (priority.uppercase()) {
+                    "LOW" -> Priority.Low
+                    "HIGH" -> Priority.High
+                    else -> Priority.Medium
+                }
+
+                val currentTime = System.currentTimeMillis()  // ✅ Get current timestamp
+
+                val newTask = Task(
+                    Task_ID = taskId,
+                    User_ID = userId,
+                    Title = title,
+                    Description = if (description.isBlank()) null else description,
+                    Category = categoryEnum,
+                    Priority = priorityEnum,
+                    Status = Status.Pending,
+                    TaskProgress = 0,
+                    DueAt = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(dueDate),
+                    DueTime = SimpleDateFormat("HH:mm", Locale.getDefault()).format(dueDate),
+                    CreatedAt = currentTime,  // ✅ Long timestamp
+                    UpdatedAt = currentTime,  // ✅ Long timestamp
+                    DeletedAt = null
+                )
+
+                withContext(Dispatchers.IO) {
+                    db.taskDao().insert(newTask)
+                }
+
+                // Create reminder if requested
+                if (reminderOption != "None") {
+                    createTaskReminder(taskId, newTask.DueAt!!, newTask.DueTime!!, reminderOption)
+                }
+
+                loadTasks()
+
+                val dateFormat = SimpleDateFormat("MMM dd, yyyy 'at' hh:mm a", Locale.getDefault())
+                val formattedDate = dateFormat.format(dueDate)
+                val reminderText = if (reminderOption != "None") "\n🔔 Reminder: $reminderOption" else ""
+
+                Toast.makeText(
+                    this@FragmentTaskActivity,
+                    "✅ Task '$title' created!\n📅 Due: $formattedDate$reminderText",
+                    Toast.LENGTH_LONG
+                ).show()
+
+            } catch (e: Exception) {
+                android.util.Log.e("FragmentTaskActivity", "Error creating task", e)
+                Toast.makeText(this@FragmentTaskActivity, "❌ Error: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    // ✅ CREATE TASK REMINDER
+    private fun createTaskReminder(
+        taskId: Int,
+        dueDate: String,
+        dueTime: String,
+        reminderOption: String
+    ) {
+        lifecycleScope.launch {
+            try {
+                val db = AppDb.get(this@FragmentTaskActivity)
+
+                // Parse due date and time
+                val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
+                val dueDateTime = dateFormat.parse("$dueDate $dueTime")
+
+                if (dueDateTime != null) {
+                    val dueTimeMillis = dueDateTime.time
+
+                    // Calculate reminder time based on option
+                    val remindAtMillis = when (reminderOption) {
+                        "10 minutes before" -> dueTimeMillis - (10 * 60 * 1000)
+                        "30 minutes before" -> dueTimeMillis - (30 * 60 * 1000)
+                        "At specific time" -> dueTimeMillis
+                        else -> dueTimeMillis
+                    }
+
+                    // Get next reminder ID
+                    val reminderId = withContext(Dispatchers.IO) {
+                        val existingReminders = db.taskReminderDao().getRemindersByTask(taskId)
+                        if (existingReminders.isEmpty()) 1 else existingReminders.maxOf { it.TaskReminder_ID } + 1
+                    }
+
+                    val reminder = TaskReminder(
+                        TaskReminder_ID = reminderId,
+                        Task_ID = taskId,
+                        User_ID = userId,
+                        RemindAt = remindAtMillis,
+                        IsActive = true
+                    )
+
+                    withContext(Dispatchers.IO) {
+                        db.taskReminderDao().insert(reminder)
+                    }
+
+                    android.util.Log.d("FragmentTaskActivity", "✅ Created reminder for task $taskId at $remindAtMillis")
+                }
+
+            } catch (e: Exception) {
+                android.util.Log.e("FragmentTaskActivity", "Error creating task reminder", e)
+                // Don't show error to user - reminder is optional feature
+            }
+        }
+    }
+
+    // ✅ NAVIGATION METHODS
     private fun navigateToMain() {
         val intent = Intent(this, MainActivity::class.java)
         intent.putExtra(MainActivity.EXTRA_SHOW_DASHBOARD, true)
@@ -877,6 +1522,19 @@ class FragmentTaskActivity : AppCompatActivity() {
         finish()
     }
 
+    // ✅ HELPER METHODS
+    private fun getCurrentDateString(): String {
+        val format = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+        val todayStr = format.format(Date())
+        android.util.Log.d("FragmentTaskActivity", "🔍 getCurrentDateString: $todayStr")
+        return todayStr
+    }
+
+    private fun dpToPx(dp: Int): Int {
+        return (dp * resources.displayMetrics.density).toInt()
+    }
+
+    // ✅ ACTIVITY LIFECYCLE METHODS
     override fun onSupportNavigateUp(): Boolean {
         navigateToMain()
         return true
