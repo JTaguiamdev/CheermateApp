@@ -37,18 +37,19 @@ class FragmentTaskExtensionActivity : AppCompatActivity() {
     private lateinit var toolbar: Toolbar
     private lateinit var overdueRow: LinearLayout
     private lateinit var overdueText: TextView
-    private lateinit var taskCard: androidx.cardview.widget.CardView
+    private lateinit var taskCard: LinearLayout
     private lateinit var etTaskTitle: EditText
     private lateinit var etTaskDescription: EditText
     private lateinit var btnTaskCategory: Button
     private lateinit var btnTaskPriority: Button
     private lateinit var btnTaskDueDate: Button
     private lateinit var btnTaskReminder: Button
-    private lateinit var subtaskCard: androidx.cardview.widget.CardView
+    private lateinit var subtaskCard: LinearLayout
     private lateinit var etSubtaskInput: EditText
     private lateinit var btnAddSubtask: Button
     private lateinit var subtasksContainer: LinearLayout
     private lateinit var tvNoSubtasks: TextView
+    private lateinit var tvItemsCount: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -86,6 +87,7 @@ class FragmentTaskExtensionActivity : AppCompatActivity() {
         btnAddSubtask = findViewById(R.id.btn_add_subtask)
         subtasksContainer = findViewById(R.id.subtasks_container)
         tvNoSubtasks = findViewById(R.id.tv_no_subtasks)
+        tvItemsCount = findViewById(R.id.tv_items_count)
 
         // Setup toolbar
         setSupportActionBar(toolbar)
@@ -458,10 +460,16 @@ class FragmentTaskExtensionActivity : AppCompatActivity() {
     private fun displaySubtasks() {
         subtasksContainer.removeAllViews()
         
+        // Update items count
+        val completedCount = subtasks.count { it.IsCompleted }
+        tvItemsCount.text = "$completedCount/${subtasks.size} items"
+        
         if (subtasks.isEmpty()) {
             tvNoSubtasks.visibility = View.VISIBLE
+            subtasksContainer.visibility = View.GONE
         } else {
             tvNoSubtasks.visibility = View.GONE
+            subtasksContainer.visibility = View.VISIBLE
             
             subtasks.forEach { subtask ->
                 val subtaskView = createSubtaskView(subtask)
@@ -580,6 +588,10 @@ class FragmentTaskExtensionActivity : AppCompatActivity() {
                 if (index >= 0) {
                     subtasks[index] = subtask
                 }
+                
+                // Update items count display
+                val completedCount = subtasks.count { it.IsCompleted }
+                tvItemsCount.text = "$completedCount/${subtasks.size} items"
             } catch (e: Exception) {
                 android.util.Log.e("FragmentTaskExtensionActivity", "Error updating subtask", e)
             }

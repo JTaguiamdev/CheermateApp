@@ -68,7 +68,7 @@
             </LinearLayout>
 
             <!-- Task Details Card -->
-            <androidx.cardview.widget.CardView
+            <LinearLayout
                 android:id="@+id/task_card"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -78,19 +78,14 @@
                 android:clickable="true"
                 android:focusable="true"
                 android:foreground="?attr/selectableItemBackground"
-                app:cardCornerRadius="1dp"
-                app:cardBackgroundColor="#33FFFFFF"
-                app:cardElevation="2dp"
+                android:background="@drawable/bg_card_glass_hover"
+                android:elevation="2dp"
                 android:stateListAnimator="@animator/card_elevation_state"
+                android:orientation="vertical"
+                android:padding="16dp"
                 app:layout_constraintTop_toBottomOf="@id/overdue_row"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
 
                     <!-- Task Title label then field -->
 
@@ -188,11 +183,10 @@
                         android:textAllCaps="false"
                         android:textColor="@android:color/white"
                         android:textSize="14sp" />
-                </LinearLayout>
-            </androidx.cardview.widget.CardView>
+            </LinearLayout>
 
             <!-- Subtasks Section -->
-            <androidx.cardview.widget.CardView
+            <LinearLayout
                 android:id="@+id/subtask_card"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -203,21 +197,15 @@
                 android:clickable="true"
                 android:focusable="true"
                 android:foreground="?attr/selectableItemBackground"
-                app:cardCornerRadius="16dp"
-                app:cardBackgroundColor="#33FFFFFF"
-                app:cardElevation="2dp"
+                android:background="@drawable/bg_card_glass_hover"
+                android:elevation="2dp"
                 android:stateListAnimator="@animator/card_elevation_state"
+                android:orientation="vertical"
+                android:padding="16dp"
                 app:layout_constraintTop_toBottomOf="@id/task_card"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp"
-                    android:background="@drawable/bg_card_glass">
 
                     <!-- Header row: title left, count right -->
                     <LinearLayout
@@ -307,8 +295,7 @@
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
                         android:visibility="gone" />
-                </LinearLayout>
-            </androidx.cardview.widget.CardView>
+            </LinearLayout>
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>
 </LinearLayout>
