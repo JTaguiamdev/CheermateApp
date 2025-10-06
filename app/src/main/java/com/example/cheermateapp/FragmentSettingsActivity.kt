@@ -432,17 +432,35 @@ class FragmentSettingsActivity : AppCompatActivity() {
         lifecycleScope.launch {
             try {
                 val db = AppDb.get(this@FragmentSettingsActivity)
-                val personalities = withContext(Dispatchers.IO) {
-                    db.personalityDao().getAll()
+                
+                // Get all personalities and current user personality
+                val (personalities, currentPersonality) = withContext(Dispatchers.IO) {
+                    val allPersonalities = db.personalityDao().getAll()
+                    val userPersonality = db.personalityDao().getPersonalityByUserIdFromUser(userId)
+                    Pair(allPersonalities, userPersonality)
                 }
 
                 val personalityNames = personalities.map { it.Name }.toTypedArray()
+                
+                // Find the index of the current personality
+                val checkedItem = if (currentPersonality != null) {
+                    personalities.indexOfFirst { it.Personality_ID == currentPersonality.Personality_ID }
+                } else {
+                    -1  // No selection
+                }
+                
+                // Track the selected personality
+                var selectedPersonalityId: Int? = currentPersonality?.Personality_ID
 
                 android.app.AlertDialog.Builder(this@FragmentSettingsActivity)
                     .setTitle("Choose Your Personality")
-                    .setItems(personalityNames) { _, which ->
-                        val selectedPersonality = personalities[which]
-                        updateUserPersonality(selectedPersonality.Personality_ID)
+                    .setSingleChoiceItems(personalityNames, checkedItem) { _, which ->
+                        selectedPersonalityId = personalities[which].Personality_ID
+                    }
+                    .setPositiveButton("OK") { _, _ ->
+                        selectedPersonalityId?.let { personalityId ->
+                            updateUserPersonality(personalityId)
+                        }
                     }
                     .setNegativeButton("Cancel", null)
                     .show()
