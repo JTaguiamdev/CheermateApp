@@ -537,8 +537,13 @@ class FragmentTaskExtensionActivity : AppCompatActivity() {
             try {
                 val db = AppDb.get(this@FragmentTaskExtensionActivity)
                 
+                // Get the next available Subtask_ID for this task and user
+                val nextSubtaskId = withContext(Dispatchers.IO) {
+                    db.subTaskDao().getNextSubtaskId(taskId, userId)
+                }
+                
                 val newSubtask = SubTask(
-                    Subtask_ID = 0,
+                    Subtask_ID = nextSubtaskId,
                     Task_ID = taskId,
                     User_ID = userId,
                     Name = subtaskName,

@@ -23,4 +23,7 @@ interface SubTaskDao {
 
     @Query("SELECT * FROM SubTask WHERE Task_ID = :taskId")
     suspend fun getSubTasksByTask(taskId: Int): List<SubTask>
+
+    @Query("SELECT COALESCE(MAX(Subtask_ID), 0) + 1 FROM SubTask WHERE Task_ID = :taskId AND User_ID = :userId")
+    suspend fun getNextSubtaskId(taskId: Int, userId: Int): Int
 }
