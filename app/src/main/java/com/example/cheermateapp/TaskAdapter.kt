@@ -33,7 +33,6 @@ class TaskAdapter(
         val btnComplete: View? = itemView.findViewById(R.id.btnComplete) // Can be TextView or ImageView
         val btnEdit: View? = itemView.findViewById(R.id.btnEdit)
         val btnDelete: View? = itemView.findViewById(R.id.btnDelete)
-        val layoutPriorityIndicator: View? = itemView.findViewById(R.id.priorityIndicator)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TaskViewHolder {
@@ -55,9 +54,6 @@ class TaskAdapter(
 
         // Set priority with color
         holder.tvPriority.text = "🎯 ${task.Priority.name}"
-
-        // Set priority indicator color if it exists
-        holder.layoutPriorityIndicator?.setBackgroundColor(task.getPriorityColor())
 
         // Set due date
         if (task.DueAt != null) {

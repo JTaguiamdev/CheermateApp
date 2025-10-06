@@ -25,7 +25,6 @@ class TaskListAdapter(
 
     class TaskViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         // Collapsed view elements
-        val priorityIndicator: View = itemView.findViewById(R.id.priorityIndicator)
         val tvTitle: TextView = itemView.findViewById(R.id.tvTaskTitle)
         val tvDescription: TextView = itemView.findViewById(R.id.tvTaskDescription)
         val tvCategory: TextView = itemView.findViewById(R.id.tvTaskCategory)
@@ -58,9 +57,6 @@ class TaskListAdapter(
     override fun onBindViewHolder(holder: TaskViewHolder, position: Int) {
         val task = tasks[position]
         val isExpanded = position == expandedPosition
-
-        // Set priority indicator color
-        holder.priorityIndicator.setBackgroundColor(task.getPriorityColor())
 
         // Set title
         holder.tvTitle.text = task.Title

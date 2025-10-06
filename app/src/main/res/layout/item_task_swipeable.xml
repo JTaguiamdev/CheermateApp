@@ -6,16 +6,6 @@
     android:background="@drawable/gradient_background"
     android:elevation="4dp">
 
-
-    <!-- Priority indicator bar -->
-    <View
-        android:id="@+id/layoutPriorityIndicator"
-        android:layout_width="match_parent"
-        android:layout_height="4dp"
-        android:layout_marginBottom="12dp"
-        android:background="#FFE53E3E"
-        android:visibility="visible" />
-
     <!-- Task Title -->
     <TextView
         android:id="@+id/tvTaskTitle"
@@ -68,37 +58,6 @@
             android:gravity="end"/>
     </LinearLayout>
 
-    <!-- Progress Bar Row -->
-    <LinearLayout
-        android:id="@+id/layoutProgress"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginTop="8dp"
-        android:gravity="center_vertical"
-        android:visibility="visible">
-
-        <ProgressBar
-            android:id="@+id/progressBar"
-            style="?android:attr/progressBarStyleHorizontal"
-            android:layout_width="0dp"
-            android:layout_height="8dp"
-            android:layout_weight="1"
-            android:layout_marginEnd="8dp"
-            android:progress="25"
-            android:progressBackgroundTint="#33FFFFFF"
-            android:progressTint="@android:color/white" />
-
-        <TextView
-            android:id="@+id/tvTaskProgress"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:fontFamily="@font/sf_pro_rounded_bold"
-            android:text="25%"
-            android:textColor="@android:color/white"
-            android:textSize="12sp" />
-    </LinearLayout>
-
     <!-- Due Date -->
     <TextView
         android:id="@+id/tvTaskDueDate"
@@ -110,60 +69,4 @@
         android:fontFamily="@font/sf_pro_rounded_regular"
         android:layout_marginTop="8dp"/>
 
-    <!-- Action Buttons -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginTop="16dp">
-
-        <TextView
-            android:id="@+id/btnComplete"
-            android:layout_width="0dp"
-            android:layout_height="40dp"
-            android:layout_weight="1"
-            android:text="✅ Complete"
-            android:textColor="@android:color/white"
-            android:textSize="12sp"
-            android:fontFamily="@font/sf_pro_rounded_bold"
-            android:gravity="center"
-            android:background="@drawable/bg_chip_glass"
-            android:layout_marginEnd="4dp"
-            android:clickable="true"
-            android:focusable="true"
-            android:foreground="?attr/selectableItemBackground"/>
-
-        <TextView
-            android:id="@+id/btnEdit"
-            android:layout_width="0dp"
-            android:layout_height="40dp"
-            android:layout_weight="1"
-            android:text="✏️ Edit"
-            android:textColor="@android:color/white"
-            android:textSize="12sp"
-            android:fontFamily="@font/sf_pro_rounded_bold"
-            android:gravity="center"
-            android:background="@drawable/bg_chip_glass"
-            android:layout_marginStart="2dp"
-            android:layout_marginEnd="2dp"
-            android:clickable="true"
-            android:focusable="true"
-            android:foreground="?attr/selectableItemBackground"/>
-
-        <TextView
-            android:id="@+id/btnDelete"
-            android:layout_width="0dp"
-            android:layout_height="40dp"
-            android:layout_weight="1"
-            android:text="🗑️ Delete"
-            android:textColor="@android:color/white"
-            android:textSize="12sp"
-            android:fontFamily="@font/sf_pro_rounded_bold"
-            android:gravity="center"
-            android:background="@drawable/bg_chip_glass"
-            android:layout_marginStart="4dp"
-            android:clickable="true"
-            android:focusable="true"
-            android:foreground="?attr/selectableItemBackground"/>
-    </LinearLayout>
 </LinearLayout>
