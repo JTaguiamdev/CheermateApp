@@ -2615,7 +2615,7 @@ class MainActivity : AppCompatActivity() {
             dateInfoTextView.apply {
                 setPadding(16, 8, 16, 8)
                 textSize = 12f
-                setTextColor(android.graphics.Color.WHITE)
+                setTextColor(context.getColor(R.color.text_primary))
                 gravity = android.view.Gravity.CENTER
                 text = "Tap a date to view tasks"
                 fontFeatureSettings = "smcp" // Small caps
@@ -2779,7 +2779,7 @@ class MainActivity : AppCompatActivity() {
             fallbackText.text = "📅 Calendar View\nTap dates to see tasks"
             fallbackText.gravity = android.view.Gravity.CENTER
             fallbackText.setPadding(20, 40, 20, 40)
-            fallbackText.setTextColor(resources.getColor(android.R.color.white))
+            fallbackText.setTextColor(getColor(R.color.text_primary))
             fallbackText.textSize = 16f
 
             calendarPlaceholder?.addView(fallbackText)

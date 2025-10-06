@@ -96,7 +96,10 @@ class FragmentTaskExtensionActivity : AppCompatActivity() {
         setSupportActionBar(toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setDisplayShowHomeEnabled(true)
-        toolbar.setNavigationOnClickListener { finish() }
+        toolbar.setNavigationOnClickListener { 
+            setResult(RESULT_OK)
+            finish() 
+        }
     }
 
     private fun setupListeners() {
@@ -648,9 +651,12 @@ class FragmentTaskExtensionActivity : AppCompatActivity() {
     override fun onPause() {
         super.onPause()
         saveTaskChanges()
+        // Set result to indicate task was modified
+        setResult(RESULT_OK)
     }
 
     override fun onSupportNavigateUp(): Boolean {
+        setResult(RESULT_OK)
         finish()
         return true
     }

@@ -12,7 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Task Actions"
-        android:textColor="@android:color/white"
+        android:textColor="@color/text_primary"
         android:textSize="18sp"
         android:fontFamily="@font/sf_pro_rounded_bold"
         android:paddingStart="16dp"
@@ -47,7 +47,7 @@
             android:layout_weight="1"
             android:layout_marginStart="16dp"
             android:text="Mark as Completed"
-            android:textColor="@android:color/white"
+            android:textColor="@color/text_primary"
             android:textSize="16sp"
             android:fontFamily="@font/sf_pro_rounded_regular" />
     </LinearLayout>
@@ -78,7 +78,7 @@
             android:layout_weight="1"
             android:layout_marginStart="16dp"
             android:text="Snooze"
-            android:textColor="@android:color/white"
+            android:textColor="@color/text_primary"
             android:textSize="16sp"
             android:fontFamily="@font/sf_pro_rounded_regular" />
     </LinearLayout>
@@ -109,7 +109,7 @@
             android:layout_weight="1"
             android:layout_marginStart="16dp"
             android:text="Won't Do"
-            android:textColor="@android:color/white"
+            android:textColor="@color/text_primary"
             android:textSize="16sp"
             android:fontFamily="@font/sf_pro_rounded_regular" />
     </LinearLayout>

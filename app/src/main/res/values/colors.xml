@@ -8,6 +8,10 @@
     <!-- Text colors -->
     <color name="text_secondary_white_70">#B3FFFFFF</color>
     
+    <!-- Text colors for light mode -->
+    <color name="text_primary">#FF000000</color>
+    <color name="text_secondary">#99000000</color>
+    
     <!-- Calendar colors -->
     <color name="calendar_today">#FF00B4D8</color>
     <color name="calendar_selected">#FFA667C3</color>

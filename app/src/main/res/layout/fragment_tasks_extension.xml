@@ -190,7 +190,7 @@
                         android:minWidth="0dp"
                         android:paddingLeft="14dp"
                         android:paddingRight="14dp"
-                        android:text="Reminder"
+                        android:text="⏰ Reminder"
                         android:textAllCaps="false"
                         android:textColor="@android:color/white"
                         android:textSize="12sp"
