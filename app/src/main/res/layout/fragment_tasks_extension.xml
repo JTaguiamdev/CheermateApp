@@ -257,6 +257,47 @@
                         android:fontFamily="@font/sf_pro_rounded_regular"
                         android:textColor="@color/text_secondary_white_70" />
 
+                    <!-- Subtask Input Field and Add Button -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+
+                        <EditText
+                            android:id="@+id/et_subtask_input"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:hint="Enter subtask name"
+                            android:textColor="@android:color/white"
+                            android:textColorHint="@color/text_secondary_white_70"
+                            android:fontFamily="@font/sf_pro_rounded_regular"
+                            android:textSize="16sp"
+                            android:background="@drawable/bg_chip_glass"
+                            android:paddingStart="14dp"
+                            android:paddingEnd="14dp"
+                            android:paddingTop="10dp"
+                            android:paddingBottom="10dp"
+                            android:minHeight="40dp" />
+
+                        <Button
+                            android:id="@+id/btn_add_subtask"
+                            android:layout_width="wrap_content"
+                            android:layout_height="40dp"
+                            android:layout_marginStart="8dp"
+                            android:background="@drawable/bg_chip_glass"
+                            android:minWidth="0dp"
+                            android:paddingLeft="16dp"
+                            android:paddingRight="16dp"
+                            android:text="Add"
+                            android:textAllCaps="false"
+                            android:textColor="@android:color/white"
+                            android:textSize="16sp"
+                            android:visibility="gone" />
+                    </LinearLayout>
+
                     <!-- Empty state centered -->
                     <TextView
                         android:id="@+id/tv_no_subtasks"
