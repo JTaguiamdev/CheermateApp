@@ -10,6 +10,7 @@ import com.example.cheermateapp.data.model.Priority.High
 import com.example.cheermateapp.data.model.Priority.Low
 import com.example.cheermateapp.data.model.Priority.Medium
 import com.example.cheermateapp.data.model.Status
+import com.example.cheermateapp.data.model.Category
 import android.widget.*
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
@@ -1408,6 +1409,21 @@ class MainActivity : AppCompatActivity() {
             setBackgroundResource(android.R.drawable.edit_text)
         }
 
+        // Category Spinner
+        val tvCategoryLabel = TextView(this).apply {
+            text = "Category:"
+            textSize = 16f
+            setPadding(0, 20, 0, 8)
+        }
+
+        val spinnerCategory = Spinner(this).apply {
+            val categories = arrayOf("Work", "Personal", "Shopping", "Others")
+            adapter = ArrayAdapter(this@MainActivity, android.R.layout.simple_spinner_item, categories).apply {
+                setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            }
+            setSelection(0) // Default to Work
+        }
+
         // Priority Spinner
         val tvPriorityLabel = TextView(this).apply {
             text = "Priority:"
@@ -1463,12 +1479,31 @@ class MainActivity : AppCompatActivity() {
         dateTimeLayout.addView(etDueDate)
         dateTimeLayout.addView(etDueTime)
 
+        // Reminder Spinner
+        val tvReminderLabel = TextView(this).apply {
+            text = "Reminder:"
+            textSize = 16f
+            setPadding(0, 20, 0, 8)
+        }
+
+        val spinnerReminder = Spinner(this).apply {
+            val reminders = arrayOf("None", "10 minutes before", "30 minutes before", "At specific time")
+            adapter = ArrayAdapter(this@MainActivity, android.R.layout.simple_spinner_item, reminders).apply {
+                setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            }
+            setSelection(0) // Default to None
+        }
+
         // Add all views to dialog
         dialogLayout.addView(etTitle)
         dialogLayout.addView(etDescription)
+        dialogLayout.addView(tvCategoryLabel)
+        dialogLayout.addView(spinnerCategory)
         dialogLayout.addView(tvPriorityLabel)
         dialogLayout.addView(spinnerPriority)
         dialogLayout.addView(dateTimeLayout)
+        dialogLayout.addView(tvReminderLabel)
+        dialogLayout.addView(spinnerReminder)
 
         val dialog = AlertDialog.Builder(this)
             .setTitle("Add New Task")
@@ -1484,12 +1519,20 @@ class MainActivity : AppCompatActivity() {
                 val description = etDescription.text.toString().trim()
                 val dueDate = etDueDate.text.toString().trim()
                 val dueTime = etDueTime.text.toString().trim()
+                val selectedCategory = when (spinnerCategory.selectedItem.toString()) {
+                    "Work" -> com.example.cheermateapp.data.model.Category.Work
+                    "Personal" -> com.example.cheermateapp.data.model.Category.Personal
+                    "Shopping" -> com.example.cheermateapp.data.model.Category.Shopping
+                    "Others" -> com.example.cheermateapp.data.model.Category.Others
+                    else -> com.example.cheermateapp.data.model.Category.Work
+                }
                 val selectedPriority = when (spinnerPriority.selectedItem.toString()) {
                     "High" -> Priority.High
                     "Medium" -> Priority.Medium
                     "Low" -> Priority.Low
                     else -> Priority.Medium
                 }
+                val reminderOption = spinnerReminder.selectedItem.toString()
 
                 if (title.isEmpty()) {
                     Toast.makeText(this@MainActivity, "❌ Task title is required", Toast.LENGTH_SHORT).show()
@@ -1501,13 +1544,21 @@ class MainActivity : AppCompatActivity() {
                     return@setOnClickListener
                 }
 
+                // Validate reminder requires time
+                if (reminderOption != "None" && dueTime.isEmpty()) {
+                    Toast.makeText(this@MainActivity, "❌ Reminder requires a due time to be set", Toast.LENGTH_SHORT).show()
+                    return@setOnClickListener
+                }
+
                 // Create the task
                 createDetailedTask(
                     title = title,
                     description = if (description.isEmpty()) null else description,
                     dueDate = dueDate,
                     dueTime = if (dueTime.isEmpty()) null else dueTime,
-                    priority = selectedPriority
+                    category = selectedCategory,
+                    priority = selectedPriority,
+                    reminderOption = reminderOption
                 )
 
                 dialog.dismiss()
@@ -1592,7 +1643,9 @@ class MainActivity : AppCompatActivity() {
         description: String?,
         dueDate: String,
         dueTime: String?,
-        priority: Priority
+        category: com.example.cheermateapp.data.model.Category,
+        priority: Priority,
+        reminderOption: String
     ) {
         uiScope.launch {
             try {
@@ -1607,6 +1660,7 @@ class MainActivity : AppCompatActivity() {
                     taskId = taskId,
                     title = title,
                     description = description,
+                    category = category,
                     priority = priority,
                     dueAt = dueDate,
                     dueTime = dueTime,
@@ -1617,22 +1671,82 @@ class MainActivity : AppCompatActivity() {
                     db.taskDao().insert(newTask)
                 }
 
+                // Create reminder if requested
+                if (reminderOption != "None" && dueTime != null) {
+                    createTaskReminder(taskId, dueDate, dueTime, reminderOption)
+                }
+
                 // Refresh dashboard data
                 loadTaskStatistics()
                 loadRecentTasks()
 
                 val timeText = if (dueTime != null) " at $dueTime" else ""
+                val reminderText = if (reminderOption != "None") " (Reminder: $reminderOption)" else ""
                 Toast.makeText(
                     this@MainActivity,
-                    "✅ Task '$title' created for $dueDate$timeText!",
+                    "✅ Task '$title' created for $dueDate$timeText$reminderText!",
                     Toast.LENGTH_LONG
                 ).show()
 
-                android.util.Log.d("MainActivity", "✅ Created detailed task: $title")
+                android.util.Log.d("MainActivity", "✅ Created detailed task: $title with category: $category")
 
             } catch (e: Exception) {
                 android.util.Log.e("MainActivity", "Error creating detailed task", e)
                 Toast.makeText(this@MainActivity, "❌ Error creating task", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    // ✅ CREATE TASK REMINDER
+    private fun createTaskReminder(
+        taskId: Int,
+        dueDate: String,
+        dueTime: String,
+        reminderOption: String
+    ) {
+        uiScope.launch {
+            try {
+                val db = AppDb.get(this@MainActivity)
+
+                // Parse due date and time
+                val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
+                val dueDateTime = dateFormat.parse("$dueDate $dueTime")
+
+                if (dueDateTime != null) {
+                    val dueTimeMillis = dueDateTime.time
+
+                    // Calculate reminder time based on option
+                    val remindAtMillis = when (reminderOption) {
+                        "10 minutes before" -> dueTimeMillis - (10 * 60 * 1000)
+                        "30 minutes before" -> dueTimeMillis - (30 * 60 * 1000)
+                        "At specific time" -> dueTimeMillis
+                        else -> dueTimeMillis
+                    }
+
+                    // Get next reminder ID
+                    val reminderId = withContext(Dispatchers.IO) {
+                        val existingReminders = db.taskReminderDao().getRemindersByTask(taskId)
+                        if (existingReminders.isEmpty()) 1 else existingReminders.maxOf { it.TaskReminder_ID } + 1
+                    }
+
+                    val reminder = com.example.cheermateapp.data.model.TaskReminder(
+                        TaskReminder_ID = reminderId,
+                        Task_ID = taskId,
+                        User_ID = userId,
+                        RemindAt = remindAtMillis,
+                        IsActive = true
+                    )
+
+                    withContext(Dispatchers.IO) {
+                        db.taskReminderDao().insert(reminder)
+                    }
+
+                    android.util.Log.d("MainActivity", "✅ Created reminder for task $taskId at $remindAtMillis")
+                }
+
+            } catch (e: Exception) {
+                android.util.Log.e("MainActivity", "Error creating task reminder", e)
+                // Don't show error to user - reminder is optional feature
             }
         }
     }

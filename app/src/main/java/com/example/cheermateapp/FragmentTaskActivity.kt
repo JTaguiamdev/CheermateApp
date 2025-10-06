@@ -1230,6 +1230,20 @@ class FragmentTaskActivity : AppCompatActivity() {
             descriptionInput.minLines = 2
             container.addView(descriptionInput)
 
+            // Category Spinner
+            val categoryLabel = TextView(this)
+            categoryLabel.text = "Category:"
+            categoryLabel.setPadding(0, 16, 0, 8)
+            container.addView(categoryLabel)
+
+            val categorySpinner = Spinner(this)
+            val categories = arrayOf("Work", "Personal", "Shopping", "Others")
+            val categoryAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, categories)
+            categoryAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            categorySpinner.adapter = categoryAdapter
+            categorySpinner.setSelection(0) // Default to Work
+            container.addView(categorySpinner)
+
             // Priority Spinner
             val priorityLabel = TextView(this)
             priorityLabel.text = "Priority:"
@@ -1288,6 +1302,20 @@ class FragmentTaskActivity : AppCompatActivity() {
             }
             container.addView(timeButton)
 
+            // Reminder Spinner
+            val reminderLabel = TextView(this)
+            reminderLabel.text = "Reminder:"
+            reminderLabel.setPadding(0, 16, 0, 8)
+            container.addView(reminderLabel)
+
+            val reminderSpinner = Spinner(this)
+            val reminders = arrayOf("None", "10 minutes before", "30 minutes before", "At specific time")
+            val reminderAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, reminders)
+            reminderAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            reminderSpinner.adapter = reminderAdapter
+            reminderSpinner.setSelection(0) // Default to None
+            container.addView(reminderSpinner)
+
             scrollView.addView(container)
             builder.setView(scrollView)
 
@@ -1304,15 +1332,17 @@ class FragmentTaskActivity : AppCompatActivity() {
                     titleInput.requestFocus()
                     Toast.makeText(this@FragmentTaskActivity, "⚠️ Please enter a task title", Toast.LENGTH_SHORT).show()
                 } else {
+                    val category = categorySpinner.selectedItem.toString()
                     val priority = prioritySpinner.selectedItem.toString()
                     val description = descriptionInput.text.toString().trim()
+                    val reminderOption = reminderSpinner.selectedItem.toString()
 
                     val finalCalendar = Calendar.getInstance()
                     finalCalendar.time = selectedDate
                     finalCalendar.set(Calendar.HOUR_OF_DAY, selectedHour)
                     finalCalendar.set(Calendar.MINUTE, selectedMinute)
 
-                    createNewTask(title, description, priority, finalCalendar.time)
+                    createNewTask(title, description, category, priority, finalCalendar.time, reminderOption)
                     dialog.dismiss()
                 }
             }
@@ -1353,13 +1383,21 @@ class FragmentTaskActivity : AppCompatActivity() {
     }
 
     // ✅ CRUD OPERATION: CREATE - Create new task
-    private fun createNewTask(title: String, description: String, priority: String, dueDate: Date) {
+    private fun createNewTask(title: String, description: String, category: String, priority: String, dueDate: Date, reminderOption: String) {
         lifecycleScope.launch {
             try {
                 val db = AppDb.get(this@FragmentTaskActivity)
 
                 val taskId = withContext(Dispatchers.IO) {
                     db.taskDao().getNextTaskIdForUser(userId)
+                }
+
+                val categoryEnum = when (category) {
+                    "Work" -> Category.Work
+                    "Personal" -> Category.Personal
+                    "Shopping" -> Category.Shopping
+                    "Others" -> Category.Others
+                    else -> Category.Work
                 }
 
                 val priorityEnum = when (priority.uppercase()) {
@@ -1375,6 +1413,7 @@ class FragmentTaskActivity : AppCompatActivity() {
                     User_ID = userId,
                     Title = title,
                     Description = if (description.isBlank()) null else description,
+                    Category = categoryEnum,
                     Priority = priorityEnum,
                     Status = Status.Pending,
                     TaskProgress = 0,
@@ -1389,20 +1428,80 @@ class FragmentTaskActivity : AppCompatActivity() {
                     db.taskDao().insert(newTask)
                 }
 
+                // Create reminder if requested
+                if (reminderOption != "None") {
+                    createTaskReminder(taskId, newTask.DueAt!!, newTask.DueTime!!, reminderOption)
+                }
+
                 loadTasks()
 
                 val dateFormat = SimpleDateFormat("MMM dd, yyyy 'at' hh:mm a", Locale.getDefault())
                 val formattedDate = dateFormat.format(dueDate)
+                val reminderText = if (reminderOption != "None") "\n🔔 Reminder: $reminderOption" else ""
 
                 Toast.makeText(
                     this@FragmentTaskActivity,
-                    "✅ Task '$title' created!\n📅 Due: $formattedDate",
+                    "✅ Task '$title' created!\n📅 Due: $formattedDate$reminderText",
                     Toast.LENGTH_LONG
                 ).show()
 
             } catch (e: Exception) {
                 android.util.Log.e("FragmentTaskActivity", "Error creating task", e)
                 Toast.makeText(this@FragmentTaskActivity, "❌ Error: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    // ✅ CREATE TASK REMINDER
+    private fun createTaskReminder(
+        taskId: Int,
+        dueDate: String,
+        dueTime: String,
+        reminderOption: String
+    ) {
+        lifecycleScope.launch {
+            try {
+                val db = AppDb.get(this@FragmentTaskActivity)
+
+                // Parse due date and time
+                val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
+                val dueDateTime = dateFormat.parse("$dueDate $dueTime")
+
+                if (dueDateTime != null) {
+                    val dueTimeMillis = dueDateTime.time
+
+                    // Calculate reminder time based on option
+                    val remindAtMillis = when (reminderOption) {
+                        "10 minutes before" -> dueTimeMillis - (10 * 60 * 1000)
+                        "30 minutes before" -> dueTimeMillis - (30 * 60 * 1000)
+                        "At specific time" -> dueTimeMillis
+                        else -> dueTimeMillis
+                    }
+
+                    // Get next reminder ID
+                    val reminderId = withContext(Dispatchers.IO) {
+                        val existingReminders = db.taskReminderDao().getRemindersByTask(taskId)
+                        if (existingReminders.isEmpty()) 1 else existingReminders.maxOf { it.TaskReminder_ID } + 1
+                    }
+
+                    val reminder = TaskReminder(
+                        TaskReminder_ID = reminderId,
+                        Task_ID = taskId,
+                        User_ID = userId,
+                        RemindAt = remindAtMillis,
+                        IsActive = true
+                    )
+
+                    withContext(Dispatchers.IO) {
+                        db.taskReminderDao().insert(reminder)
+                    }
+
+                    android.util.Log.d("FragmentTaskActivity", "✅ Created reminder for task $taskId at $remindAtMillis")
+                }
+
+            } catch (e: Exception) {
+                android.util.Log.e("FragmentTaskActivity", "Error creating task reminder", e)
+                // Don't show error to user - reminder is optional feature
             }
         }
     }
