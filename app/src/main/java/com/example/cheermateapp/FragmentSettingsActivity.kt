@@ -432,17 +432,29 @@ class FragmentSettingsActivity : AppCompatActivity() {
         lifecycleScope.launch {
             try {
                 val db = AppDb.get(this@FragmentSettingsActivity)
-                val personalities = withContext(Dispatchers.IO) {
-                    db.personalityDao().getAll()
+                
+                // Get all personalities and current user personality
+                val (personalities, currentPersonality) = withContext(Dispatchers.IO) {
+                    val allPersonalities = db.personalityDao().getAll()
+                    val userPersonality = db.personalityDao().getByUser(userId)
+                    Pair(allPersonalities, userPersonality)
                 }
 
                 val personalityNames = personalities.map { it.Name }.toTypedArray()
+                
+                // Find the index of the current personality
+                val currentIndex = if (currentPersonality != null) {
+                    personalities.indexOfFirst { it.Personality_ID == currentPersonality.Personality_ID }
+                } else {
+                    -1 // No selection
+                }
 
                 android.app.AlertDialog.Builder(this@FragmentSettingsActivity)
                     .setTitle("Choose Your Personality")
-                    .setItems(personalityNames) { _, which ->
+                    .setSingleChoiceItems(personalityNames, currentIndex) { dialog, which ->
                         val selectedPersonality = personalities[which]
                         updateUserPersonality(selectedPersonality.Personality_ID)
+                        dialog.dismiss()
                     }
                     .setNegativeButton("Cancel", null)
                     .show()
