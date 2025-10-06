@@ -127,7 +127,7 @@
                         android:layout_marginTop="16dp"
                         android:orientation="horizontal">
 
-                        <Button
+                        <TextView
                             android:id="@+id/btn_task_category"
                             android:layout_width="wrap_content"
                             android:layout_height="40dp"
@@ -138,9 +138,12 @@
                             android:text="Work"
                             android:textAllCaps="false"
                             android:textColor="@android:color/white"
-                            android:textSize="14sp" />
+                            android:textSize="14sp"
+                            android:gravity="center"
+                            android:clickable="true"
+                            android:focusable="true" />
 
-                        <Button
+                        <TextView
                             android:id="@+id/btn_task_priority"
                             android:layout_width="wrap_content"
                             android:layout_height="40dp"
@@ -152,9 +155,12 @@
                             android:text="Medium"
                             android:textAllCaps="false"
                             android:textColor="@android:color/white"
-                            android:textSize="14sp" />
+                            android:textSize="14sp"
+                            android:gravity="center"
+                            android:clickable="true"
+                            android:focusable="true" />
 
-                        <Button
+                        <TextView
                             android:id="@+id/btn_task_due_date"
                             android:layout_width="wrap_content"
                             android:layout_height="40dp"
@@ -166,11 +172,14 @@
                             android:text="9/24/2025"
                             android:textAllCaps="false"
                             android:textColor="@android:color/white"
-                            android:textSize="14sp" />
+                            android:textSize="14sp"
+                            android:gravity="center"
+                            android:clickable="true"
+                            android:focusable="true" />
                     </LinearLayout>
 
                     <!-- Reminder on its own row -->
-                    <Button
+                    <TextView
                         android:id="@+id/btn_task_reminder"
                         android:layout_width="wrap_content"
                         android:layout_height="40dp"
@@ -182,7 +191,10 @@
                         android:text="Reminder"
                         android:textAllCaps="false"
                         android:textColor="@android:color/white"
-                        android:textSize="14sp" />
+                        android:textSize="14sp"
+                        android:gravity="center"
+                        android:clickable="true"
+                        android:focusable="true" />
             </LinearLayout>
 
             <!-- Subtasks Section -->

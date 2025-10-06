@@ -40,10 +40,10 @@ class FragmentTaskExtensionActivity : AppCompatActivity() {
     private lateinit var taskCard: LinearLayout
     private lateinit var etTaskTitle: EditText
     private lateinit var etTaskDescription: EditText
-    private lateinit var btnTaskCategory: Button
-    private lateinit var btnTaskPriority: Button
-    private lateinit var btnTaskDueDate: Button
-    private lateinit var btnTaskReminder: Button
+    private lateinit var btnTaskCategory: TextView
+    private lateinit var btnTaskPriority: TextView
+    private lateinit var btnTaskDueDate: TextView
+    private lateinit var btnTaskReminder: TextView
     private lateinit var subtaskCard: LinearLayout
     private lateinit var etSubtaskInput: EditText
     private lateinit var btnAddSubtask: Button
