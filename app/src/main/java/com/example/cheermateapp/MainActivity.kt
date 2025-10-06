@@ -1294,29 +1294,17 @@ class MainActivity : AppCompatActivity() {
         uiScope.launch {
             try {
                 val db = AppDb.get(this@MainActivity)
-                
-                // Get all personalities and current user personality
-                val (personalities, currentPersonality) = withContext(Dispatchers.IO) {
-                    val allPersonalities = db.personalityDao().getAll()
-                    val userPersonality = db.personalityDao().getByUser(userId)
-                    Pair(allPersonalities, userPersonality)
+                val personalities: List<Personality> = withContext(Dispatchers.IO) {
+                    db.personalityDao().getAll()
                 }
 
                 val personalityNames = personalities.map { it.Name }.toTypedArray()
-                
-                // Find the index of the current personality
-                val currentIndex = if (currentPersonality != null) {
-                    personalities.indexOfFirst { it.Personality_ID == currentPersonality.Personality_ID }
-                } else {
-                    -1 // No selection
-                }
 
                 AlertDialog.Builder(this@MainActivity)
                     .setTitle("Choose Your Personality")
-                    .setSingleChoiceItems(personalityNames, currentIndex) { dialog, which ->
+                    .setItems(personalityNames) { _, which ->
                         val selectedPersonality = personalities[which]
                         updateUserPersonality(selectedPersonality.Personality_ID)
-                        dialog.dismiss()
                     }
                     .setNegativeButton("Cancel", null)
                     .show()
