@@ -78,7 +78,7 @@
                 android:clickable="true"
                 android:focusable="true"
                 android:foreground="?attr/selectableItemBackground"
-                app:cardCornerRadius="16dp"
+                app:cardCornerRadius="1dp"
                 app:cardBackgroundColor="#33FFFFFF"
                 app:cardElevation="2dp"
                 android:stateListAnimator="@animator/card_elevation_state"
@@ -90,17 +90,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="16dp"
-                    android:background="@drawable/bg_card_glass">
+                    android:padding="16dp">
 
                     <!-- Task Title label then field -->
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Task title"
-                        android:textColor="@color/text_secondary_white_70"
-                        android:fontFamily="@font/sf_pro_rounded_regular"
-                        android:textSize="14sp" />
 
                     <EditText
                         android:id="@+id/et_task_title"
@@ -116,14 +108,6 @@
                         android:paddingBottom="6dp" />
 
                     <!-- Task Description label then field -->
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Task description"
-                        android:textColor="@color/text_secondary_white_70"
-                        android:fontFamily="@font/sf_pro_rounded_regular"
-                        android:textSize="14sp"
-                        android:layout_marginTop="16dp" />
 
                     <EditText
                         android:id="@+id/et_task_description"
@@ -159,7 +143,7 @@
                             android:text="Work"
                             android:textAllCaps="false"
                             android:textColor="@android:color/white"
-                            android:textSize="16sp" />
+                            android:textSize="14sp" />
 
                         <Button
                             android:id="@+id/btn_task_priority"
@@ -173,7 +157,7 @@
                             android:text="Medium"
                             android:textAllCaps="false"
                             android:textColor="@android:color/white"
-                            android:textSize="16sp" />
+                            android:textSize="14sp" />
 
                         <Button
                             android:id="@+id/btn_task_due_date"
@@ -187,7 +171,7 @@
                             android:text="9/24/2025"
                             android:textAllCaps="false"
                             android:textColor="@android:color/white"
-                            android:textSize="16sp" />
+                            android:textSize="14sp" />
                     </LinearLayout>
 
                     <!-- Reminder on its own row -->
@@ -203,7 +187,7 @@
                         android:text="Reminder"
                         android:textAllCaps="false"
                         android:textColor="@android:color/white"
-                        android:textSize="16sp" />
+                        android:textSize="14sp" />
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
@@ -262,14 +246,6 @@
                     </LinearLayout>
 
                     <!-- Placeholder input label like screenshot -->
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
-                        android:text="Subtask title"
-                        android:textSize="16sp"
-                        android:fontFamily="@font/sf_pro_rounded_regular"
-                        android:textColor="@color/text_secondary_white_70" />
 
                     <!-- Subtask Input Field and Add Button -->
                     <LinearLayout
