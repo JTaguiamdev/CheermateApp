@@ -318,9 +318,6 @@ class MainActivity : AppCompatActivity() {
             container?.removeAllViews()
             container?.visibility = View.GONE
             
-            // Update bottom navigation selection
-            findViewById<BottomNavigationView>(R.id.bottomNav)?.selectedItemId = R.id.nav_home
-            
         } catch (e: Exception) {
             android.util.Log.e("MainActivity", "Error showing home screen", e)
         }
@@ -342,9 +339,6 @@ class MainActivity : AppCompatActivity() {
 
             // Initialize task-specific functionality
             setupTasksFragment()
-
-            // Update bottom navigation selection
-            findViewById<BottomNavigationView>(R.id.bottomNav)?.selectedItemId = R.id.nav_tasks
 
             android.util.Log.d("MainActivity", "✅ Loaded Tasks Fragment")
 
@@ -370,9 +364,6 @@ class MainActivity : AppCompatActivity() {
 
             // Initialize settings-specific functionality
             setupSettingsFragment()
-
-            // Update bottom navigation selection
-            findViewById<BottomNavigationView>(R.id.bottomNav)?.selectedItemId = R.id.nav_settings
 
             android.util.Log.d("MainActivity", "✅ Loaded Settings Fragment")
 
