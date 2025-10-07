@@ -1283,33 +1283,41 @@ class MainActivity : AppCompatActivity() {
             try {
                 val db = AppDb.get(this@MainActivity)
                 
-                // Get all personalities and current user personality
-                val (personalities, currentPersonality) = withContext(Dispatchers.IO) {
-                    val allPersonalities = db.personalityDao().getAll()
-                    val userPersonality = db.personalityDao().getPersonalityByUserIdFromUser(userId)
-                    Pair(allPersonalities, userPersonality)
+                // Define all 5 available personality types (matching PersonalityActivity and FragmentSettingsActivity)
+                val availablePersonalities = listOf(
+                    Triple(1, "Kalog", "The funny friend who makes everything entertaining!"),
+                    Triple(2, "Gen Z", "Tech-savvy and trendy with the latest slang!"),
+                    Triple(3, "Softy", "Gentle and caring with a warm heart!"),
+                    Triple(4, "Grey", "Calm and balanced with steady wisdom!"),
+                    Triple(5, "Flirty", "Playful and charming with a wink!")
+                )
+                
+                // Get current user personality
+                val currentPersonality = withContext(Dispatchers.IO) {
+                    db.personalityDao().getByUser(userId)
                 }
 
-                val personalityNames = personalities.map { it.Name }.toTypedArray()
+                val personalityNames = availablePersonalities.map { it.second }.toTypedArray()
                 
-                // Find the index of the current personality
+                // Find the index of the current personality type
                 val checkedItem = if (currentPersonality != null) {
-                    personalities.indexOfFirst { it.Personality_ID == currentPersonality.Personality_ID }
+                    availablePersonalities.indexOfFirst { it.first == currentPersonality.PersonalityType }
                 } else {
                     -1  // No selection
                 }
                 
                 // Track the selected personality
-                var selectedPersonalityId: Int? = currentPersonality?.Personality_ID
+                var selectedPersonalityIndex: Int = checkedItem
 
                 AlertDialog.Builder(this@MainActivity)
                     .setTitle("Choose Your Personality")
                     .setSingleChoiceItems(personalityNames, checkedItem) { _, which ->
-                        selectedPersonalityId = personalities[which].Personality_ID
+                        selectedPersonalityIndex = which
                     }
                     .setPositiveButton("OK") { _, _ ->
-                        selectedPersonalityId?.let { personalityId ->
-                            updateUserPersonality(personalityId)
+                        if (selectedPersonalityIndex >= 0) {
+                            val selected = availablePersonalities[selectedPersonalityIndex]
+                            updateUserPersonalityWithType(selected.first, selected.second, selected.third)
                         }
                     }
                     .setNegativeButton("Cancel", null)
@@ -1322,15 +1330,23 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun updateUserPersonality(personalityId: Int) {
+    private fun updateUserPersonalityWithType(type: Int, name: String, description: String) {
         uiScope.launch {
             try {
                 val db = AppDb.get(this@MainActivity)
                 withContext(Dispatchers.IO) {
-                    db.userDao().updatePersonality(userId, personalityId)
+                    // Create or update the personality record for this user
+                    val personality = Personality(
+                        Personality_ID = 0, // Will be auto-generated or updated
+                        User_ID = userId,
+                        PersonalityType = type,
+                        Name = name,
+                        Description = description
+                    )
+                    db.personalityDao().upsert(personality)
                 }
 
-                Toast.makeText(this@MainActivity, "✅ Personality updated!", Toast.LENGTH_SHORT)
+                Toast.makeText(this@MainActivity, "✅ Personality updated to $name!", Toast.LENGTH_SHORT)
                     .show()
                 loadSettingsFragmentData()
 
