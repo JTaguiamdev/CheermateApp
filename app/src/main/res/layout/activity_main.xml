@@ -17,7 +17,7 @@
     <!-- Top app bar -->
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
-        android:layout_width="350dp"
+        android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         android:layout_gravity="center"
         android:layout_marginBottom="1dp"
@@ -498,8 +498,8 @@
     <!-- Bottom navigation (3 items) -->
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNav"
-        android:layout_width="312dp"
-        android:layout_height="60dp"
+        android:layout_width="wrap_content"
+        android:layout_height="65dp"
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="1dp"
         android:background="@drawable/bg_card_glass_hover"
@@ -517,7 +517,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_marginEnd="20dp"
-        android:layout_marginBottom="100dp"
+        android:layout_marginBottom="110dp"
         android:backgroundTint="#6B48FF"
         android:elevation="6dp"
         android:src="@android:drawable/ic_input_add"
