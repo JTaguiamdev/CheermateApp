@@ -12,16 +12,12 @@ CheermateApp/
 ├── README.md                    ← Start here: Project overview
 ├── TODO.md                      ← Immediate tasks to work on
 ├── ROADMAP.md                   ← Long-term vision and planning
+├── CHANGELOG.md                 ← Version history and changes
 │
-├── TESTING_CHECKLIST.md         ← Testing after changes
-├── MIGRATION_SUMMARY.md         ← Recent DAO changes (technical)
-├── SUMMARY.md                   ← DAO cleanup summary
-│
-├── QUICKSTART.md                ← You are here!
-└── DOCUMENTATION_INDEX.md       ← Complete documentation index
+└── QUICKSTART.md                ← You are here!
 ```
 
-💡 **Pro Tip:** Check [DOCUMENTATION_INDEX.md](DOCUMENTATION_INDEX.md) for a comprehensive guide to all 11+ documentation files!
+💡 **Pro Tip:** These essential documents provide all you need to understand the project's roadmap, progress, and contribution guidelines!
 
 ---
 
@@ -49,18 +45,18 @@ CheermateApp/
 - Align your work with the roadmap
 
 ### 4. Made Changes to Code?
-👉 **Test Using:** [TESTING_CHECKLIST.md](TESTING_CHECKLIST.md)
-- Run through relevant test cases
+👉 **Test Your Changes**
+- Build and run the application
 - Verify no regressions
-- Mark tests as complete
+- Test affected functionality
 - Report any issues found
 
 ### 5. Need Context on Recent Changes?
-👉 **Read:** [MIGRATION_SUMMARY.md](MIGRATION_SUMMARY.md) & [SUMMARY.md](SUMMARY.md)
-- Understand the DAO cleanup
-- See what methods changed
-- Learn about naming conventions
-- Find usage examples
+👉 **Read:** [CHANGELOG.md](CHANGELOG.md)
+- See version history
+- Understand recent changes
+- Learn about new features
+- Check migration notes
 
 ---
 
@@ -70,7 +66,7 @@ CheermateApp/
 1. Check if it's in [TODO.md](TODO.md) or [ROADMAP.md](ROADMAP.md)
 2. If not, create an issue to discuss
 3. Implement following existing patterns
-4. Write tests using [TESTING_CHECKLIST.md](TESTING_CHECKLIST.md)
+4. Write and run tests
 5. Update documentation
 
 ### Fix a Bug
@@ -88,7 +84,7 @@ CheermateApp/
 5. Add screenshots to PR
 
 ### Write Tests
-1. Follow [TESTING_CHECKLIST.md](TESTING_CHECKLIST.md)
+1. Review existing test patterns
 2. Start with untested critical paths
 3. Write unit tests for DAOs
 4. Add integration tests for flows
@@ -136,12 +132,12 @@ CheermateApp/
 2. Create a feature branch
 3. Implement the feature
 4. Write/update tests
-5. Run TESTING_CHECKLIST.md
+5. Run tests and verify changes
 6. Update documentation
 7. Submit PR
 8. Address review comments
 9. Merge and deploy
-10. Update TODO.md
+10. Update TODO.md and CHANGELOG.md
 ```
 
 ### Emergency Hotfix

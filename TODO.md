@@ -29,11 +29,11 @@ This document tracks immediate tasks and known issues that need to be addressed 
   - Priority: Security best practice
 
 ### Database & Data Integrity
-- [ ] **Test all DAO methods after cleanup**
-  - Follow the comprehensive [TESTING_CHECKLIST.md](TESTING_CHECKLIST.md)
-  - Verify parameter order consistency in updated methods
+- [ ] **Test all DAO methods**
+  - Verify parameter order consistency in methods
   - Test method name changes (e.g., `getById()`, `deleteById()`)
-  - Ensure no data corruption from recent DAO consolidation
+  - Ensure data integrity and no corruption
+  - Write comprehensive unit tests
 
 ---
 
@@ -312,6 +312,6 @@ Track completed items here for reference:
 
 **See also:**
 - [ROADMAP.md](ROADMAP.md) - Long-term development roadmap
-- [TESTING_CHECKLIST.md](TESTING_CHECKLIST.md) - Testing guidelines
-- [MIGRATION_SUMMARY.md](MIGRATION_SUMMARY.md) - Recent DAO changes
 - [README.md](README.md) - Project overview and setup
+- [CHANGELOG.md](CHANGELOG.md) - Version history and changes
+- [QUICKSTART.md](QUICKSTART.md) - Quick reference guide

@@ -61,7 +61,7 @@ Complete essential missing features and ensure stability. Make the app fully fun
 
 #### Quality Assurance
 - **Complete Testing**
-  - Execute full [TESTING_CHECKLIST.md](TESTING_CHECKLIST.md)
+  - Execute comprehensive testing
   - Fix all critical bugs
   - Write unit tests for DAOs
   
@@ -487,9 +487,9 @@ Features deferred to future phases
 
 ### Documentation
 - [TODO.md](TODO.md) - Immediate action items
-- [TESTING_CHECKLIST.md](TESTING_CHECKLIST.md) - Testing guidelines
-- [MIGRATION_SUMMARY.md](MIGRATION_SUMMARY.md) - Recent changes
 - [README.md](README.md) - Project overview
+- [CHANGELOG.md](CHANGELOG.md) - Version history
+- [QUICKSTART.md](QUICKSTART.md) - Quick reference guide
 
 ### Learning Resources
 - Android Development Best Practices

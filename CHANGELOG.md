@@ -337,16 +337,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Contributing
 
-Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct and the process for submitting pull requests.
+See [QUICKSTART.md](QUICKSTART.md) for contribution guidelines and development workflow.
 
 ## Support
 
 For support, please check:
-- [PHASE2_IMPLEMENTATION.md](PHASE2_IMPLEMENTATION.md) - Phase 2 feature guide
-- [PHASE2_SUMMARY.md](PHASE2_SUMMARY.md) - Implementation summary
-- [TESTING_CHECKLIST.md](TESTING_CHECKLIST.md) - Testing guidelines
-- [PHASE1_IMPLEMENTATION.md](PHASE1_IMPLEMENTATION.md) - Phase 1 implementation details
+- [README.md](README.md) - Project overview and setup
 - [TODO.md](TODO.md) - Known issues and planned features
+- [ROADMAP.md](ROADMAP.md) - Development roadmap
+- [QUICKSTART.md](QUICKSTART.md) - Quick reference guide
 - [GitHub Issues](https://github.com/JTaguiamdev/CheermateApp/issues)
 
 ---
