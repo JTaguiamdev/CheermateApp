@@ -8,17 +8,20 @@ import android.widget.ArrayAdapter
 import android.widget.TextView
 
 /**
+ * Data class representing an item in the spinner with an icon and text
+ */
+data class SpinnerItem(
+    val icon: String,  // Emoji or unicode character
+    val text: String
+)
+
+/**
  * Custom spinner adapter that displays an icon (emoji) and text
  */
 class IconSpinnerAdapter(
     context: Context,
     private val items: List<SpinnerItem>
 ) : ArrayAdapter<SpinnerItem>(context, R.layout.item_spinner_with_icon, items) {
-
-    data class SpinnerItem(
-        val icon: String,  // Emoji or unicode character
-        val text: String
-    )
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
         return createView(position, convertView, parent)

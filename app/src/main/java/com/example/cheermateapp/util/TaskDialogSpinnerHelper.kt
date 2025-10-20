@@ -3,6 +3,7 @@ package com.example.cheermateapp.util
 import android.content.Context
 import android.widget.Spinner
 import com.example.cheermateapp.IconSpinnerAdapter
+import com.example.cheermateapp.SpinnerItem
 
 /**
  * Helper object to set up spinners with icons for the Add Task dialog
@@ -27,10 +28,10 @@ object TaskDialogSpinnerHelper {
      */
     fun setupCategorySpinner(context: Context, spinner: Spinner) {
         val categoryItems = listOf(
-            IconSpinnerAdapter.SpinnerItem("💼", "Work"),
-            IconSpinnerAdapter.SpinnerItem("👤", "Personal"),
-            IconSpinnerAdapter.SpinnerItem("🛒", "Shopping"),
-            IconSpinnerAdapter.SpinnerItem("📋", "Others")
+            SpinnerItem("💼", "Work"),
+            SpinnerItem("👤", "Personal"),
+            SpinnerItem("🛒", "Shopping"),
+            SpinnerItem("📋", "Others")
         )
         
         val adapter = IconSpinnerAdapter(context, categoryItems)
@@ -44,9 +45,9 @@ object TaskDialogSpinnerHelper {
      */
     fun setupPrioritySpinner(context: Context, spinner: Spinner) {
         val priorityItems = listOf(
-            IconSpinnerAdapter.SpinnerItem("🟢", "Low"),
-            IconSpinnerAdapter.SpinnerItem("🟡", "Medium"),
-            IconSpinnerAdapter.SpinnerItem("🔴", "High")
+            SpinnerItem("🟢", "Low"),
+            SpinnerItem("🟡", "Medium"),
+            SpinnerItem("🔴", "High")
         )
         
         val adapter = IconSpinnerAdapter(context, priorityItems)
@@ -60,10 +61,10 @@ object TaskDialogSpinnerHelper {
      */
     fun setupReminderSpinner(context: Context, spinner: Spinner) {
         val reminderItems = listOf(
-            IconSpinnerAdapter.SpinnerItem("🔕", "None"),
-            IconSpinnerAdapter.SpinnerItem("⏰", "10 minutes before"),
-            IconSpinnerAdapter.SpinnerItem("⏰", "30 minutes before"),
-            IconSpinnerAdapter.SpinnerItem("🕐", "At specific time")
+            SpinnerItem("🔕", "None"),
+            SpinnerItem("⏰", "10 minutes before"),
+            SpinnerItem("⏰", "30 minutes before"),
+            SpinnerItem("🕐", "At specific time")
         )
         
         val adapter = IconSpinnerAdapter(context, reminderItems)
@@ -75,7 +76,7 @@ object TaskDialogSpinnerHelper {
      * Get the selected category as a string
      */
     fun getSelectedCategory(spinner: Spinner): String {
-        val item = spinner.selectedItem as? IconSpinnerAdapter.SpinnerItem
+        val item = spinner.selectedItem as? SpinnerItem
         return item?.text ?: "Work"
     }
     
@@ -83,7 +84,7 @@ object TaskDialogSpinnerHelper {
      * Get the selected priority as a string
      */
     fun getSelectedPriority(spinner: Spinner): String {
-        val item = spinner.selectedItem as? IconSpinnerAdapter.SpinnerItem
+        val item = spinner.selectedItem as? SpinnerItem
         return item?.text ?: "Medium"
     }
     
@@ -91,7 +92,7 @@ object TaskDialogSpinnerHelper {
      * Get the selected reminder option as a string
      */
     fun getSelectedReminder(spinner: Spinner): String {
-        val item = spinner.selectedItem as? IconSpinnerAdapter.SpinnerItem
+        val item = spinner.selectedItem as? SpinnerItem
         return item?.text ?: "None"
     }
 }
