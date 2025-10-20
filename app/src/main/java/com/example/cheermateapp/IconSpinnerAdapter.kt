@@ -13,7 +13,7 @@ import android.widget.TextView
 class IconSpinnerAdapter(
     context: Context,
     private val items: List<SpinnerItem>
-) : ArrayAdapter<SpinnerItem>(context, R.layout.item_spinner_with_icon, items) {
+) : ArrayAdapter<IconSpinnerAdapter.SpinnerItem>(context, R.layout.item_spinner_with_icon, items) {
 
     data class SpinnerItem(
         val icon: String,  // Emoji or unicode character
