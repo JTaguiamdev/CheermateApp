@@ -1410,9 +1410,10 @@ class MainActivity : AppCompatActivity() {
                 showProgressDetails()
             }
 
-            findViewById<View>(R.id.cardRecent)?.setOnClickListener {
-                navigateToTasks() // Navigate to full task management
-            }
+            // ✅ REMOVED: cardRecent click listener to fix navigation bug
+            // findViewById<View>(R.id.cardRecent)?.setOnClickListener {
+            //     navigateToTasks() // Navigate to full task management
+            // }
 
            } catch (e: Exception) {
             android.util.Log.e("MainActivity", "Error setting up home interactions", e)
