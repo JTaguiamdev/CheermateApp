@@ -24,6 +24,7 @@ import com.example.cheermateapp.data.model.Task
 import com.example.cheermateapp.data.model.Priority
 import com.example.cheermateapp.data.model.User
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -44,6 +45,16 @@ class MainActivity : AppCompatActivity() {
     // ✅ RecyclerView and TaskAdapter for fragment_tasks
     private var taskRecyclerView: RecyclerView? = null
     private var taskAdapter: TaskAdapter? = null
+
+    // ✅ Cached reference to FAB for better performance
+    private val fabAddTask: FloatingActionButton? by lazy {
+        findViewById(R.id.fabAddTask)
+    }
+
+    // ✅ Helper method to control FAB visibility
+    private fun setFabVisibility(visible: Boolean) {
+        fabAddTask?.visibility = if (visible) View.VISIBLE else View.GONE
+    }
 
     // ✅ LIVE TASK UPDATE SYSTEM
     private var taskUpdateHandler = android.os.Handler(android.os.Looper.getMainLooper())
@@ -318,6 +329,9 @@ class MainActivity : AppCompatActivity() {
             container?.removeAllViews()
             container?.visibility = View.GONE
             
+            // Show FAB on home screen
+            setFabVisibility(true)
+            
         } catch (e: Exception) {
             android.util.Log.e("MainActivity", "Error showing home screen", e)
         }
@@ -339,6 +353,9 @@ class MainActivity : AppCompatActivity() {
 
             // Initialize task-specific functionality
             setupTasksFragment()
+
+            // Show FAB on tasks screen
+            setFabVisibility(true)
 
             android.util.Log.d("MainActivity", "✅ Loaded Tasks Fragment")
 
@@ -364,6 +381,9 @@ class MainActivity : AppCompatActivity() {
 
             // Initialize settings-specific functionality
             setupSettingsFragment()
+
+            // Hide FAB on settings screen
+            setFabVisibility(false)
 
             android.util.Log.d("MainActivity", "✅ Loaded Settings Fragment")
 
