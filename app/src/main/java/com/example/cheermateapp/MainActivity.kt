@@ -24,6 +24,7 @@ import com.example.cheermateapp.data.model.Task
 import com.example.cheermateapp.data.model.Priority
 import com.example.cheermateapp.data.model.User
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -46,7 +47,7 @@ class MainActivity : AppCompatActivity() {
     private var taskAdapter: TaskAdapter? = null
 
     // ✅ Cached reference to FAB for better performance
-    private val fabAddTask: com.google.android.material.floatingactionbutton.FloatingActionButton? by lazy {
+    private val fabAddTask: FloatingActionButton? by lazy {
         findViewById(R.id.fabAddTask)
     }
 
