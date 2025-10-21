@@ -5,9 +5,17 @@ import android.os.Bundle
 import android.widget.Spinner
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import com.example.cheermateapp.R
+import com.example.cheermateapp.data.db.AppDb
+import com.example.cheermateapp.data.model.Task
+import com.example.cheermateapp.data.model.TaskReminder
+import com.example.cheermateapp.data.model.Status
 import com.example.cheermateapp.util.TaskDialogSpinnerHelper
 import com.google.android.material.textfield.TextInputEditText
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -20,9 +28,15 @@ import java.util.*
  */
 class TaskDialogExample : AppCompatActivity() {
 
+    // Example user ID - in a real app, get this from login session
+    private var currentUserId: Int = 1
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         // Your activity setup
+        
+        // Get user ID from intent or shared preferences
+        currentUserId = intent.getIntExtra("USER_ID", 1)
     }
 
     /**
@@ -180,26 +194,107 @@ class TaskDialogExample : AppCompatActivity() {
         
         Toast.makeText(this, message, Toast.LENGTH_LONG).show()
         
-        // TODO: Actually save to database using your existing Task DAO
-        // Example:
-        // val task = Task.create(
-        //     userId = currentUserId,
-        //     taskId = getNextTaskId(),
-        //     title = title,
-        //     description = description,
-        //     category = categoryEnum,
-        //     priority = priorityEnum,
-        //     dueAt = dueDate,
-        //     dueTime = dueTime,
-        //     status = Status.Pending
-        // )
-        // 
-        // CoroutineScope(Dispatchers.IO).launch {
-        //     database.taskDao().insert(task)
-        //     if (reminder != "None") {
-        //         createTaskReminder(task.Task_ID, dueDate, dueTime!!, reminder)
-        //     }
-        // }
+        // Save to database using Task DAO
+        lifecycleScope.launch {
+            try {
+                val db = AppDb.get(this@TaskDialogExample)
+                
+                // Get next task ID for this user
+                val taskId = withContext(Dispatchers.IO) {
+                    db.taskDao().getNextTaskIdForUser(currentUserId)
+                }
+                
+                // Create the task object
+                val currentTime = System.currentTimeMillis()
+                val task = Task(
+                    Task_ID = taskId,
+                    User_ID = currentUserId,
+                    Title = title,
+                    Description = description,
+                    Category = categoryEnum,
+                    Priority = priorityEnum,
+                    Status = Status.Pending,
+                    TaskProgress = 0,
+                    DueAt = dueDate,
+                    DueTime = dueTime,
+                    CreatedAt = currentTime,
+                    UpdatedAt = currentTime,
+                    DeletedAt = null
+                )
+                
+                // Insert task into database
+                withContext(Dispatchers.IO) {
+                    db.taskDao().insert(task)
+                }
+                
+                // Create reminder if requested
+                if (reminder != "None" && dueTime != null) {
+                    createTaskReminder(taskId, dueDate, dueTime, reminder)
+                }
+                
+                android.util.Log.d("TaskDialogExample", "Task created successfully: $title")
+                
+            } catch (e: Exception) {
+                android.util.Log.e("TaskDialogExample", "Error creating task", e)
+                Toast.makeText(
+                    this@TaskDialogExample,
+                    "Failed to create task: ${e.message}",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+    }
+    
+    /**
+     * Create a task reminder
+     */
+    private suspend fun createTaskReminder(taskId: Int, dueDate: String, dueTime: String, reminderOption: String) {
+        try {
+            val db = AppDb.get(this@TaskDialogExample)
+            
+            // Calculate reminder time based on option
+            val reminderMinutesBefore = when (reminderOption) {
+                "5 minutes before" -> 5
+                "15 minutes before" -> 15
+                "30 minutes before" -> 30
+                "1 hour before" -> 60
+                "1 day before" -> 1440
+                else -> 0
+            }
+            
+            if (reminderMinutesBefore > 0) {
+                // Parse due date and time
+                val dateTimeFormat = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
+                val dueDateTime = dateTimeFormat.parse("$dueDate $dueTime")
+                
+                if (dueDateTime != null) {
+                    // Calculate reminder time
+                    val calendar = Calendar.getInstance()
+                    calendar.time = dueDateTime
+                    calendar.add(Calendar.MINUTE, -reminderMinutesBefore)
+                    
+                    val reminderDateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                    val reminderTimeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
+                    
+                    val reminder = TaskReminder(
+                        Reminder_ID = 0, // Auto-generated
+                        Task_ID = taskId,
+                        ReminderDate = reminderDateFormat.format(calendar.time),
+                        ReminderTime = reminderTimeFormat.format(calendar.time),
+                        Message = "Task reminder: Due in $reminderOption",
+                        IsActive = true
+                    )
+                    
+                    withContext(Dispatchers.IO) {
+                        db.taskReminderDao().insert(reminder)
+                    }
+                    
+                    android.util.Log.d("TaskDialogExample", "Reminder created for task $taskId")
+                }
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("TaskDialogExample", "Error creating reminder", e)
+        }
     }
     
     /**

@@ -1,19 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?><!--
-   Sample data extraction rules file; uncomment and customize as necessary.
+   Data extraction rules for CheermateApp
    See https://developer.android.com/about/versions/12/backup-restore#xml-changes
    for details.
 -->
 <data-extraction-rules>
     <cloud-backup>
-        <!-- TODO: Use <include> and <exclude> to control what is backed up.
-        <include .../>
-        <exclude .../>
-        -->
+        <!-- Include user preferences and settings -->
+        <include domain="sharedpref" path="." />
+        
+        <!-- Include the app database -->
+        <include domain="database" path="." />
+        
+        <!-- Exclude sensitive data like passwords (handled by Room encryption if enabled) -->
+        <!-- Cache files should not be backed up -->
+        <exclude domain="cache" path="." />
+        
+        <!-- External storage should be excluded for privacy -->
+        <exclude domain="external" path="." />
     </cloud-backup>
-    <!--
+    
     <device-transfer>
-        <include .../>
-        <exclude .../>
+        <!-- Transfer user preferences and settings during device migration -->
+        <include domain="sharedpref" path="." />
+        
+        <!-- Transfer the app database -->
+        <include domain="database" path="." />
+        
+        <!-- Do not transfer cache -->
+        <exclude domain="cache" path="." />
     </device-transfer>
-    -->
 </data-extraction-rules>
