@@ -692,6 +692,20 @@ class FragmentTaskActivity : AppCompatActivity() {
                 if (params is LinearLayout.LayoutParams) {
                     params.weight = percentage.coerceAtLeast(0).toFloat()
                     progressFill?.layoutParams = params
+                    
+                    // Update the remainder weight
+                    val progressBar = progressFill?.parent as? LinearLayout
+                    if (progressBar != null && progressBar.childCount > 1) {
+                        val remainder = progressBar.getChildAt(1)
+                        remainder?.layoutParams?.let { remParams ->
+                            if (remParams is LinearLayout.LayoutParams) {
+                                remParams.weight = (100 - percentage).toFloat()
+                                remainder.layoutParams = remParams
+                            }
+                        }
+                        // ✅ Request layout update to force redraw
+                        progressBar.requestLayout()
+                    }
                 }
             }
             

@@ -2124,9 +2124,13 @@ class MainActivity : AppCompatActivity() {
                                 remainder.layoutParams = remParams
                             }
                         }
+                        // ✅ Request layout update to force redraw
+                        progressBar.requestLayout()
                     }
                 }
             }
+
+            android.util.Log.d("MainActivity", "✅ Progress updated: $percentage% ($completed/$total)")
 
         } catch (e: Exception) {
             android.util.Log.e("MainActivity", "Error updating progress display", e)
