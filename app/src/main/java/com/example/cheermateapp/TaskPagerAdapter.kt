@@ -23,6 +23,7 @@ class TaskPagerAdapter(
         val layoutPriorityIndicator: View = itemView.findViewById(R.id.layoutPriorityIndicator)
         val tvTaskTitle: TextView = itemView.findViewById(R.id.tvTaskTitle)
         val tvTaskDescription: TextView = itemView.findViewById(R.id.tvTaskDescription)
+        val tvTaskCategory: TextView = itemView.findViewById(R.id.tvTaskCategory)
         val tvTaskPriority: TextView = itemView.findViewById(R.id.tvTaskPriority)
         val tvTaskStatus: TextView = itemView.findViewById(R.id.tvTaskStatus)
         val tvTaskDueDate: TextView = itemView.findViewById(R.id.tvTaskDueDate)
@@ -46,6 +47,14 @@ class TaskPagerAdapter(
         // Set task details
         holder.tvTaskTitle.text = task.Title
         holder.tvTaskDescription.text = task.Description ?: "No description"
+        
+        // Set category with emoji
+        holder.tvTaskCategory.text = when (task.Category) {
+            com.example.cheermateapp.data.model.Category.Work -> "📋 Work"
+            com.example.cheermateapp.data.model.Category.Personal -> "👤 Personal"
+            com.example.cheermateapp.data.model.Category.Shopping -> "🛒 Shopping"
+            com.example.cheermateapp.data.model.Category.Others -> "📌 Others"
+        }
         
         // Set priority with color-coded indicator
         when (task.Priority) {
@@ -83,13 +92,14 @@ class TaskPagerAdapter(
             holder.layoutProgress.visibility = View.GONE
         }
         
-        // Set due date
-        if (task.DueAt != null) {
+        // Set due date - hide if task is completed
+        if (task.DueAt != null && task.Status != Status.Completed) {
             val dueText = "📅 Due: ${task.DueAt}"
             val timeText = if (!task.DueTime.isNullOrBlank()) " at ${task.DueTime}" else ""
             holder.tvTaskDueDate.text = "$dueText$timeText"
+            holder.tvTaskDueDate.visibility = View.VISIBLE
         } else {
-            holder.tvTaskDueDate.text = "📅 No due date"
+            holder.tvTaskDueDate.visibility = View.GONE
         }
         
         // Configure action buttons
