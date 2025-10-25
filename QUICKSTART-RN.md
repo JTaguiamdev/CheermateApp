@@ -8,7 +8,7 @@
 node --version  # Should be 18+ or 20+
 
 # Check if you have npm installed
-npm --version   # Should be 8+ or 10+
+npm --version   # Should be 8+
 ```
 
 If you don't have Node.js, download it from [nodejs.org](https://nodejs.org/)
