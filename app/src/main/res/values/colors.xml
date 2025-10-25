@@ -15,6 +15,12 @@
     <!-- Calendar colors -->
     <color name="calendar_today">#FF00B4D8</color>
     <color name="calendar_selected">#FFA667C3</color>
+    
+    <!-- Calendar background for light mode -->
+    <color name="calendar_background">#FFFFFFFF</color>
+    
+    <!-- Toolbar icon color for light mode -->
+    <color name="toolbar_icon">#FF000000</color>
 
 
 </resources>

@@ -3,4 +3,10 @@
     <!-- Text colors for dark mode -->
     <color name="text_primary">#FFFFFFFF</color>
     <color name="text_secondary">#B3FFFFFF</color>
+    
+    <!-- Calendar background for dark mode -->
+    <color name="calendar_background">#FF1A1A1A</color>
+    
+    <!-- Toolbar icon color for dark mode -->
+    <color name="toolbar_icon">#FFFFFFFF</color>
 </resources>

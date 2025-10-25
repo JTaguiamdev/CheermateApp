@@ -3,5 +3,10 @@
     <style name="Base.Theme.CheermateApp" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your dark theme here. -->
         <!-- <item name="colorPrimary">@color/my_dark_primary</item> -->
+        
+        <!-- Switch styling for dark mode -->
+        <item name="colorControlActivated">#8B6BFF</item>
+        <item name="colorSwitchThumbNormal">#666666</item>
+        <item name="android:colorForeground">@android:color/white</item>
     </style>
 </resources>

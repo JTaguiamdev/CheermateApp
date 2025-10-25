@@ -22,8 +22,9 @@
         android:stateListAnimator="@animator/card_elevation_state"
         android:theme="@style/ThemeOverlay.Material3.ActionBar"
         app:title="Task"
-        app:titleTextColor="@android:color/white"
-        app:navigationIcon="?attr/homeAsUpIndicator" />
+        app:titleTextColor="@color/text_primary"
+        app:navigationIcon="?attr/homeAsUpIndicator"
+        app:navigationIconTint="@color/toolbar_icon" />
 
     <!-- Scrollable Content -->
     <ScrollView

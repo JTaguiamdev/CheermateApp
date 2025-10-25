@@ -143,7 +143,8 @@
                     android:layout_height="290dp"
                     android:orientation="vertical"
                     android:layout_marginLeft="20dp"
-                    android:layout_marginRight="20dp">
+                    android:layout_marginRight="20dp"
+                    android:background="@color/calendar_background">
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -152,7 +153,7 @@
                         android:layout_gravity="center"
                         android:fontFamily="@font/sf_pro_rounded_bold"
                         android:text="@string/calendar"
-                        android:textColor="@android:color/white"
+                        android:textColor="@color/text_primary"
                         android:textSize="20sp" />
                 </LinearLayout>
 
