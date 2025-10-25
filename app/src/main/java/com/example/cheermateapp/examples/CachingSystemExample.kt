@@ -3,7 +3,6 @@ package com.example.cheermateapp.examples
 import android.content.Context
 import com.example.cheermateapp.data.db.AppDb
 import com.example.cheermateapp.util.CacheManager
-import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 

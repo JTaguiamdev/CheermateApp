@@ -6,7 +6,6 @@ import com.example.cheermateapp.data.db.AppDb
 import com.example.cheermateapp.data.model.PersonalityType
 import com.example.cheermateapp.data.model.SecurityQuestion
 import com.example.cheermateapp.util.CacheManager
-import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 

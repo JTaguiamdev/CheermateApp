@@ -31,9 +31,9 @@ object CacheManager {
     
     /**
      * Get cached data if it exists and is not stale
+     * @param T Type parameter (inferred automatically using reified generics)
      * @param context Application context
      * @param cacheKey Unique key for this cache entry
-     * @param type Class type for deserialization
      * @param maxAgeMs Maximum age of cache in milliseconds (default 24 hours)
      * @return Cached data or null if not found or stale
      */
