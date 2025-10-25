@@ -81,3 +81,24 @@ lint/generated/
 lint/outputs/
 lint/tmp/
 # lint/reports/
+
+# ============================================================
+# NOT A NODE.JS/REACT NATIVE/EXPO PROJECT!
+# This is a native Android/Kotlin project.
+# If you see these files locally, they are NOT from this repo.
+# See ANDROID_PROJECT_GUIDE.md for clarification.
+# ============================================================
+
+# Node.js / React Native / Expo (NOT USED IN THIS PROJECT)
+node_modules/
+package.json
+package-lock.json
+yarn.lock
+.expo/
+.expo-shared/
+index.ts
+index.js
+app.json
+babel.config.js
+metro.config.js
+tsconfig.json
