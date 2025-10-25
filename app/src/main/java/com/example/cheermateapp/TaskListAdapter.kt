@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.cheermateapp.data.model.Task
 import com.example.cheermateapp.data.model.Priority
 import com.example.cheermateapp.data.model.Category
+import com.example.cheermateapp.data.model.Status
 import com.example.cheermateapp.data.model.getPriorityColor
 import java.text.SimpleDateFormat
 import java.util.*
@@ -88,7 +89,7 @@ class TaskListAdapter(
         holder.tvStatus.text = "${task.getStatusEmoji()} ${task.Status.name}"
 
         // Set due date (shortened format for list) - hide if task is completed
-        if (task.DueAt != null && task.Status != com.example.cheermateapp.data.model.Status.Completed) {
+        if (task.DueAt != null && task.Status != Status.Completed) {
             try {
                 val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
                 val date = dateFormat.parse(task.DueAt)
