@@ -1,5 +1,8 @@
 # 🎯 CheermateApp - Complete Task Management System
 
+⚠️ **IMPORTANT: This is a Native Android Application (Kotlin), NOT React Native/Expo!**
+📖 **Confused about project type?** See [ANDROID_PROJECT_GUIDE.md](ANDROID_PROJECT_GUIDE.md) for clarification.
+
 A comprehensive Android task management application built with Kotlin, featuring complete CRUD operations, smart task features, and modern UI design.
 
 ## ✨ Features
@@ -70,10 +73,42 @@ A comprehensive Android task management application built with Kotlin, featuring
 
 ## 🚀 Getting Started
 
+### ⚠️ Common Error: "Cannot find package 'expo'"
+
+If you're seeing this error:
+```
+Error [ERR_MODULE_NOT_FOUND]: Cannot find package 'expo' imported from index.ts
+```
+
+**This is NOT related to this project!** This is a native Android/Kotlin app, not React Native/Expo.
+- ❌ No `package.json`, `index.ts`, or `node_modules`
+- ❌ Don't use `npm install` or `npm start`
+- ✅ Use `./gradlew` commands (see below)
+- ✅ Open in Android Studio, not VS Code with Node.js
+
+📖 **Read [ANDROID_PROJECT_GUIDE.md](ANDROID_PROJECT_GUIDE.md) for detailed clarification!**
+
 ### Prerequisites
 - Android Studio Arctic Fox or later
 - Kotlin 1.9+
 - Android SDK 24+
+- JDK 11 or later
+
+### Build and Run Commands
+
+```bash
+# Build the project
+./gradlew clean build
+
+# Build debug APK
+./gradlew assembleDebug
+
+# Install on connected device/emulator
+./gradlew installDebug
+
+# Run tests
+./gradlew test
+```
 
 ### Installation
 1. Clone the repository
