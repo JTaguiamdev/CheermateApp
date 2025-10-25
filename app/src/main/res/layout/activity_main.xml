@@ -152,7 +152,7 @@
                         android:layout_gravity="center"
                         android:fontFamily="@font/sf_pro_rounded_bold"
                         android:text="@string/calendar"
-                        android:textColor="@color/text_primary"
+                        android:textColor="@android:color/white"
                         android:textSize="20sp" />
                 </LinearLayout>
 
