@@ -1,0 +1,40 @@
+{
+  "expo": {
+    "name": "CheermateApp",
+    "slug": "cheermate-app",
+    "version": "1.5.0",
+    "orientation": "portrait",
+    "icon": "./rn-assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./rn-assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#6200ee"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.example.cheermateapp"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./rn-assets/adaptive-icon.png",
+        "backgroundColor": "#6200ee"
+      },
+      "package": "com.example.cheermateapp",
+      "edgeToEdgeEnabled": true,
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./rn-assets/favicon.png"
+    },
+    "plugins": [
+      [
+        "expo-sqlite",
+        {
+          "enableFTS": true
+        }
+      ]
+    ]
+  }
+}
