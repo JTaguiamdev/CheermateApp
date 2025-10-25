@@ -764,8 +764,9 @@ class FragmentTaskExtensionActivity : AppCompatActivity() {
                                 Toast.LENGTH_SHORT
                             ).show()
                             
-                            // Reload task details to reflect changes
-                            loadTaskDetails()
+                            // Set result and finish activity to refresh caller's progress bar
+                            setResult(RESULT_OK)
+                            finish()
                         } catch (e: Exception) {
                             android.util.Log.e("FragmentTaskExtensionActivity", "Error marking task as completed", e)
                             Toast.makeText(
@@ -944,8 +945,9 @@ class FragmentTaskExtensionActivity : AppCompatActivity() {
                                 Toast.LENGTH_SHORT
                             ).show()
                             
-                            // Reload task details to reflect changes
-                            loadTaskDetails()
+                            // Set result and finish activity to refresh caller's progress bar
+                            setResult(RESULT_OK)
+                            finish()
                         } catch (e: Exception) {
                             android.util.Log.e("FragmentTaskExtensionActivity", "Error marking task as won't do", e)
                             Toast.makeText(
