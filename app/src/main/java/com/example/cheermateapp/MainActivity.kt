@@ -11,6 +11,7 @@ import com.example.cheermateapp.data.model.Priority.Low
 import com.example.cheermateapp.data.model.Priority.Medium
 import com.example.cheermateapp.data.model.Status
 import com.example.cheermateapp.data.model.Category
+import com.example.cheermateapp.data.model.getDisplayText
 import android.widget.*
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
@@ -2302,12 +2303,7 @@ class MainActivity : AppCompatActivity() {
             }
 
             // 6. Category with icon
-            tvTaskCategory.text = when (task.Category) {
-                com.example.cheermateapp.data.model.Category.Work -> "📋 Work"
-                com.example.cheermateapp.data.model.Category.Personal -> "👤 Personal"
-                com.example.cheermateapp.data.model.Category.Shopping -> "🛒 Shopping"
-                com.example.cheermateapp.data.model.Category.Others -> "📌 Others"
-            }
+            tvTaskCategory.text = task.Category.getDisplayText()
 
             // 7. Progress
             if (tvTaskProgress != null && progressBar != null) {

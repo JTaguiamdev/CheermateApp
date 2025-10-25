@@ -28,6 +28,16 @@ enum class Category {
     Others
 }
 
+// Extension function for Category display text with icons
+fun Category.getDisplayText(): String {
+    return when (this) {
+        Category.Work -> "📋 Work"
+        Category.Personal -> "👤 Personal"
+        Category.Shopping -> "🛒 Shopping"
+        Category.Others -> "📌 Others"
+    }
+}
+
 @Entity(
     tableName = "Task",
     primaryKeys = ["Task_ID", "User_ID"],

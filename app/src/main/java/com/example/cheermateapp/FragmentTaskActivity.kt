@@ -847,12 +847,7 @@ class FragmentTaskActivity : AppCompatActivity() {
             }
             
             // Set category
-            tvTaskCategory.text = when (task.Category) {
-                com.example.cheermateapp.data.model.Category.Work -> "📋 Work"
-                com.example.cheermateapp.data.model.Category.Personal -> "👤 Personal"
-                com.example.cheermateapp.data.model.Category.Shopping -> "🛒 Shopping"
-                com.example.cheermateapp.data.model.Category.Others -> "📌 Others"
-            }
+            tvTaskCategory.text = task.Category.getDisplayText()
             
             // Set priority
             tvTaskPriority.text = task.Priority.name

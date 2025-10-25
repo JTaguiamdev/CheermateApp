@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.cheermateapp.data.model.Priority
 import com.example.cheermateapp.data.model.Status
 import com.example.cheermateapp.data.model.Task
+import com.example.cheermateapp.data.model.getDisplayText
 
 class TaskPagerAdapter(
     private var tasks: List<Task>,
@@ -39,12 +40,7 @@ class TaskPagerAdapter(
         holder.tvTaskDescription.text = task.Description ?: "No description"
         
         // Set category with icon
-        holder.tvTaskCategory.text = when (task.Category) {
-            com.example.cheermateapp.data.model.Category.Work -> "📋 Work"
-            com.example.cheermateapp.data.model.Category.Personal -> "👤 Personal"
-            com.example.cheermateapp.data.model.Category.Shopping -> "🛒 Shopping"
-            com.example.cheermateapp.data.model.Category.Others -> "📌 Others"
-        }
+        holder.tvTaskCategory.text = task.Category.getDisplayText()
         
         // Set priority with color-coded indicator
         when (task.Priority) {

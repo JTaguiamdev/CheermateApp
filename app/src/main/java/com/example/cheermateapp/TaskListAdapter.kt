@@ -12,6 +12,7 @@ import com.example.cheermateapp.data.model.Task
 import com.example.cheermateapp.data.model.Priority
 import com.example.cheermateapp.data.model.Category
 import com.example.cheermateapp.data.model.getPriorityColor
+import com.example.cheermateapp.data.model.getDisplayText
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -70,12 +71,7 @@ class TaskListAdapter(
         }
 
         // Set category with emoji
-        holder.tvCategory.text = when (task.Category) {
-            Category.Work -> "📋 Work"
-            Category.Personal -> "👤 Personal"
-            Category.Shopping -> "🛒 Shopping"
-            Category.Others -> "📌 Others"
-        }
+        holder.tvCategory.text = task.Category.getDisplayText()
 
         // Set priority with emoji
         holder.tvPriority.text = "🎯 ${task.Priority.name}"

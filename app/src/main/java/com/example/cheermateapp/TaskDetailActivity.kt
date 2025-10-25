@@ -132,12 +132,7 @@ class TaskDetailActivity : AppCompatActivity() {
         }
 
         // Set category with emoji
-        tvTaskCategory.text = when (task.Category) {
-            Category.Work -> "📋 Work"
-            Category.Personal -> "👤 Personal"
-            Category.Shopping -> "🛒 Shopping"
-            Category.Others -> "📌 Others"
-        }
+        tvTaskCategory.text = task.Category.getDisplayText()
 
         // Set priority
         tvTaskPriority.text = "🎯 ${task.Priority.name}"
