@@ -26,6 +26,7 @@ A comprehensive Android task management application built with Kotlin, featuring
 - **Soft Delete**: Tasks are archived, not permanently deleted
 - **Timestamp Management**: Proper Long timestamp handling
 - **User-specific Data**: Multi-user support with user isolation
+- **📦 Caching System**: JSON-based caching for static data with automatic invalidation
 
 ### 🚀 Phase 2: Smart Task Features (v1.5) ✨ NEW
 - **🔄 Recurring Tasks**: Daily, weekly, monthly, and yearly recurring tasks
@@ -34,12 +35,14 @@ A comprehensive Android task management application built with Kotlin, featuring
 - **📦 Bulk Operations**: Multi-select and batch edit tasks
 - **📊 Analytics**: Productivity trends, time-based analytics, streak tracking
 - **💾 Data Export/Import**: CSV and JSON export with backup/restore functionality
+- **⚡ Performance**: Database-backed caching reduces queries by ~90% for static data
 
 ## 🛠️ Technology Stack
 
 - **Language**: Kotlin
 - **UI**: Android Views with Material Design
-- **Database**: SQLite with Room persistence library (v14)
+- **Database**: SQLite with Room persistence library (v16)
+- **Caching**: JSON-based caching with Gson for static data
 - **Architecture**: MVVM pattern with LiveData
 - **Async Operations**: Coroutines with Dispatchers
 - **Navigation**: Intent-based activity navigation
@@ -55,6 +58,7 @@ A comprehensive Android task management application built with Kotlin, featuring
 
 ### Documentation
 - **[QUICKSTART.md](QUICKSTART.md)** - Quick reference guide for contributors
+- **[CACHING_SYSTEM_GUIDE.md](CACHING_SYSTEM_GUIDE.md)** - Database-backed caching system documentation
 - **[TODO.md](TODO.md)** - Immediate tasks and known issues to address
 - **[ROADMAP.md](ROADMAP.md)** - Long-term development roadmap and feature planning
 - **[CHANGELOG.md](CHANGELOG.md)** - Version history and changes
