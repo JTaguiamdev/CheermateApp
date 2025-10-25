@@ -88,6 +88,8 @@ class FragmentSettingsActivity : AppCompatActivity() {
                     val tvProfileEmail = findViewById<TextView>(R.id.tvProfileEmail)
                     val tvCurrentPersona = findViewById<TextView>(R.id.tvCurrentPersona)
                     val chipPersona = findViewById<TextView>(R.id.chipPersona)
+                    val personalityTitle = findViewById<TextView>(R.id.personalityTitle)
+                    val personalityDesc = findViewById<TextView>(R.id.personalityDesc)
 
                     if (user != null) {
                         val displayName = when {
@@ -108,9 +110,13 @@ class FragmentSettingsActivity : AppCompatActivity() {
                     if (personality != null) {
                         tvCurrentPersona?.text = personality.Name
                         chipPersona?.text = "${personality.Name} Personality"
+                        personalityTitle?.text = "${personality.Name} Vibes"
+                        personalityDesc?.text = personality.Description ?: "No description available"
                     } else {
-                        tvCurrentPersona?.text = "Your Personality"
+                        tvCurrentPersona?.text = "No Personality Selected"
                         chipPersona?.text = "No Personality Selected"
+                        personalityTitle?.text = "Your Personality"
+                        personalityDesc?.text = "Choose a personality to get personalized motivation"
                     }
 
                     // ✅ UPDATE TASK STATISTICS
@@ -126,6 +132,8 @@ class FragmentSettingsActivity : AppCompatActivity() {
             findViewById<TextView>(R.id.tvProfileEmail)?.text = "guest@example.com"
             findViewById<TextView>(R.id.tvCurrentPersona)?.text = "Guest Mode"
             findViewById<TextView>(R.id.chipPersona)?.text = "Guest User"
+            findViewById<TextView>(R.id.personalityTitle)?.text = "Guest Mode"
+            findViewById<TextView>(R.id.personalityDesc)?.text = "Log in to personalize your experience"
         }
     }
 
@@ -228,9 +236,19 @@ class FragmentSettingsActivity : AppCompatActivity() {
                 showProfileEditDialog()
             }
 
+            // Personality Card Click
+            findViewById<LinearLayout>(R.id.cardPersonality)?.setOnClickListener {
+                showPersonalitySelectionDialog()
+            }
+
             // AI Personality Row Click
             findViewById<LinearLayout>(R.id.rowPersonality)?.setOnClickListener {
                 showPersonalitySelectionDialog()
+            }
+
+            // Motivate Button Click
+            findViewById<TextView>(R.id.btnMotivate)?.setOnClickListener {
+                showMotivationalMessage()
             }
 
             // Stats Card Click
@@ -745,6 +763,75 @@ class FragmentSettingsActivity : AppCompatActivity() {
 
             } catch (e: Exception) {
                 Toast.makeText(this@FragmentSettingsActivity, "Error deleting account", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    private fun showMotivationalMessage() {
+        lifecycleScope.launch {
+            try {
+                val db = AppDb.get(this@FragmentSettingsActivity)
+
+                val personality: Personality? = withContext(Dispatchers.IO) {
+                    db.personalityDao().getByUser(userId)
+                }
+
+                val motivationalMessages = when (personality?.Name?.lowercase()) {
+                    "kalog" -> arrayOf(
+                        "🤣 Time to turn that task list into a comedy show!",
+                        "😄 Let's tackle these tasks with a smile and a laugh!",
+                        "🎭 Make productivity fun - you've got this!",
+                        "😆 Turn your to-do list into a ta-da list!",
+                        "🎉 Life's a party and you're the host - let's get things done with style!",
+                        "😁 Laughter is the best productivity tool - now let's ace this!"
+                    )
+                    "gen z" -> arrayOf(
+                        "💯 No cap, you're about to absolutely slay these tasks!",
+                        "🔥 It's giving main character energy - let's go!",
+                        "✨ Periodt! Time to show these tasks who's boss!",
+                        "💅 About to serve some serious productivity looks!",
+                        "🚀 Bestie, you're about to pop off and crush these goals!",
+                        "⚡ Living rent free in success's mind - go get it!"
+                    )
+                    "softy" -> arrayOf(
+                        "🌸 You've got this, take it one gentle step at a time",
+                        "💕 Be kind to yourself while you accomplish amazing things",
+                        "🌺 Small progress is still progress - you're doing great!",
+                        "🤗 Sending you gentle motivation and warm encouragement!",
+                        "☁️ You're capable of wonderful things - believe in yourself!",
+                        "🦋 Take your time, breathe, and watch yourself bloom!"
+                    )
+                    "grey" -> arrayOf(
+                        "⚖️ Steady progress leads to lasting success",
+                        "🧘 Focus on what matters, let go of what doesn't",
+                        "📚 Wisdom comes from consistent, thoughtful action",
+                        "🎯 Balance effort with patience - you're on the right path",
+                        "🌙 Calm minds achieve great things - stay centered",
+                        "⚗️ Master your craft through deliberate practice"
+                    )
+                    "flirty" -> arrayOf(
+                        "😉 Hey gorgeous, ready to charm those tasks into submission?",
+                        "💋 You're about to make productivity look effortlessly sexy",
+                        "😘 Wink at your goals and watch them fall for you!",
+                        "🌹 Turn on that irresistible charm and conquer your day!",
+                        "💃 Work it like you own it - because you absolutely do!",
+                        "✨ Stunning AND productive? You're unstoppable!"
+                    )
+                    else -> arrayOf(
+                        "🌟 You have everything it takes to succeed!",
+                        "💪 Believe in yourself - you're stronger than you know!",
+                        "🚀 Ready to launch into an amazing day of achievement!",
+                        "✨ Your potential is limitless - let's unlock it together!",
+                        "🎯 Focus on your goals and watch magic happen!",
+                        "🌈 Today is your day to shine bright!"
+                    )
+                }
+
+                val randomMessage = motivationalMessages.random()
+                Toast.makeText(this@FragmentSettingsActivity, randomMessage, Toast.LENGTH_LONG).show()
+
+            } catch (e: Exception) {
+                Toast.makeText(this@FragmentSettingsActivity, "💪 You've got this! Let's make today amazing!", Toast.LENGTH_SHORT).show()
             }
         }
     }

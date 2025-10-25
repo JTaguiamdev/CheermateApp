@@ -219,12 +219,65 @@
             android:layout_marginStart="10dp"
             android:textSize="12sp" />
 
+        <!-- Personality highlight card -->
+        <LinearLayout
+            android:id="@+id/cardPersonality"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:background="@drawable/bg_card_glass_hover"
+            android:clickable="true"
+            android:elevation="2dp"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground"
+            android:orientation="vertical"
+            android:padding="16dp"
+            android:stateListAnimator="@animator/card_elevation_state">
+
+            <TextView
+                android:id="@+id/personalityTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/sf_pro_rounded_bold"
+                android:text="@string/personality_type"
+                android:textColor="@android:color/white"
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/personalityDesc"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/sf_pro_rounded_regular"
+                android:paddingTop="2dp"
+                android:paddingBottom="10dp"
+                android:text="@string/personality_description_goes_here"
+                android:textColor="@color/text_secondary_white_70"
+                android:textSize="12sp" />
+
+            <TextView
+                android:id="@+id/btnMotivate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_chip_glass"
+                android:clickable="true"
+                android:focusable="true"
+                android:fontFamily="@font/sf_pro_rounded_bold"
+                android:foreground="?attr/selectableItemBackground"
+                android:paddingLeft="12dp"
+                android:paddingTop="6dp"
+                android:paddingRight="12dp"
+                android:paddingBottom="6dp"
+                android:text="Motivate Me!"
+                android:textColor="@android:color/white"
+                android:textSize="12sp" />
+        </LinearLayout>
+
         <!-- AI Personality row -->
         <LinearLayout
             android:id="@+id/rowPersonality"
             android:layout_width="match_parent"
             android:layout_height="56dp"
-            android:layout_marginTop="6dp"
+            android:layout_marginTop="8dp"
             android:background="@drawable/bg_card_glass_hover"
             android:gravity="center_vertical"
             android:paddingHorizontal="14dp">
@@ -232,7 +285,7 @@
             <ImageView
                 android:layout_width="22dp"
                 android:layout_height="22dp"
-                android:src="@android:drawable/ic_menu_compass"
+                android:src="@android:drawable/ic_menu_edit"
                 app:tint="@android:color/white" />
 
             <LinearLayout
@@ -246,7 +299,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/sf_pro_rounded_bold"
-                    android:text="Personality"
+                    android:text="Change Personality"
                     android:textColor="@android:color/white"
                     android:textSize="14sp" />
 
@@ -262,7 +315,7 @@
             <ImageView
                 android:layout_width="16dp"
                 android:layout_height="16dp"
-                android:src="@android:drawable/ic_menu_edit"
+                android:src="@android:drawable/ic_menu_sort_by_size"
                 app:tint="@android:color/white" />
         </LinearLayout>
 

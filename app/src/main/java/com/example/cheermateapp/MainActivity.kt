@@ -1928,37 +1928,49 @@ class MainActivity : AppCompatActivity() {
                             "🤣 Time to turn that task list into a comedy show!",
                             "😄 Let's tackle these tasks with a smile and a laugh!",
                             "🎭 Make productivity fun - you've got this!",
-                            "😆 Turn your to-do list into a ta-da list!"
+                            "😆 Turn your to-do list into a ta-da list!",
+                            "🎉 Life's a party and you're the host - let's get things done with style!",
+                            "😁 Laughter is the best productivity tool - now let's ace this!"
                         )
                         "gen z" -> arrayOf(
                             "💯 No cap, you're about to absolutely slay these tasks!",
                             "🔥 It's giving main character energy - let's go!",
                             "✨ Periodt! Time to show these tasks who's boss!",
-                            "💅 About to serve some serious productivity looks!"
+                            "💅 About to serve some serious productivity looks!",
+                            "🚀 Bestie, you're about to pop off and crush these goals!",
+                            "⚡ Living rent free in success's mind - go get it!"
                         )
                         "softy" -> arrayOf(
                             "🌸 You've got this, take it one gentle step at a time",
                             "💕 Be kind to yourself while you accomplish amazing things",
                             "🌺 Small progress is still progress - you're doing great!",
-                            "🤗 Sending you gentle motivation and warm encouragement!"
+                            "🤗 Sending you gentle motivation and warm encouragement!",
+                            "☁️ You're capable of wonderful things - believe in yourself!",
+                            "🦋 Take your time, breathe, and watch yourself bloom!"
                         )
                         "grey" -> arrayOf(
                             "⚖️ Steady progress leads to lasting success",
                             "🧘 Focus on what matters, let go of what doesn't",
                             "📚 Wisdom comes from consistent, thoughtful action",
-                            "🎯 Balance effort with patience - you're on the right path"
+                            "🎯 Balance effort with patience - you're on the right path",
+                            "🌙 Calm minds achieve great things - stay centered",
+                            "⚗️ Master your craft through deliberate practice"
                         )
                         "flirty" -> arrayOf(
                             "😉 Hey gorgeous, ready to charm those tasks into submission?",
                             "💋 You're about to make productivity look effortlessly sexy",
                             "😘 Wink at your goals and watch them fall for you!",
-                            "🌹 Turn on that irresistible charm and conquer your day!"
+                            "🌹 Turn on that irresistible charm and conquer your day!",
+                            "💃 Work it like you own it - because you absolutely do!",
+                            "✨ Stunning AND productive? You're unstoppable!"
                         )
                         else -> arrayOf(
                             "🌟 You have everything it takes to succeed!",
                             "💪 Believe in yourself - you're stronger than you know!",
                             "🚀 Ready to launch into an amazing day of achievement!",
-                            "✨ Your potential is limitless - let's unlock it together!"
+                            "✨ Your potential is limitless - let's unlock it together!",
+                            "🎯 Focus on your goals and watch magic happen!",
+                            "🌈 Today is your day to shine bright!"
                         )
                     }
 
