@@ -30,7 +30,6 @@ class TaskListAdapter(
         val tvCategory: TextView = itemView.findViewById(R.id.tvTaskCategory)
         val tvPriority: TextView = itemView.findViewById(R.id.tvTaskPriority)
         val tvStatus: TextView = itemView.findViewById(R.id.tvTaskStatus)
-        val taskDueDate: TextView = itemView.findViewById(R.id.task_due_date)
         val tvDueDate: TextView = itemView.findViewById(R.id.tvTaskDueDate)
         val layoutCollapsed: View = itemView.findViewById(R.id.layoutCollapsed)
         
@@ -84,23 +83,7 @@ class TaskListAdapter(
         // Set status with emoji
         holder.tvStatus.text = "${task.getStatusEmoji()} ${task.Status.name}"
 
-        // Set chip-style due date beside status
-        if (task.DueAt != null) {
-            try {
-                val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-                val date = dateFormat.parse(task.DueAt)
-                val shortFormat = SimpleDateFormat("MMM dd", Locale.getDefault())
-                holder.taskDueDate.text = "📅 ${shortFormat.format(date)}"
-                holder.taskDueDate.visibility = View.VISIBLE
-            } catch (e: Exception) {
-                holder.taskDueDate.text = "📅 ${task.DueAt}"
-                holder.taskDueDate.visibility = View.VISIBLE
-            }
-        } else {
-            holder.taskDueDate.visibility = View.GONE
-        }
-
-        // Set due date (shortened format for list) - Original tvTaskDueDate kept for compatibility
+        // Set due date (shortened format for list)
         if (task.DueAt != null) {
             try {
                 val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())

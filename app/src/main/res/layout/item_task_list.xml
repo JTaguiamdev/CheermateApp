@@ -95,19 +95,6 @@
                     android:textSize="11sp" />
 
                 <TextView
-                    android:id="@+id/task_due_date"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="6dp"
-                    android:background="@drawable/bg_chip_glass"
-                    android:fontFamily="@font/sf_pro_rounded_bold"
-                    android:paddingHorizontal="8dp"
-                    android:paddingVertical="4dp"
-                    android:text="@string/duedate"
-                    android:textColor="@android:color/white"
-                    android:textSize="11sp" />
-
-                <TextView
                     android:id="@+id/tvTaskDueDate"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -119,8 +106,7 @@
                     android:maxLines="1"
                     android:text="@string/duedate"
                     android:textColor="@color/text_secondary_white_70"
-                    android:textSize="11sp"
-                    android:visibility="gone" />
+                    android:textSize="11sp" />
             </LinearLayout>
         </LinearLayout>
 
