@@ -1368,7 +1368,10 @@ class MainActivity : AppCompatActivity() {
 
                 Toast.makeText(this@MainActivity, "✅ Personality updated to $name!", Toast.LENGTH_SHORT)
                     .show()
+                
+                // ✅ Update both settings fragment AND home screen personality card
                 loadSettingsFragmentData()
+                loadUserData() // This updates the personality card on home screen
 
             } catch (e: Exception) {
                 Toast.makeText(this@MainActivity, "Error updating personality", Toast.LENGTH_SHORT)
