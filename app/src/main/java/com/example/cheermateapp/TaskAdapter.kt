@@ -59,8 +59,8 @@ class TaskAdapter(
         // Set priority indicator color if it exists
         holder.layoutPriorityIndicator?.setBackgroundColor(task.getPriorityColor())
 
-        // Set due date
-        if (task.DueAt != null) {
+        // Set due date - hide if task is completed
+        if (task.DueAt != null && task.Status != Status.Completed) {
             val dueText = formatDueDate(task)
             holder.tvDueDate.text = dueText
             holder.tvDueDate.visibility = View.VISIBLE

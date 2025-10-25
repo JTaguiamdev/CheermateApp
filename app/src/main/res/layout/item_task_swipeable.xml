@@ -39,6 +39,20 @@
         android:maxLines="3"
         android:ellipsize="end"/>
 
+    <!-- Task Category -->
+    <TextView
+        android:id="@+id/tvTaskCategory"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/bg_chip_glass"
+        android:fontFamily="@font/sf_pro_rounded_bold"
+        android:paddingHorizontal="8dp"
+        android:paddingVertical="4dp"
+        android:text="📋 Work"
+        android:textColor="@android:color/white"
+        android:textSize="11sp" />
+
     <!-- Priority and Status Row -->
     <LinearLayout
         android:layout_width="match_parent"

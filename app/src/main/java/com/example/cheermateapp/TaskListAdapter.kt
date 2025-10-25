@@ -87,8 +87,8 @@ class TaskListAdapter(
         // Set status with emoji
         holder.tvStatus.text = "${task.getStatusEmoji()} ${task.Status.name}"
 
-        // Set due date (shortened format for list)
-        if (task.DueAt != null) {
+        // Set due date (shortened format for list) - hide if task is completed
+        if (task.DueAt != null && task.Status != com.example.cheermateapp.data.model.Status.Completed) {
             try {
                 val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
                 val date = dateFormat.parse(task.DueAt)
