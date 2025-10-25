@@ -2691,15 +2691,6 @@ class MainActivity : AppCompatActivity() {
                 // ✅ STYLING - Apply theme-aware background
                 val backgroundColor = getColor(R.color.calendar_background)
                 calendarView.setBackgroundColor(backgroundColor)
-                
-                // Apply theme-aware date text color
-                val textColor = getColor(R.color.text_primary)
-                try {
-                    // Try to set date text color if API is available
-                    calendarView.dateTextAppearance = android.R.style.TextAppearance_Material_Body1
-                } catch (e: Exception) {
-                    android.util.Log.w("MainActivity", "Could not set date text appearance", e)
-                }
 
                 // ✅ DATE SELECTION LISTENER with visual feedback
                 calendarView.setOnDateChangeListener { _, year, month, dayOfMonth ->
