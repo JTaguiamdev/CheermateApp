@@ -142,6 +142,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="290dp"
                     android:orientation="vertical"
+                    android:background="@android:color/transparent"
                     android:layout_marginLeft="20dp"
                     android:layout_marginRight="20dp">
 

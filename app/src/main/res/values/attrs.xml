@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Glass background colors for theme support -->
+    <attr name="glassBackgroundColor" format="color" />
+    <attr name="glassBackgroundStroke" format="color" />
+    <attr name="glassBackgroundHover" format="color" />
+    <attr name="glassBackgroundStrokeHover" format="color" />
+    <attr name="glassBackgroundPressed" format="color" />
+    <attr name="glassBackgroundStrokePressed" format="color" />
+</resources>

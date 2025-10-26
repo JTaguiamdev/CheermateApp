@@ -8,5 +8,13 @@
         <item name="colorControlActivated">#8B6BFF</item>
         <item name="colorSwitchThumbNormal">#666666</item>
         <item name="android:colorForeground">@android:color/white</item>
+        
+        <!-- Glass background colors for dark mode - lighter white overlay -->
+        <item name="glassBackgroundColor">#33FFFFFF</item>
+        <item name="glassBackgroundStroke">#66FFFFFF</item>
+        <item name="glassBackgroundHover">#3DFFFFFF</item>
+        <item name="glassBackgroundStrokeHover">#80FFFFFF</item>
+        <item name="glassBackgroundPressed">#4DFFFFFF</item>
+        <item name="glassBackgroundStrokePressed">#99FFFFFF</item>
     </style>
 </resources>

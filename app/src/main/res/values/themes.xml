@@ -9,6 +9,14 @@
         <item name="colorControlActivated">#6B48FF</item>
         <item name="colorSwitchThumbNormal">#CCCCCC</item>
         <item name="android:colorForeground">@android:color/black</item>
+        
+        <!-- Glass background colors for light mode - more opaque for visibility on light backgrounds -->
+        <item name="glassBackgroundColor">#33000000</item>
+        <item name="glassBackgroundStroke">#66000000</item>
+        <item name="glassBackgroundHover">#3D000000</item>
+        <item name="glassBackgroundStrokeHover">#80000000</item>
+        <item name="glassBackgroundPressed">#4D000000</item>
+        <item name="glassBackgroundStrokePressed">#99000000</item>
     </style>
 
     <style name="Theme.CheermateApp" parent="Base.Theme.CheermateApp" />
