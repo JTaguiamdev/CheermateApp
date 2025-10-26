@@ -25,7 +25,7 @@ class TaskAdapter(
     class TaskViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val tvTitle: TextView = itemView.findViewById(R.id.tvTaskTitle)
         val tvDescription: TextView = itemView.findViewById(R.id.tvTaskDescription)
-        val tvStatus: TextView = itemView.findViewById(R.id.tvTaskStatus)
+        val tvCategory: TextView = itemView.findViewById(R.id.tvTaskCategory)
         val tvPriority: TextView = itemView.findViewById(R.id.tvTaskPriority)
         val tvDueDate: TextView = itemView.findViewById(R.id.tvTaskDueDate)
         val tvProgress: TextView? = itemView.findViewById(R.id.tvTaskProgress)
@@ -50,8 +50,13 @@ class TaskAdapter(
         holder.tvDescription.text = if (task.Description.isNullOrBlank()) "No description" else task.Description
         holder.tvDescription.visibility = if (task.Description.isNullOrBlank()) View.GONE else View.VISIBLE
 
-        // Set status with emoji
-        holder.tvStatus.text = "${task.getStatusEmoji()} ${task.Status.name}"
+        // Set category with emoji
+        holder.tvCategory.text = when (task.Category) {
+            com.example.cheermateapp.data.model.Category.Work -> "📋 Work"
+            com.example.cheermateapp.data.model.Category.Personal -> "👤 Personal"
+            com.example.cheermateapp.data.model.Category.Shopping -> "🛒 Shopping"
+            com.example.cheermateapp.data.model.Category.Others -> "📌 Others"
+        }
 
         // Set priority with color
         holder.tvPriority.text = "🎯 ${task.Priority.name}"

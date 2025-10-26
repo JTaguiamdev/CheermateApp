@@ -31,7 +31,6 @@ class TaskListAdapter(
         val tvDescription: TextView = itemView.findViewById(R.id.tvTaskDescription)
         val tvCategory: TextView = itemView.findViewById(R.id.tvTaskCategory)
         val tvPriority: TextView = itemView.findViewById(R.id.tvTaskPriority)
-        val tvStatus: TextView = itemView.findViewById(R.id.tvTaskStatus)
         val tvDueDate: TextView = itemView.findViewById(R.id.tvTaskDueDate)
         val layoutCollapsed: View = itemView.findViewById(R.id.layoutCollapsed)
         
@@ -84,9 +83,6 @@ class TaskListAdapter(
 
         // Set priority with emoji
         holder.tvPriority.text = "🎯 ${task.Priority.name}"
-
-        // Set status with emoji
-        holder.tvStatus.text = "${task.getStatusEmoji()} ${task.Status.name}"
 
         // Set due date (shortened format for list) - hide if task is completed
         if (task.DueAt != null && task.Status != Status.Completed) {

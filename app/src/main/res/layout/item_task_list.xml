@@ -58,7 +58,7 @@
                 android:textSize="13sp"
                 android:visibility="visible" />
 
-            <!-- Info Row (Category, Priority, Status, Due Date) -->
+            <!-- Info Row (Category, Priority, Due Date) -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -87,19 +87,6 @@
                     android:paddingHorizontal="8dp"
                     android:paddingVertical="4dp"
                     android:text="@string/high"
-                    android:textColor="@android:color/white"
-                    android:textSize="11sp" />
-
-                <TextView
-                    android:id="@+id/tvTaskStatus"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="6dp"
-                    android:background="@drawable/bg_chip_glass"
-                    android:fontFamily="@font/sf_pro_rounded_bold"
-                    android:paddingHorizontal="8dp"
-                    android:paddingVertical="4dp"
-                    android:text="@string/pending1"
                     android:textColor="@android:color/white"
                     android:textSize="11sp" />
 
