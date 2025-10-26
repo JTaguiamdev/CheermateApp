@@ -682,12 +682,12 @@ class MainActivity : AppCompatActivity() {
                 }
                 
                 Toast.makeText(this@MainActivity, "✅ Task completed!", Toast.LENGTH_SHORT).show()
-                loadTasksFragmentData() // Reload to refresh the list
                 
-                // ✅ Update home screen progress bar if on home screen
-                if (findViewById<ScrollView>(R.id.homeScroll)?.visibility == View.VISIBLE) {
-                    loadTaskStatistics()
-                }
+                // ✅ FIXED: Update progress bar immediately
+                loadTaskStatistics()
+                
+                // Reload tasks to refresh the list
+                loadTasksFragmentData()
                 
             } catch (e: Exception) {
                 android.util.Log.e("MainActivity", "Error completing task", e)
@@ -2551,6 +2551,8 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 Toast.makeText(this@MainActivity, "✅ Task '${task.Title}' marked as done!", Toast.LENGTH_SHORT).show()
+                
+                // ✅ FIXED: Update progress bar immediately
                 loadTaskStatistics()
                 loadRecentTasks()
 

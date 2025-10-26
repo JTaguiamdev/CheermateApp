@@ -316,6 +316,9 @@ class FragmentTaskActivity : AppCompatActivity() {
 
                 Toast.makeText(this@FragmentTaskActivity, "✅ Task '${task.Title}' completed!", Toast.LENGTH_SHORT).show()
 
+                // ✅ FIXED: Update progress bar immediately before reloading tasks
+                updateTabCounts()
+
                 // Reload current filter to refresh display
                 filterTasks(currentFilter)
 
