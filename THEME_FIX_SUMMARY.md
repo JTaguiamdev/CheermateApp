@@ -59,7 +59,35 @@ The dark mode switch wasn't initialized to reflect the current theme state when 
 - `Theme.Material3.Dark.NoActionBar` explicitly provides dark theme styling
 - These don't auto-switch based on system settings, giving full control to `ThemeManager`
 
-### 2. **Wired Up Dark Mode Switch**
+### 2. **Updated All Activity Themes**
+
+**File: `app/src/main/AndroidManifest.xml`**
+
+Several activities had explicit theme overrides using `Theme.Material3.DayNight.NoActionBar`. These were updated to use the app's custom theme:
+
+```xml
+<!-- Before -->
+<activity android:name=".ActivityLogin"
+    android:theme="@style/Theme.Material3.DayNight.NoActionBar" />
+
+<!-- After -->
+<activity android:name=".ActivityLogin"
+    android:theme="@style/Theme.CheermateApp" />
+```
+
+**Activities updated:**
+- ActivityLogin (launcher activity)
+- SignUpActivity
+- ForgotPasswordActivity
+- TaskDetailActivity
+- FragmentTaskExtensionActivity
+
+**Why this matters:**
+- Ensures all activities respect the user's theme selection
+- Prevents individual activities from auto-switching based on system theme
+- Provides consistent theming throughout the app
+
+### 3. **Wired Up Dark Mode Switch**
 
 **File: `app/src/main/java/com/example/cheermateapp/MainActivity.kt`**
 ```kotlin
@@ -141,7 +169,11 @@ This calls `AppCompatDelegate.setDefaultNightMode()` which:
 2. **app/src/main/res/values-night/themes.xml**
    - Changed parent from `Theme.Material3.DayNight.NoActionBar` to `Theme.Material3.Dark.NoActionBar`
 
-3. **app/src/main/java/com/example/cheermateapp/MainActivity.kt**
+3. **app/src/main/AndroidManifest.xml**
+   - Updated 5 activities to use `@style/Theme.CheermateApp` instead of `Theme.Material3.DayNight.NoActionBar`
+   - Activities: ActivityLogin, SignUpActivity, ForgotPasswordActivity, TaskDetailActivity, FragmentTaskExtensionActivity
+
+4. **app/src/main/java/com/example/cheermateapp/MainActivity.kt**
    - Added initialization of switch state in `setupSettingsFragment()`
    - Modified `switchDarkMode.setOnCheckedChangeListener` to call `ThemeManager.setThemeMode()`
 
