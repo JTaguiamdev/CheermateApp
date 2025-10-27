@@ -23,7 +23,7 @@
         <activity
             android:name=".ActivityLogin"
             android:exported="true"
-            android:theme="@style/Theme.Material3.DayNight.NoActionBar">
+            android:theme="@style/Theme.CheermateApp">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -44,25 +44,25 @@
         <activity
             android:name=".SignUpActivity"
             android:exported="false"
-            android:theme="@style/Theme.Material3.DayNight.NoActionBar" />
+            android:theme="@style/Theme.CheermateApp" />
 
         <!-- Forgot Password Activity -->
         <activity
             android:name=".ForgotPasswordActivity"
             android:exported="false"
-            android:theme="@style/Theme.Material3.DayNight.NoActionBar" />
+            android:theme="@style/Theme.CheermateApp" />
 
         <!-- Task Detail Activity -->
         <activity
             android:name=".TaskDetailActivity"
             android:exported="false"
-            android:theme="@style/Theme.Material3.DayNight.NoActionBar" />
+            android:theme="@style/Theme.CheermateApp" />
 
         <!-- Fragment Task Extension Activity -->
         <activity
             android:name=".FragmentTaskExtensionActivity"
             android:exported="false"
-            android:theme="@style/Theme.Material3.DayNight.NoActionBar" />
+            android:theme="@style/Theme.CheermateApp" />
 
         <!-- Reminder Broadcast Receiver -->
         <receiver
