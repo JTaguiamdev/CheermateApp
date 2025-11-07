@@ -121,7 +121,6 @@ class UserDaoCrudCheckerTest {
     }
     
     private fun <T> any(): T {
-        org.mockito.Mockito.any<T>()
-        return null as T
+        return org.mockito.ArgumentMatchers.any()
     }
 }
