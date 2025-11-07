@@ -10,6 +10,10 @@ import com.example.cheermateapp.data.model.Priority
  */
 class RecurringTaskDaoCrudChecker(private val recurringTaskDao: RecurringTaskDao) : BaseCrudChecker() {
     
+    companion object {
+        private const val TEST_DATE = "2099-12-31"
+    }
+    
     override fun getDaoName(): String = "RecurringTaskDao"
     
     override suspend fun validateDao(): List<CrudTestResult> {
@@ -92,7 +96,7 @@ class RecurringTaskDaoCrudChecker(private val recurringTaskDao: RecurringTaskDao
         val test = createTestRecurringTask()
         recurringTaskDao.insert(test)
         
-        recurringTaskDao.updateLastGenerated(9999, 99999, "2024-12-31")
+        recurringTaskDao.updateLastGenerated(9999, 99999, TEST_DATE)
         
         // Cleanup
         recurringTaskDao.deleteById(9999, 99999)

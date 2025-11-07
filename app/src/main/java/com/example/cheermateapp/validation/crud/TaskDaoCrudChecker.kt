@@ -10,6 +10,11 @@ import com.example.cheermateapp.data.model.Priority
  */
 class TaskDaoCrudChecker(private val taskDao: TaskDao) : BaseCrudChecker() {
     
+    companion object {
+        private const val TEST_DUE_DATE = "2099-12-31"
+        private const val TEST_DUE_TIME = "23:59"
+    }
+    
     override fun getDaoName(): String = "TaskDao"
     
     override suspend fun validateDao(): List<CrudTestResult> {
@@ -308,8 +313,8 @@ class TaskDaoCrudChecker(private val taskDao: TaskDao) : BaseCrudChecker() {
             Description = "Test Description",
             Status = "Pending",
             Priority = Priority.MEDIUM,
-            DueAt = "2024-12-31",
-            DueTime = "23:59",
+            DueAt = TEST_DUE_DATE,
+            DueTime = TEST_DUE_TIME,
             TaskProgress = 0,
             CreatedAt = System.currentTimeMillis(),
             UpdatedAt = System.currentTimeMillis(),

@@ -10,6 +10,14 @@ import kotlin.system.measureTimeMillis
  */
 abstract class BaseCrudChecker : CrudChecker {
     
+    companion object {
+        /**
+         * Performance threshold in milliseconds
+         * Operations exceeding this will get a recommendation
+         */
+        private const val PERFORMANCE_THRESHOLD_MS = 100L
+    }
+    
     /**
      * Execute a test and capture the result
      * 
@@ -97,7 +105,7 @@ abstract class BaseCrudChecker : CrudChecker {
             .toMutableList()
         
         // Add performance recommendations
-        if (avgExecutionTime > 100) {
+        if (avgExecutionTime > PERFORMANCE_THRESHOLD_MS) {
             recommendations.add("Consider optimizing queries - average execution time is ${avgExecutionTime.toInt()}ms")
         }
         

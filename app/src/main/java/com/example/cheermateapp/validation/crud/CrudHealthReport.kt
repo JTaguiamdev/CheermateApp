@@ -26,6 +26,10 @@ data class CrudHealthReport(
     val warningsCount: Int,
     val timestamp: Long = System.currentTimeMillis()
 ) {
+    companion object {
+        private const val REPORT_WIDTH = 80
+    }
+    
     /**
      * Get all DAOs with critical issues
      */
@@ -59,9 +63,9 @@ data class CrudHealthReport(
      */
     fun toFormattedString(): String {
         val sb = StringBuilder()
-        sb.appendLine("=" .repeat(80))
+        sb.appendLine("=".repeat(REPORT_WIDTH))
         sb.appendLine("CRUD HEALTH REPORT")
-        sb.appendLine("=" .repeat(80))
+        sb.appendLine("=".repeat(REPORT_WIDTH))
         sb.appendLine("Generated: ${java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(timestamp)}")
         sb.appendLine()
         sb.appendLine("OVERALL STATISTICS:")
@@ -112,7 +116,7 @@ data class CrudHealthReport(
             }
         }
         
-        sb.appendLine("=" .repeat(80))
+        sb.appendLine("=".repeat(REPORT_WIDTH))
         return sb.toString()
     }
 }
