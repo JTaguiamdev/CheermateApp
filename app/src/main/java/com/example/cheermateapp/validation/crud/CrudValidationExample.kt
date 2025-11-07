@@ -125,7 +125,12 @@ object CrudValidationExample {
             println("Performance Analysis:")
             println("Total Execution Time: ${report.totalExecutionTimeMs}ms")
             println("Total Tests: ${report.totalTests}")
-            println("Average Time Per Test: ${report.totalExecutionTimeMs / report.totalTests}ms")
+            
+            if (report.totalTests > 0) {
+                println("Average Time Per Test: ${report.totalExecutionTimeMs / report.totalTests}ms")
+            } else {
+                println("Average Time Per Test: N/A (no tests run)")
+            }
             
             // Find slowest DAOs
             val slowestDaos = report.daoSummaries

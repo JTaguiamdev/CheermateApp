@@ -105,7 +105,7 @@ class TaskTemplateDaoCrudChecker(private val taskTemplateDao: TaskTemplateDao) :
     
     private suspend fun testGetNextTemplateId() = executeTest(CrudOperation.QUERY, "getNextTemplateId") {
         val nextId = taskTemplateDao.getNextTemplateId(9999)
-        assert(nextId > 0) { "Next ID should be positive" }
+        assert(nextId >= 1) { "Next ID should be at least 1" }
     }
     
     private suspend fun testInsertAll() = executeTest(CrudOperation.BULK_OPERATION, "insertAll") {

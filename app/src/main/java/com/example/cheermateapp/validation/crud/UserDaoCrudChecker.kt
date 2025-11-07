@@ -29,11 +29,17 @@ class UserDaoCrudChecker(private val userDao: UserDao) : BaseCrudChecker() {
     
     private suspend fun testInsert() = executeTest(CrudOperation.CREATE, "insert") {
         val testUser = createTestUser(userId = 99999, username = "test_user_99999")
-        val insertedId = userDao.insert(testUser)
-        assert(insertedId > 0) { "Insert should return positive ID" }
-        
-        // Cleanup
-        userDao.deleteById(99999)
+        try {
+            val insertedId = userDao.insert(testUser)
+            assert(insertedId > 0) { "Insert should return positive ID" }
+        } finally {
+            // Cleanup: Always attempt to delete even if test fails
+            try {
+                userDao.deleteById(99999)
+            } catch (e: Exception) {
+                // Ignore cleanup errors
+            }
+        }
     }
     
     private suspend fun testUpdate() = executeTest(CrudOperation.UPDATE, "update") {

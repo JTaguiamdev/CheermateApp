@@ -36,13 +36,14 @@ class UserDaoCrudCheckerTest {
     @Test
     fun testValidateDao_AllOperationsSuccessful() = runBlocking {
         // Mock successful operations
-        `when`(mockUserDao.insert(any())).thenReturn(1L)
-        `when`(mockUserDao.getById(any())).thenReturn(createTestUser())
-        `when`(mockUserDao.findByUsername(any())).thenReturn(createTestUser())
-        `when`(mockUserDao.findByEmail(any())).thenReturn(createTestUser())
+        val testUser = createTestUser()
+        `when`(mockUserDao.insert(testUser)).thenReturn(1L)
+        `when`(mockUserDao.getById(99996)).thenReturn(createTestUser(99996))
+        `when`(mockUserDao.findByUsername("unique_username_99995")).thenReturn(createTestUser(99995))
+        `when`(mockUserDao.findByEmail("unique99994@test.com")).thenReturn(createTestUser(99994))
         `when`(mockUserDao.getAllUsers()).thenReturn(listOf(createTestUser()))
         `when`(mockUserDao.getUserCount()).thenReturn(1)
-        `when`(mockUserDao.deleteById(any())).thenReturn(1)
+        `when`(mockUserDao.deleteById(org.mockito.ArgumentMatchers.anyInt())).thenReturn(1)
         
         val results = checker.validateDao()
         
@@ -113,14 +114,10 @@ class UserDaoCrudCheckerTest {
     private fun createTestUser(userId: Int = 1): User {
         return User(
             User_ID = userId,
-            Username = "testuser",
-            Email = "test@example.com",
+            Username = "testuser$userId",
+            Email = "test$userId@example.com",
             PasswordHash = "hash123",
             Personality_ID = null
         )
-    }
-    
-    private fun <T> any(): T {
-        return org.mockito.ArgumentMatchers.any()
     }
 }
