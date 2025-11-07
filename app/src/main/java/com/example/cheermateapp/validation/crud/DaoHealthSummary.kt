@@ -22,6 +22,13 @@ data class DaoHealthSummary(
     val warnings: Int,
     val recommendations: List<String>
 ) {
+    companion object {
+        /**
+         * Minimum health score percentage to be considered healthy
+         */
+        const val HEALTHY_THRESHOLD = 95.0
+    }
+    
     /**
      * Health score as a percentage (0-100)
      */
@@ -33,8 +40,8 @@ data class DaoHealthSummary(
         }
     
     /**
-     * Whether this DAO is considered healthy (>= 95% success rate)
+     * Whether this DAO is considered healthy (>= HEALTHY_THRESHOLD and no critical issues)
      */
     val isHealthy: Boolean
-        get() = healthScore >= 95.0 && criticalIssues == 0
+        get() = healthScore >= HEALTHY_THRESHOLD && criticalIssues == 0
 }

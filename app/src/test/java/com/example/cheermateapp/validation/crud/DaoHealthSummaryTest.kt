@@ -77,7 +77,7 @@ class DaoHealthSummaryTest {
     
     @Test
     fun testIsHealthy_BoundaryCase() {
-        // Test exactly 95% success rate
+        // Test exactly HEALTHY_THRESHOLD success rate
         val summary = DaoHealthSummary(
             daoName = "TestDao",
             totalOperations = 20,
@@ -89,13 +89,13 @@ class DaoHealthSummaryTest {
             recommendations = emptyList()
         )
         
-        assertEquals(95.0, summary.healthScore, 0.01)
-        assertTrue("Should be healthy at 95%", summary.isHealthy)
+        assertEquals(DaoHealthSummary.HEALTHY_THRESHOLD, summary.healthScore, 0.01)
+        assertTrue("Should be healthy at threshold", summary.isHealthy)
     }
     
     @Test
     fun testIsHealthy_JustBelowThreshold() {
-        // Test just below 95% success rate
+        // Test just below HEALTHY_THRESHOLD success rate
         val summary = DaoHealthSummary(
             daoName = "TestDao",
             totalOperations = 20,
@@ -108,6 +108,6 @@ class DaoHealthSummaryTest {
         )
         
         assertEquals(90.0, summary.healthScore, 0.01)
-        assertFalse("Should not be healthy below 95%", summary.isHealthy)
+        assertFalse("Should not be healthy below threshold", summary.isHealthy)
     }
 }
