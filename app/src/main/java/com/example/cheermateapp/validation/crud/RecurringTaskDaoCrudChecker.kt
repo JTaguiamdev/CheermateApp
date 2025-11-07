@@ -115,7 +115,7 @@ class RecurringTaskDaoCrudChecker(private val recurringTaskDao: RecurringTaskDao
     
     private suspend fun testGetNextRecurringTaskId() = executeTest(CrudOperation.QUERY, "getNextRecurringTaskId") {
         val nextId = recurringTaskDao.getNextRecurringTaskId(9999)
-        assert(nextId > 0) { "Next ID should be positive" }
+        assert(nextId >= 1) { "Next ID should be at least 1" }
     }
     
     private fun createTestRecurringTask(): RecurringTask {

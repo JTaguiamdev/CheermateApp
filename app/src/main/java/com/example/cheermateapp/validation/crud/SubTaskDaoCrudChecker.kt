@@ -64,7 +64,7 @@ class SubTaskDaoCrudChecker(private val subTaskDao: SubTaskDao) : BaseCrudChecke
     
     private suspend fun testGetNextSubtaskId() = executeTest(CrudOperation.QUERY, "getNextSubtaskId") {
         val nextId = subTaskDao.getNextSubtaskId(9999, 9999)
-        assert(nextId > 0) { "Next ID should be positive" }
+        assert(nextId >= 1) { "Next ID should be at least 1" }
     }
     
     private fun createTestSubTask(): SubTask {
