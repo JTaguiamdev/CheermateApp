@@ -62,7 +62,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/sf_pro_rounded_bold"
-                android:text="📋 Work"
+                android:text=""
                 android:textColor="@android:color/white"
                 android:textSize="14sp" />
         </LinearLayout>
@@ -88,7 +88,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/sf_pro_rounded_bold"
-                android:text="High"
+                android:text=""
                 android:textColor="@android:color/white"
                 android:textSize="14sp" />
         </LinearLayout>
@@ -181,7 +181,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/sf_pro_rounded_bold"
-                android:text="Dec 25, 2024 at 3:30 PM"
+                android:text=""
                 android:textColor="@android:color/white"
                 android:textSize="14sp" />
         </LinearLayout>

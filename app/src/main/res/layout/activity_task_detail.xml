@@ -134,7 +134,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/sf_pro_rounded_bold"
-                    android:text="High"
+                    android:text=""
                     android:textColor="@android:color/white"
                     android:textSize="14sp" />
             </LinearLayout>
