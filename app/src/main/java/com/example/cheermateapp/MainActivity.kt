@@ -2714,10 +2714,11 @@ class MainActivity : AppCompatActivity() {
 
             // ✅ CREATE AND CONFIGURE CalendarView
             val calendarView = CalendarView(this)
+            // ✅ FIXED: Use fixed height instead of weight to ensure all dates are visible
+            val calendarHeight = (300 * resources.displayMetrics.density).toInt() // 300dp
             calendarView.layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
-                0,
-                1f // Use weight to share space
+                calendarHeight
             )
 
             // ✅ CREATE A HELPER TEXT VIEW for showing date task info
@@ -2727,8 +2728,8 @@ class MainActivity : AppCompatActivity() {
                 LinearLayout.LayoutParams.WRAP_CONTENT
             )
             dateInfoTextView.apply {
-                setPadding(16, 8, 16, 8)
-                textSize = 12f
+                setPadding(16, 4, 16, 4) // Reduced padding to save space
+                textSize = 11f // Slightly smaller text
                 setTextColor(context.getColor(R.color.text_primary))
                 gravity = android.view.Gravity.CENTER
                 text = "Tap a date to view tasks"

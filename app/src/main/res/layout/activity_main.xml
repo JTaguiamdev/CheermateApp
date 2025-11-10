@@ -140,7 +140,7 @@
                 <LinearLayout
                     android:id="@+id/calendarPlaceholder"
                     android:layout_width="match_parent"
-                    android:layout_height="290dp"
+                    android:layout_height="340dp"
                     android:orientation="vertical"
                     android:layout_marginLeft="20dp"
                     android:layout_marginRight="20dp">
