@@ -547,16 +547,7 @@ class MainActivity : AppCompatActivity() {
                 showPersonalitySelectionDialog()
             }
 
-            // Initialize dark mode switch state
-            switchDarkMode?.isChecked = com.example.cheermateapp.util.ThemeManager.isDarkModeActive(this)
-            
             switchDarkMode?.setOnCheckedChangeListener { _, isChecked ->
-                val newMode = if (isChecked) {
-                    com.example.cheermateapp.util.ThemeManager.THEME_DARK
-                } else {
-                    com.example.cheermateapp.util.ThemeManager.THEME_LIGHT
-                }
-                com.example.cheermateapp.util.ThemeManager.setThemeMode(this, newMode)
                 Toast.makeText(
                     this,
                     if (isChecked) "🌙 Dark mode enabled" else "☀️ Light mode enabled",
