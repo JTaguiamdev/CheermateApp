@@ -495,14 +495,14 @@
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNav"
         android:layout_width="wrap_content"
-        android:layout_height="65dp"
+        android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="1dp"
         android:background="@drawable/bg_card_glass_hover"
         app:itemGravity="center"
         app:itemIconTint="@android:color/white"
         app:itemTextColor="@android:color/white"
-        app:labelVisibilityMode="selected"
+        app:labelVisibilityMode="labeled"
         app:menu="@menu/menu_bottom_nav" />
 </LinearLayout>
 
