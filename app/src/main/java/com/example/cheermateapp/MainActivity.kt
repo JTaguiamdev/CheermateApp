@@ -1358,7 +1358,7 @@ class MainActivity : AppCompatActivity() {
                 
                 // Find the index of the current personality type
                 val checkedItem = if (currentPersonality != null) {
-                    availablePersonalities.indexOfFirst { it.first == currentPersonality.PersonalityType }
+                    availablePersonalities.indexOfFirst { it.first == currentPersonality.PersonalityType_ID }
                 } else {
                     -1  // No selection
                 }
@@ -1396,7 +1396,7 @@ class MainActivity : AppCompatActivity() {
                     val personality = Personality(
                         Personality_ID = 0, // Will be auto-generated or updated
                         User_ID = userId,
-                        PersonalityType = type,
+                        PersonalityType_ID = type,
                         Name = name,
                         Description = description
                     )

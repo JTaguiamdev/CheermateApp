@@ -457,7 +457,7 @@ class FragmentSettingsActivity : AppCompatActivity() {
                 
                 // Find the index of the current personality type
                 val checkedItem = if (currentPersonality != null) {
-                    personalityTypes.indexOfFirst { it.Type_ID == currentPersonality.PersonalityType }
+                    personalityTypes.indexOfFirst { it.Type_ID == currentPersonality.PersonalityType_ID }
                 } else {
                     -1  // No selection
                 }
@@ -494,7 +494,7 @@ class FragmentSettingsActivity : AppCompatActivity() {
                     val personality = Personality(
                         Personality_ID = 0, // Will be auto-generated or updated
                         User_ID = userId,
-                        PersonalityType = type,
+                        PersonalityType_ID = type,
                         Name = name,
                         Description = description
                     )

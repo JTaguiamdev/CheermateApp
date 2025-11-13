@@ -15,9 +15,15 @@ import com.example.cheermateapp.data.model.Personality
             parentColumns = ["User_ID"],
             childColumns = ["User_ID"],
             onDelete = ForeignKey.CASCADE
+        ),
+        ForeignKey(
+            entity = PersonalityType::class,
+            parentColumns = ["Type_ID"],
+            childColumns = ["PersonalityType_ID"],
+            onDelete = ForeignKey.RESTRICT
         )
     ],
-    indices = [Index("User_ID")]
+    indices = [Index("User_ID"), Index("PersonalityType_ID")]
 )
 data class Personality(
     @PrimaryKey(autoGenerate = true)
@@ -27,8 +33,8 @@ data class Personality(
     @ColumnInfo(name = "User_ID")
     val User_ID: Int,  // FIXED: Changed from String to Int to match User.User_ID
 
-    @ColumnInfo(name = "PersonalityType")
-    val PersonalityType: Int,
+    @ColumnInfo(name = "PersonalityType_ID")
+    val PersonalityType_ID: Int,
 
     @ColumnInfo(name = "Name")
     val Name: String,

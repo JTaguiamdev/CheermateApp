@@ -94,7 +94,7 @@ class PersonalityActivity : AppCompatActivity() {
                         val personality = Personality(
                             Personality_ID = 0,
                             User_ID = userId, // Use Int value, not String
-                            PersonalityType = personalityType.Type_ID,
+                            PersonalityType_ID = personalityType.Type_ID,
                             Name = personalityType.Name,
                             Description = personalityType.Description
                         )

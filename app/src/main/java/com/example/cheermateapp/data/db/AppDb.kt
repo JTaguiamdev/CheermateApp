@@ -48,7 +48,7 @@ import com.google.gson.Gson
         TaskTemplate::class,
         TaskDependency::class
     ],
-    version = 16,
+    version = 17,
     exportSchema = false
 )
 @TypeConverters(AppTypeConverters::class)
