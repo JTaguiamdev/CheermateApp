@@ -442,7 +442,7 @@ class FragmentSettingsActivity : AppCompatActivity() {
                     .setTitle("Choose Your Personality")
                     .setItems(personalityNames) { _, which ->
                         val selectedPersonality = personalities[which]
-                        updateUserPersonality(selectedPersonality.Personality_ID)
+                        updateUserPersonality(selectedPersonality.PersonalityType)
                     }
                     .setNegativeButton("Cancel", null)
                     .show()
