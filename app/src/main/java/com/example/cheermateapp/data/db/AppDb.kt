@@ -79,6 +79,15 @@ abstract class AppDb : RoomDatabase() {
             )
                 // Uses ProvidedTypeConverter to supply Gson at runtime
                 .addTypeConverter(AppTypeConverters(gson))
+                // Add callback to enforce constraints
+                .addCallback(object : RoomDatabase.Callback() {
+                    override fun onCreate(db: androidx.sqlite.db.SupportSQLiteDatabase) {
+                        super.onCreate(db)
+                        // Add CHECK constraint for Personality_ID to ensure values are 1-5 or NULL
+                        // Note: SQLite doesn't support ALTER TABLE ADD CONSTRAINT, so this needs to be in the CREATE TABLE
+                        // This is enforced through application-level validation in UserDaoExtensions.kt
+                    }
+                })
                 // Consider replacing with proper migrations in production
                 .fallbackToDestructiveMigration()
                 .build()

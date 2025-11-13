@@ -63,6 +63,10 @@ class PersonalityActivity : AppCompatActivity() {
 
                         db.personalityDao().upsert(personality)
                         Log.d("PersonalityActivity", "Personality saved successfully")
+                        
+                        // Update User.Personality_ID with the PersonalityType (1-5)
+                        db.userDao().updatePersonality(userId, type)
+                        Log.d("PersonalityActivity", "User Personality_ID updated to: $type")
                     }
 
                     Log.d("PersonalityActivity", "Navigating to MainActivity...")
