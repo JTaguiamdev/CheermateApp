@@ -102,6 +102,14 @@ class PersonalityActivity : AppCompatActivity() {
 
                         db.personalityDao().upsert(personality)
                         Log.d("PersonalityActivity", "Personality saved successfully")
+                        
+                        // Get the saved personality to get its ID
+                        val savedPersonality = db.personalityDao().getByUser(userId)
+                        if (savedPersonality != null) {
+                            // Update User.Personality_ID to link the user to their personality
+                            db.userDao().updatePersonality(userId, savedPersonality.Personality_ID)
+                            Log.d("PersonalityActivity", "User.Personality_ID updated to ${savedPersonality.Personality_ID}")
+                        }
                     }
 
                     Log.d("PersonalityActivity", "Navigating to MainActivity...")

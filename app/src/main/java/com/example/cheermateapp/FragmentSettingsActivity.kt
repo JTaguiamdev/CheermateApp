@@ -499,6 +499,13 @@ class FragmentSettingsActivity : AppCompatActivity() {
                         Description = description
                     )
                     db.personalityDao().upsert(personality)
+                    
+                    // Get the saved personality to get its ID
+                    val savedPersonality = db.personalityDao().getByUser(userId)
+                    if (savedPersonality != null) {
+                        // Update User.Personality_ID to link the user to their personality
+                        db.userDao().updatePersonality(userId, savedPersonality.Personality_ID)
+                    }
                 }
 
                 Toast.makeText(this@FragmentSettingsActivity, "✅ Personality updated to $name!", Toast.LENGTH_SHORT).show()
