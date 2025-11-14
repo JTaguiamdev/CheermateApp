@@ -161,7 +161,7 @@ class MainActivity : AppCompatActivity() {
 
     // ✅ OBSERVE TASK CHANGES FOR LIVE PROGRESS BAR UPDATES
     private fun observeTaskChangesForProgressBar() {
-        androidx.lifecycle.lifecycleScope.launch {
+        lifecycleScope.launch {
             try {
                 val db = AppDb.get(this@MainActivity)
                 
