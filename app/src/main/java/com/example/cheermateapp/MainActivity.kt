@@ -1340,25 +1340,26 @@ class MainActivity : AppCompatActivity() {
             try {
                 val db = AppDb.get(this@MainActivity)
                 
-                // Define all 5 available personality types (matching PersonalityActivity and FragmentSettingsActivity)
-                val availablePersonalities = listOf(
-                    Triple(1, "Kalog", "The funny friend who makes everything entertaining!"),
-                    Triple(2, "Gen Z", "Tech-savvy and trendy with the latest slang!"),
-                    Triple(3, "Softy", "Gentle and caring with a warm heart!"),
-                    Triple(4, "Grey", "Calm and balanced with steady wisdom!"),
-                    Triple(5, "Flirty", "Playful and charming with a wink!")
-                )
+                // Fetch personalities from database
+                val availablePersonalities = withContext(Dispatchers.IO) {
+                    db.personalityDao().getAllActive()
+                }
                 
-                // Get current user personality
-                val currentPersonality = withContext(Dispatchers.IO) {
-                    db.personalityDao().getByUser(userId)
+                if (availablePersonalities.isEmpty()) {
+                    Toast.makeText(this@MainActivity, "No personalities available", Toast.LENGTH_SHORT).show()
+                    return@launch
+                }
+                
+                // Get current user's personality ID
+                val currentUser = withContext(Dispatchers.IO) {
+                    db.userDao().getById(userId)
                 }
 
-                val personalityNames = availablePersonalities.map { it.second }.toTypedArray()
+                val personalityNames = availablePersonalities.map { it.Name }.toTypedArray()
                 
-                // Find the index of the current personality type
-                val checkedItem = if (currentPersonality != null) {
-                    availablePersonalities.indexOfFirst { it.first == currentPersonality.PersonalityType_ID }
+                // Find the index of the current personality
+                val checkedItem = if (currentUser?.Personality_ID != null) {
+                    availablePersonalities.indexOfFirst { it.Personality_ID == currentUser.Personality_ID }
                 } else {
                     -1  // No selection
                 }
@@ -1374,7 +1375,7 @@ class MainActivity : AppCompatActivity() {
                     .setPositiveButton("OK") { _, _ ->
                         if (selectedPersonalityIndex >= 0) {
                             val selected = availablePersonalities[selectedPersonalityIndex]
-                            updateUserPersonalityWithType(selected.first, selected.second, selected.third)
+                            updateUserPersonality(selected.Personality_ID)
                         }
                     }
                     .setNegativeButton("Cancel", null)
@@ -1387,23 +1388,19 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun updateUserPersonalityWithType(type: Int, name: String, description: String) {
+    private fun updateUserPersonality(personalityId: Int) {
         uiScope.launch {
             try {
                 val db = AppDb.get(this@MainActivity)
-                withContext(Dispatchers.IO) {
-                    // Create or update the personality record for this user
-                    val personality = Personality(
-                        Personality_ID = 0, // Will be auto-generated or updated
-                        User_ID = userId,
-                        PersonalityType_ID = type,
-                        Name = name,
-                        Description = description
-                    )
-                    db.personalityDao().upsert(personality)
+                val personalityName = withContext(Dispatchers.IO) {
+                    // Update User.Personality_ID to link the user to the personality
+                    db.userDao().updatePersonality(userId, personalityId)
+                    
+                    // Get personality name for confirmation message
+                    db.personalityDao().getById(personalityId)?.Name ?: "Unknown"
                 }
 
-                Toast.makeText(this@MainActivity, "✅ Personality updated to $name!", Toast.LENGTH_SHORT)
+                Toast.makeText(this@MainActivity, "✅ Personality updated to $personalityName!", Toast.LENGTH_SHORT)
                     .show()
                 
                 // ✅ Update both settings fragment AND home screen personality card
@@ -1955,51 +1952,33 @@ class MainActivity : AppCompatActivity() {
                 try {
                     val db = AppDb.get(this@MainActivity)
 
-                    val personality: Personality? = withContext(Dispatchers.IO) {
-                        db.personalityDao().getByUser(userId)
+                    // Get user's personality ID
+                    val user = withContext(Dispatchers.IO) {
+                        db.userDao().getById(userId)
                     }
-
-                    val motivationalMessages = when (personality?.Name?.lowercase()) {
-                        "kalog" -> arrayOf(
-                            "🤣 Time to turn that task list into a comedy show!",
-                            "😄 Let's tackle these tasks with a smile and a laugh!",
-                            "🎭 Make productivity fun - you've got this!",
-                            "😆 Turn your to-do list into a ta-da list!"
-                        )
-                        "gen z" -> arrayOf(
-                            "💯 No cap, you're about to absolutely slay these tasks!",
-                            "🔥 It's giving main character energy - let's go!",
-                            "✨ Periodt! Time to show these tasks who's boss!",
-                            "💅 About to serve some serious productivity looks!"
-                        )
-                        "softy" -> arrayOf(
-                            "🌸 You've got this, take it one gentle step at a time",
-                            "💕 Be kind to yourself while you accomplish amazing things",
-                            "🌺 Small progress is still progress - you're doing great!",
-                            "🤗 Sending you gentle motivation and warm encouragement!"
-                        )
-                        "grey" -> arrayOf(
-                            "⚖️ Steady progress leads to lasting success",
-                            "🧘 Focus on what matters, let go of what doesn't",
-                            "📚 Wisdom comes from consistent, thoughtful action",
-                            "🎯 Balance effort with patience - you're on the right path"
-                        )
-                        "flirty" -> arrayOf(
-                            "😉 Hey gorgeous, ready to charm those tasks into submission?",
-                            "💋 You're about to make productivity look effortlessly sexy",
-                            "😘 Wink at your goals and watch them fall for you!",
-                            "🌹 Turn on that irresistible charm and conquer your day!"
-                        )
-                        else -> arrayOf(
-                            "🌟 You have everything it takes to succeed!",
-                            "💪 Believe in yourself - you're stronger than you know!",
-                            "🚀 Ready to launch into an amazing day of achievement!",
-                            "✨ Your potential is limitless - let's unlock it together!"
-                        )
+                    
+                    val personalityId = user?.Personality_ID
+                    
+                    if (personalityId != null) {
+                        // Fetch motivation messages from database
+                        val motivationMessages = withContext(Dispatchers.IO) {
+                            db.messageTemplateDao().getByPersonalityAndCategory(personalityId, "motivation")
+                        }
+                        
+                        if (motivationMessages.isNotEmpty()) {
+                            val randomMessage = motivationMessages.random().TextTemplate
+                            Toast.makeText(this@MainActivity, randomMessage, Toast.LENGTH_LONG).show()
+                        } else {
+                            // Fallback to personality's default motivation message
+                            val personality = withContext(Dispatchers.IO) {
+                                db.personalityDao().getById(personalityId)
+                            }
+                            val message = personality?.MotivationMessage ?: "💪 You've got this! Let's make today amazing!"
+                            Toast.makeText(this@MainActivity, message, Toast.LENGTH_LONG).show()
+                        }
+                    } else {
+                        Toast.makeText(this@MainActivity, "💪 You've got this! Let's make today amazing!", Toast.LENGTH_SHORT).show()
                     }
-
-                    val randomMessage = motivationalMessages.random()
-                    Toast.makeText(this@MainActivity, randomMessage, Toast.LENGTH_LONG).show()
 
                 } catch (e: Exception) {
                     Toast.makeText(this@MainActivity, "💪 You've got this! Let's make today amazing!", Toast.LENGTH_SHORT).show()

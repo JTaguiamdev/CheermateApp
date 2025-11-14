@@ -2,8 +2,6 @@ package com.example.cheermateapp.data.dao
 
 import androidx.room.*
 import com.example.cheermateapp.data.model.Personality
-import androidx.room.Dao
-import androidx.room.Query
 
 @Dao
 interface PersonalityDao {
@@ -11,6 +9,9 @@ interface PersonalityDao {
     // ✅ BASIC CRUD OPERATIONS
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(personality: Personality): Long
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAll(personalities: List<Personality>)
 
     @Update
     suspend fun update(personality: Personality)
@@ -22,7 +23,10 @@ interface PersonalityDao {
     suspend fun upsert(personality: Personality)
 
     // ✅ QUERY METHODS
-    @Query("SELECT * FROM Personality")
+    @Query("SELECT * FROM Personality WHERE IsActive = 1 ORDER BY Personality_ID")
+    suspend fun getAllActive(): List<Personality>
+
+    @Query("SELECT * FROM Personality ORDER BY Personality_ID")
     suspend fun getAll(): List<Personality>
 
     @Query("SELECT * FROM Personality WHERE Personality_ID = :personalityId")
@@ -31,18 +35,17 @@ interface PersonalityDao {
     @Query("SELECT * FROM Personality WHERE Name = :name")
     suspend fun getByName(name: String): Personality?
 
-    // ✅ USER-BASED QUERIES
-    @Query("SELECT * FROM Personality WHERE User_ID = :userId LIMIT 1")
-    suspend fun getByUser(userId: Int): Personality?
+    @Query("SELECT COUNT(*) FROM Personality")
+    suspend fun getCount(): Int
 
-    // ✅ JOIN QUERY FOR PERSONALITY VIA USER TABLE
+    @Query("SELECT MAX(UpdatedAt) FROM Personality")
+    suspend fun getLastModifiedTimestamp(): Long?
+
+    // ✅ USER-BASED QUERY - Get personality for a user via User.Personality_ID
     @Query("""
         SELECT p.* FROM Personality p 
         INNER JOIN User u ON p.Personality_ID = u.Personality_ID 
         WHERE u.User_ID = :userId
     """)
-    suspend fun getPersonalityByUserIdFromUser(userId: Int): Personality?
-
-    @Query("SELECT COUNT(*) FROM Personality")
-    suspend fun getCount(): Int
+    suspend fun getByUser(userId: Int): Personality?
 }
