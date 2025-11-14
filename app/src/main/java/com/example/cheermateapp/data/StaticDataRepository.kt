@@ -3,7 +3,7 @@ package com.example.cheermateapp.data
 import android.content.Context
 import android.util.Log
 import com.example.cheermateapp.data.db.AppDb
-import com.example.cheermateapp.data.model.PersonalityType
+import com.example.cheermateapp.data.model.Personality
 import com.example.cheermateapp.data.model.SecurityQuestion
 import com.example.cheermateapp.util.CacheManager
 import kotlinx.coroutines.Dispatchers
@@ -18,7 +18,7 @@ class StaticDataRepository(private val context: Context) {
     
     companion object {
         private const val TAG = "StaticDataRepository"
-        private const val CACHE_KEY_PERSONALITY_TYPES = "personality_types"
+        private const val CACHE_KEY_PERSONALITIES = "personalities"
         private const val CACHE_KEY_SECURITY_QUESTIONS = "security_questions"
         
         // Cache for 7 days since this is relatively static data
@@ -26,33 +26,33 @@ class StaticDataRepository(private val context: Context) {
     }
     
     /**
-     * Get personality types with caching
+     * Get personalities with caching
      * First checks cache, then database if cache miss or stale
      */
-    suspend fun getPersonalityTypes(): List<PersonalityType> {
+    suspend fun getPersonalities(): List<Personality> {
         return withContext(Dispatchers.IO) {
             try {
                 // Try to get from cache first
-                val cachedData = CacheManager.getCache<List<PersonalityType>>(context, CACHE_KEY_PERSONALITY_TYPES, CACHE_MAX_AGE_MS)
+                val cachedData = CacheManager.getCache<List<Personality>>(context, CACHE_KEY_PERSONALITIES, CACHE_MAX_AGE_MS)
                 
                 if (cachedData != null) {
-                    Log.d(TAG, "Personality types loaded from cache")
+                    Log.d(TAG, "Personalities loaded from cache")
                     return@withContext cachedData
                 }
                 
                 // Cache miss or stale, fetch from database
-                Log.d(TAG, "Cache miss, fetching personality types from database")
-                val data = db.personalityTypeDao().getAllActive()
+                Log.d(TAG, "Cache miss, fetching personalities from database")
+                val data = db.personalityDao().getAllActive()
                 
                 if (data.isNotEmpty()) {
                     // Save to cache for next time
-                    CacheManager.saveCache(context, CACHE_KEY_PERSONALITY_TYPES, data)
-                    Log.d(TAG, "Personality types cached (${data.size} items)")
+                    CacheManager.saveCache(context, CACHE_KEY_PERSONALITIES, data)
+                    Log.d(TAG, "Personalities cached (${data.size} items)")
                 }
                 
                 data
             } catch (e: Exception) {
-                Log.e(TAG, "Error getting personality types", e)
+                Log.e(TAG, "Error getting personalities", e)
                 emptyList()
             }
         }
@@ -100,12 +100,12 @@ class StaticDataRepository(private val context: Context) {
     }
     
     /**
-     * Invalidate personality types cache
-     * Call this when personality types are modified in the database
+     * Invalidate personalities cache
+     * Call this when personalities are modified in the database
      */
-    fun invalidatePersonalityTypesCache() {
-        CacheManager.invalidateCache(context, CACHE_KEY_PERSONALITY_TYPES)
-        Log.d(TAG, "Personality types cache invalidated")
+    fun invalidatePersonalitiesCache() {
+        CacheManager.invalidateCache(context, CACHE_KEY_PERSONALITIES)
+        Log.d(TAG, "Personalities cache invalidated")
     }
     
     /**
@@ -121,7 +121,7 @@ class StaticDataRepository(private val context: Context) {
      * Invalidate all caches
      */
     fun invalidateAllCaches() {
-        invalidatePersonalityTypesCache()
+        invalidatePersonalitiesCache()
         invalidateSecurityQuestionsCache()
         Log.d(TAG, "All caches invalidated")
     }

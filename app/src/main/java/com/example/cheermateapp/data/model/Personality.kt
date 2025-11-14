@@ -2,43 +2,34 @@ package com.example.cheermateapp.data.model
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
-import androidx.room.ForeignKey
-import androidx.room.Index
 import androidx.room.PrimaryKey
-import com.example.cheermateapp.data.model.Personality
 
-@Entity(
-    tableName = "Personality",
-    foreignKeys = [
-        ForeignKey(
-            entity = User::class,
-            parentColumns = ["User_ID"],
-            childColumns = ["User_ID"],
-            onDelete = ForeignKey.CASCADE
-        ),
-        ForeignKey(
-            entity = PersonalityType::class,
-            parentColumns = ["Type_ID"],
-            childColumns = ["PersonalityType_ID"],
-            onDelete = ForeignKey.RESTRICT
-        )
-    ],
-    indices = [Index("User_ID"), Index("PersonalityType_ID")]
-)
+/**
+ * Represents a personality type with associated messages and characteristics.
+ * This entity stores the personality types (1-5) that users can choose from.
+ * Each personality has unique motivation messages for different contexts.
+ */
+@Entity(tableName = "Personality")
 data class Personality(
-    @PrimaryKey(autoGenerate = true)
+    @PrimaryKey
     @ColumnInfo(name = "Personality_ID")
-    val Personality_ID: Int = 0,
-
-    @ColumnInfo(name = "User_ID")
-    val User_ID: Int,  // FIXED: Changed from String to Int to match User.User_ID
-
-    @ColumnInfo(name = "PersonalityType_ID")
-    val PersonalityType_ID: Int,
+    val Personality_ID: Int, // Values: 1=Kalog, 2=Gen Z, 3=Softy, 4=Grey, 5=Flirty
 
     @ColumnInfo(name = "Name")
     val Name: String,
 
     @ColumnInfo(name = "Description")
-    val Description: String? = null
+    val Description: String,
+
+    @ColumnInfo(name = "MotivationMessage")
+    val MotivationMessage: String? = null,
+
+    @ColumnInfo(name = "IsActive")
+    val IsActive: Boolean = true,
+
+    @ColumnInfo(name = "CreatedAt")
+    val CreatedAt: Long = System.currentTimeMillis(),
+
+    @ColumnInfo(name = "UpdatedAt")
+    val UpdatedAt: Long = System.currentTimeMillis()
 )
