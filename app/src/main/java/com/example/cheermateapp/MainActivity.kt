@@ -99,6 +99,9 @@ class MainActivity : AppCompatActivity() {
                 // ✅ START LIVE TASK UPDATES
                 startLiveTaskUpdates()
 
+                // ✅ OBSERVE TASK CHANGES FOR LIVE PROGRESS BAR UPDATES
+                observeTaskChangesForProgressBar()
+
                 showHomeScreen()
 
             } else {
@@ -153,6 +156,41 @@ class MainActivity : AppCompatActivity() {
         isTaskUpdateActive = false
         taskUpdateRunnable?.let { taskUpdateHandler.removeCallbacks(it) }
         android.util.Log.d("MainActivity", "⏹️ Live task updates stopped")
+    }
+
+    // ✅ OBSERVE TASK CHANGES FOR LIVE PROGRESS BAR UPDATES
+    private fun observeTaskChangesForProgressBar() {
+        androidx.lifecycle.lifecycleScope.launch {
+            try {
+                val db = AppDb.get(this@MainActivity)
+                
+                // Get today's date string for filtering
+                val todayStr = dateToString(Calendar.getInstance().time)
+                val todayMidnight = Calendar.getInstance().apply {
+                    set(Calendar.HOUR_OF_DAY, 0)
+                    set(Calendar.MINUTE, 0)
+                    set(Calendar.SECOND, 0)
+                    set(Calendar.MILLISECOND, 0)
+                }.timeInMillis
+                
+                // Observe completed tasks count for today
+                kotlinx.coroutines.flow.combine(
+                    db.taskDao().getTodayTasksCountFlow(userId, todayStr),
+                    db.taskDao().getTasksCompletedTodayByUpdateFlow(userId, todayMidnight)
+                ) { totalToday, completedToday ->
+                    Pair(totalToday, completedToday)
+                }.collect { (totalToday, completedToday) ->
+                    // Update progress bar on main thread
+                    withContext(Dispatchers.Main) {
+                        updateProgressDisplay(completedToday, totalToday)
+                        android.util.Log.d("MainActivity", "🔄 Progress bar updated live: $completedToday/$totalToday")
+                    }
+                }
+                
+            } catch (e: Exception) {
+                android.util.Log.e("MainActivity", "Error observing task changes for progress bar", e)
+            }
+        }
     }
 
     // ✅ REFRESH CURRENT VIEW - Called when returning from task details
