@@ -75,6 +75,9 @@ class FragmentTaskActivity : AppCompatActivity() {
         loadTasks()
         debugAllTasks()
         debugTaskLoading()
+        
+        // ✅ OBSERVE TASK CHANGES FOR LIVE PROGRESS BAR UPDATES
+        observeTaskChangesForProgressBar()
     }
 
     // ✅ FIXED: Proper loadTasks method
@@ -715,6 +718,32 @@ class FragmentTaskActivity : AppCompatActivity() {
             android.util.Log.d("FragmentTaskActivity", "✅ Progress updated: $percentage% ($completed/$total)")
         } catch (e: Exception) {
             android.util.Log.e("FragmentTaskActivity", "Error updating progress card", e)
+        }
+    }
+
+    // ✅ OBSERVE TASK CHANGES FOR LIVE PROGRESS BAR UPDATES
+    private fun observeTaskChangesForProgressBar() {
+        lifecycleScope.launch {
+            try {
+                val db = AppDb.get(this@FragmentTaskActivity)
+                
+                // Observe all tasks and completed tasks count
+                kotlinx.coroutines.flow.combine(
+                    db.taskDao().getAllTasksCountFlow(userId),
+                    db.taskDao().getCompletedTasksCountFlow(userId)
+                ) { total, completed ->
+                    Pair(total, completed)
+                }.collect { (total, completed) ->
+                    // Update progress bar on main thread
+                    withContext(Dispatchers.Main) {
+                        updateProgressCard(completed, total)
+                        android.util.Log.d("FragmentTaskActivity", "🔄 Progress bar updated live: $completed/$total")
+                    }
+                }
+                
+            } catch (e: Exception) {
+                android.util.Log.e("FragmentTaskActivity", "Error observing task changes for progress bar", e)
+            }
         }
     }
 

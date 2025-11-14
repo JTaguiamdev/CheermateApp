@@ -86,6 +86,25 @@ interface TaskDao {
     @Query("SELECT COUNT(*) FROM Task WHERE User_ID = :userId AND Status = 'Completed' AND DeletedAt IS NULL")
     suspend fun getCompletedTasksCount(userId: Int): Int
 
+    // ✅ FLOW COUNT QUERIES FOR LIVE UPDATES
+    @Query("SELECT COUNT(*) FROM Task WHERE User_ID = :userId AND DeletedAt IS NULL")
+    fun getAllTasksCountFlow(userId: Int): Flow<Int>
+
+    @Query("SELECT COUNT(*) FROM Task WHERE User_ID = :userId AND DueAt = :date AND DeletedAt IS NULL")
+    fun getTodayTasksCountFlow(userId: Int, date: String): Flow<Int>
+
+    @Query("SELECT COUNT(*) FROM Task WHERE User_ID = :userId AND Status = 'Completed' AND DeletedAt IS NULL")
+    fun getCompletedTasksCountFlow(userId: Int): Flow<Int>
+
+    @Query("""
+        SELECT COUNT(*) FROM Task 
+        WHERE User_ID = :userId 
+        AND Status = 'Completed' 
+        AND DeletedAt IS NULL
+        AND date(UpdatedAt / 1000, 'unixepoch', 'localtime') = date(:todayTimestamp / 1000, 'unixepoch', 'localtime')
+    """)
+    fun getTasksCompletedTodayByUpdateFlow(userId: Int, todayTimestamp: Long): Flow<Int>
+
     // ✅ REMAINING EXISTING METHODS (PRESERVED)
     @Query("SELECT * FROM Task WHERE User_ID = :userId AND DeletedAt IS NULL ORDER BY CreatedAt DESC")
     fun getAllTasksLive(userId: Int): LiveData<List<Task>>
