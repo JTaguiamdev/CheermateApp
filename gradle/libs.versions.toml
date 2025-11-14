@@ -1,6 +1,6 @@
 [versions]
-agp = "8.13.0"
-kotlin = "2.2.20"
+agp = "8.3.0"
+kotlin = "1.9.22"
 
 coreKtx = "1.17.0"
 junit = "4.13.2"
@@ -30,6 +30,9 @@ room-compiler = { group = "androidx.room", name = "room-compiler", version.ref =
 
 # BCrypt
 bcrypt = { group = "at.favre.lib", name = "bcrypt", version.ref = "bcrypt" }
+
+# Kotlin Reflection
+kotlin-reflect = { group = "org.jetbrains.kotlin", name = "kotlin-reflect", version.ref = "kotlin" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

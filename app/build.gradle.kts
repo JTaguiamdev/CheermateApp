@@ -67,6 +67,9 @@ dependencies {
     // BCrypt for password hashing
     implementation("at.favre.lib:bcrypt:0.10.2")
 
+    // Kotlin Reflection for schema validation
+    implementation(libs.kotlin.reflect)
+
     // Multidex support
     implementation("androidx.multidex:multidex:2.0.1")
 
