@@ -438,26 +438,26 @@ class FragmentSettingsActivity : AppCompatActivity() {
             try {
                 val db = AppDb.get(this@FragmentSettingsActivity)
                 
-                // Fetch personality types from repository (with caching)
-                val personalityTypes = withContext(Dispatchers.IO) {
-                    staticDataRepository.getPersonalityTypes()
+                // Fetch personalities from repository (with caching)
+                val personalities = withContext(Dispatchers.IO) {
+                    staticDataRepository.getPersonalities()
                 }
                 
-                if (personalityTypes.isEmpty()) {
-                    Toast.makeText(this@FragmentSettingsActivity, "No personality types available", Toast.LENGTH_SHORT).show()
+                if (personalities.isEmpty()) {
+                    Toast.makeText(this@FragmentSettingsActivity, "No personalities available", Toast.LENGTH_SHORT).show()
                     return@launch
                 }
                 
-                // Get current user personality
-                val currentPersonality = withContext(Dispatchers.IO) {
-                    db.personalityDao().getByUser(userId)
+                // Get current user's personality ID
+                val currentUser = withContext(Dispatchers.IO) {
+                    db.userDao().getById(userId)
                 }
 
-                val personalityNames = personalityTypes.map { it.Name }.toTypedArray()
+                val personalityNames = personalities.map { it.Name }.toTypedArray()
                 
-                // Find the index of the current personality type
-                val checkedItem = if (currentPersonality != null) {
-                    personalityTypes.indexOfFirst { it.Type_ID == currentPersonality.PersonalityType_ID }
+                // Find the index of the current personality
+                val checkedItem = if (currentUser?.Personality_ID != null) {
+                    personalities.indexOfFirst { it.Personality_ID == currentUser.Personality_ID }
                 } else {
                     -1  // No selection
                 }
@@ -472,8 +472,8 @@ class FragmentSettingsActivity : AppCompatActivity() {
                     }
                     .setPositiveButton("OK") { _, _ ->
                         if (selectedPersonalityIndex >= 0) {
-                            val selected = personalityTypes[selectedPersonalityIndex]
-                            updateUserPersonalityWithType(selected.Type_ID, selected.Name, selected.Description)
+                            val selected = personalities[selectedPersonalityIndex]
+                            updateUserPersonality(selected.Personality_ID)
                         }
                     }
                     .setNegativeButton("Cancel", null)
@@ -485,30 +485,19 @@ class FragmentSettingsActivity : AppCompatActivity() {
         }
     }
 
-    private fun updateUserPersonalityWithType(type: Int, name: String, description: String) {
+    private fun updateUserPersonality(personalityId: Int) {
         lifecycleScope.launch {
             try {
                 val db = AppDb.get(this@FragmentSettingsActivity)
-                withContext(Dispatchers.IO) {
-                    // Create or update the personality record for this user
-                    val personality = Personality(
-                        Personality_ID = 0, // Will be auto-generated or updated
-                        User_ID = userId,
-                        PersonalityType_ID = type,
-                        Name = name,
-                        Description = description
-                    )
-                    db.personalityDao().upsert(personality)
+                val personalityName = withContext(Dispatchers.IO) {
+                    // Update User.Personality_ID to link the user to the personality
+                    db.userDao().updatePersonality(userId, personalityId)
                     
-                    // Get the saved personality to get its ID
-                    val savedPersonality = db.personalityDao().getByUser(userId)
-                    if (savedPersonality != null) {
-                        // Update User.Personality_ID to link the user to their personality
-                        db.userDao().updatePersonality(userId, savedPersonality.Personality_ID)
-                    }
+                    // Get personality name for confirmation message
+                    db.personalityDao().getById(personalityId)?.Name ?: "Unknown"
                 }
 
-                Toast.makeText(this@FragmentSettingsActivity, "✅ Personality updated to $name!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@FragmentSettingsActivity, "✅ Personality updated to $personalityName!", Toast.LENGTH_SHORT).show()
                 loadSettingsUserData()
 
             } catch (e: Exception) {
