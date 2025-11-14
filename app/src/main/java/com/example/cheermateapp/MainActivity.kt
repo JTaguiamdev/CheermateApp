@@ -27,6 +27,7 @@ import com.example.cheermateapp.data.model.Priority
 import com.example.cheermateapp.data.model.User
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
