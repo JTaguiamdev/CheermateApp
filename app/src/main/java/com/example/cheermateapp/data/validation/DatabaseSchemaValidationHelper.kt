@@ -22,7 +22,6 @@ object DatabaseSchemaValidationHelper {
             RecurringTask::class,
             Settings::class,
             Personality::class,
-            PersonalityType::class,
             SecurityQuestion::class,
             UserSecurityAnswer::class,
             MessageTemplate::class
