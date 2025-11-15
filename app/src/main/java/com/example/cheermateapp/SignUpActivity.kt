@@ -218,11 +218,13 @@ class SignUpActivity : AppCompatActivity() {
                     val questionId = questions.find { it.Prompt == securityQuestion }?.SecurityQuestion_ID
 
                     if (questionId != null) {
+                        // Hash the security answer using BCrypt (same as password)
+                        val hashedAnswer = PasswordHashUtil.hashPassword(securityAnswer)
                         val userAnswer = UserSecurityAnswer(
                             Answer_ID = 0,
                             User_ID = newUserId.toInt(),
                             Question_ID = questionId,
-                            AnswerHash = securityAnswer // In production, this should be hashed too
+                            AnswerHash = hashedAnswer
                         )
                         db.securityDao().saveAnswer(userAnswer)
                     }

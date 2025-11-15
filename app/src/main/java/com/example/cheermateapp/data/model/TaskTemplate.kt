@@ -17,9 +17,18 @@ import com.example.cheermateapp.data.model.Status
             parentColumns = ["User_ID"],
             childColumns = ["User_ID"],
             onDelete = ForeignKey.CASCADE
+        ),
+        ForeignKey(
+            entity = Task::class,
+            parentColumns = ["Task_ID", "User_ID"],
+            childColumns = ["Task_ID", "User_ID"],
+            onDelete = ForeignKey.SET_NULL
         )
     ],
-    indices = [Index("User_ID")]
+    indices = [
+        Index("User_ID"),
+        Index(value = ["Task_ID", "User_ID"])
+    ]
 )
 data class TaskTemplate(
     @ColumnInfo(name = "Template_ID")
@@ -27,6 +36,9 @@ data class TaskTemplate(
 
     @ColumnInfo(name = "User_ID")
     val User_ID: Int,
+
+    @ColumnInfo(name = "Task_ID")
+    val Task_ID: Int? = null,
 
     @ColumnInfo(name = "Name")
     val Name: String,
@@ -68,6 +80,7 @@ data class TaskTemplate(
         fun create(
             templateId: Int = 0,
             userId: Int,
+            taskId: Int? = null,
             name: String,
             description: String? = null,
             category: String? = null,
@@ -81,6 +94,7 @@ data class TaskTemplate(
         ) = TaskTemplate(
             Template_ID = templateId,
             User_ID = userId,
+            Task_ID = taskId,
             Name = name,
             Description = description,
             Category = category,
