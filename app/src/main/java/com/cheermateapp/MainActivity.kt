@@ -2759,8 +2759,15 @@ class MainActivity : AppCompatActivity() {
 
             android.util.Log.d("MainActivity", "✅ Cleared existing calendar content")
 
-            // ✅ CREATE AND CONFIGURE CalendarView
-            val calendarView = CalendarView(this)
+            // ✅ CREATE AND CONFIGURE CalendarView with theme-aware styling
+            // Create CalendarView with a themed context to ensure proper text colors
+            val isDarkMode = (resources.configuration.uiMode and 
+                android.content.res.Configuration.UI_MODE_NIGHT_MASK) == 
+                android.content.res.Configuration.UI_MODE_NIGHT_YES
+            
+            // Create a ContextThemeWrapper with the appropriate CalendarView style
+            val themedContext = android.view.ContextThemeWrapper(this, R.style.CalendarViewStyle)
+            val calendarView = CalendarView(themedContext)
             // ✅ FIXED: Use fixed height instead of weight to ensure all dates are visible
             val calendarHeight = (300 * resources.displayMetrics.density).toInt() // 300dp
             calendarView.layoutParams = LinearLayout.LayoutParams(

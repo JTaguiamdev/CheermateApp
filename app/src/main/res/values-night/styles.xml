@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- CalendarView Style for Dark Mode -->
+    <style name="CalendarViewStyle" parent="android:Widget.Material.CalendarView">
+        <item name="android:dateTextAppearance">@style/CalendarViewDateTextAppearance</item>
+        <item name="android:weekDayTextAppearance">@style/CalendarViewWeekDayTextAppearance</item>
+    </style>
+
+    <style name="CalendarViewDateTextAppearance" parent="android:TextAppearance.Material.Small">
+        <item name="android:textColor">@android:color/black</item>
+    </style>
+
+    <style name="CalendarViewWeekDayTextAppearance" parent="android:TextAppearance.Material.Small">
+        <item name="android:textColor">@android:color/black</item>
+    </style>
+</resources>

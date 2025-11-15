@@ -4,8 +4,8 @@
     <color name="text_primary">#FF000000</color>
     <color name="text_secondary">#99000000</color>
     
-    <!-- Calendar background for dark mode -->
-    <color name="calendar_background">#FFFFFFFF</color>
+    <!-- Calendar background for dark mode - transparent -->
+    <color name="calendar_background">#00FFFFFF</color>
     
     <!-- Toolbar icon color for dark mode - black for light background -->
     <color name="toolbar_icon">#FF000000</color>

@@ -79,4 +79,18 @@
         <item name="android:clickable">true</item>
         <item name="android:focusable">true</item>
     </style>
+
+    <!-- CalendarView Style for Light Mode -->
+    <style name="CalendarViewStyle" parent="android:Widget.Material.CalendarView">
+        <item name="android:dateTextAppearance">@style/CalendarViewDateTextAppearance</item>
+        <item name="android:weekDayTextAppearance">@style/CalendarViewWeekDayTextAppearance</item>
+    </style>
+
+    <style name="CalendarViewDateTextAppearance" parent="android:TextAppearance.Material.Small">
+        <item name="android:textColor">@android:color/white</item>
+    </style>
+
+    <style name="CalendarViewWeekDayTextAppearance" parent="android:TextAppearance.Material.Small">
+        <item name="android:textColor">@android:color/white</item>
+    </style>
 </resources>
