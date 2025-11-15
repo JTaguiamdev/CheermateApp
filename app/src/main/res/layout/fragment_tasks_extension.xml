@@ -124,19 +124,21 @@
                         android:maxLines="3" />
 
                     <!-- Task Status -->
-                    <TextView
-                        android:id="@+id/tvTaskStatus"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="6dp"
-                        android:layout_marginTop="8dp"
-                        android:background="@drawable/bg_chip_glass"
-                        android:fontFamily="@font/sf_pro_rounded_bold"
-                        android:paddingHorizontal="8dp"
-                        android:paddingVertical="4dp"
-                        android:text="@string/pending1"
-                        android:textColor="@android:color/white"
-                        android:textSize="11sp" />
+                <TextView
+                    android:id="@+id/tvTaskStatus"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:layout_marginTop="8dp"
+                    android:background="@drawable/bg_chip_glass"
+                    android:minWidth="0dp"
+                    android:paddingLeft="14dp"
+                    android:paddingRight="14dp"
+                    android:text="@string/pending1"
+                    android:textColor="@android:color/white"
+                    android:textSize="12sp"
+                    android:gravity="center"
+                    android:clickable="false"
+                    android:focusable="false" />
 
                     <!-- Row: category, priority, due date -->
                     <LinearLayout
