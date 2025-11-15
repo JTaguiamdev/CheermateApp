@@ -12,6 +12,9 @@
         
         <!-- Bottom sheet background -->
         <item name="bottomSheetDialogTheme">@style/ThemeOverlay.App.BottomSheetDialog</item>
+        
+        <!-- Material Alert Dialog with rounded corners -->
+        <item name="materialAlertDialogTheme">@style/ThemeOverlay.App.MaterialAlertDialog</item>
     </style>
 
     <style name="Theme.CheermateApp" parent="Base.Theme.CheermateApp" />
@@ -34,5 +37,16 @@
         <item name="cornerSizeTopRight">28dp</item>
         <item name="cornerSizeBottomLeft">0dp</item>
         <item name="cornerSizeBottomRight">0dp</item>
+    </style>
+    
+    <!-- Dialog Theme with Rounded Corners -->
+    <style name="ThemeOverlay.App.MaterialAlertDialog" parent="ThemeOverlay.Material3.MaterialAlertDialog">
+        <item name="shapeAppearanceOverlay">@style/ShapeAppearance.App.Dialog</item>
+        <item name="android:background">@android:color/transparent</item>
+    </style>
+    
+    <style name="ShapeAppearance.App.Dialog" parent="ShapeAppearance.Material3.Corner.Medium">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">16dp</item>
     </style>
 </resources>

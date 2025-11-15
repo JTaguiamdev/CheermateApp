@@ -23,7 +23,6 @@
         android:theme="@style/ThemeOverlay.Material3.ActionBar"
         app:title="Task"
         app:titleTextColor="@color/text_primary"
-        app:navigationIcon="?attr/homeAsUpIndicator"
         app:navigationIconTint="@color/toolbar_icon" />
 
     <!-- Scrollable Content -->
