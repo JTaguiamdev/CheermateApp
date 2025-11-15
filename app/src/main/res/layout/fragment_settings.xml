@@ -280,7 +280,7 @@
                 android:layout_width="22dp"
                 android:layout_height="22dp"
                 android:src="@android:drawable/ic_menu_day"
-                app:tint="@color/text_primary" />
+                app:tint="@android:color/white" />
 
             <LinearLayout
                 android:layout_width="0dp"
@@ -294,14 +294,15 @@
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/sf_pro_rounded_bold"
                     android:text="Dark Mode"
-                    android:textColor="@color/text_primary"
+                    android:textColor="@android:color/white"
                     android:textSize="14sp" />
 
                 <TextView
+                    android:id="@+id/tvDarkModeDescription"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Toggle dark/light theme"
-                    android:textColor="@color/text_secondary"
+                    android:textColor="@color/text_secondary_white_70"
                     android:textSize="12sp" />
             </LinearLayout>
 
@@ -309,7 +310,6 @@
                 android:id="@+id/switchDarkMode"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:checked="true"
                 android:thumbTint="?attr/colorSwitchThumbNormal"
                 android:trackTint="?attr/colorControlActivated" />
         </LinearLayout>
