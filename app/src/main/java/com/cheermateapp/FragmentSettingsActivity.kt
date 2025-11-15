@@ -238,12 +238,15 @@ class FragmentSettingsActivity : AppCompatActivity() {
                 showDetailedStatisticsDialog()
             }
 
-            // Dark Mode Switch - Now with functional implementation
+            // Dark Mode Switch and Row - Updated to support system theme
             val switchDarkMode = findViewById<Switch>(R.id.switchDarkMode)
+            val rowDarkMode = findViewById<LinearLayout>(R.id.rowDarkMode)
+            val tvDarkModeDescription = findViewById<TextView>(R.id.tvDarkModeDescription)
             
             // Set initial state based on current theme
-            switchDarkMode?.isChecked = ThemeManager.isDarkModeActive(this)
+            updateDarkModeUI(switchDarkMode, tvDarkModeDescription)
             
+            // Handle switch toggle
             switchDarkMode?.setOnCheckedChangeListener { _, isChecked ->
                 val newMode = if (isChecked) ThemeManager.THEME_DARK else ThemeManager.THEME_LIGHT
                 ThemeManager.setThemeMode(this, newMode)
@@ -255,6 +258,11 @@ class FragmentSettingsActivity : AppCompatActivity() {
                 
                 // Recreate activity to apply theme
                 recreate()
+            }
+            
+            // Handle row click to show theme options dialog
+            rowDarkMode?.setOnClickListener {
+                showThemeOptionsDialog()
             }
 
             // Notifications Row and Switch
@@ -278,6 +286,77 @@ class FragmentSettingsActivity : AppCompatActivity() {
         } catch (e: Exception) {
             android.util.Log.e("FragmentSettingsActivity", "Error setting up interactions", e)
         }
+    }
+
+    /**
+     * Update the dark mode switch and description text based on current theme
+     */
+    private fun updateDarkModeUI(switchDarkMode: Switch?, tvDescription: TextView?) {
+        val currentMode = ThemeManager.getThemeMode(this)
+        
+        when (currentMode) {
+            ThemeManager.THEME_SYSTEM -> {
+                // When in system mode, show the actual current appearance
+                val isDarkActive = ThemeManager.isDarkModeActive(this)
+                switchDarkMode?.isChecked = isDarkActive
+                tvDescription?.text = "Following system theme"
+            }
+            ThemeManager.THEME_DARK -> {
+                switchDarkMode?.isChecked = true
+                tvDescription?.text = "Dark mode active"
+            }
+            ThemeManager.THEME_LIGHT -> {
+                switchDarkMode?.isChecked = false
+                tvDescription?.text = "Light mode active"
+            }
+        }
+    }
+
+    /**
+     * Show dialog to select theme mode (System/Light/Dark)
+     */
+    private fun showThemeOptionsDialog() {
+        val currentMode = ThemeManager.getThemeMode(this)
+        val options = arrayOf("☀️ Light Mode", "🌙 Dark Mode", "📱 System Default")
+        
+        val checkedItem = when (currentMode) {
+            ThemeManager.THEME_LIGHT -> 0
+            ThemeManager.THEME_DARK -> 1
+            ThemeManager.THEME_SYSTEM -> 2
+            else -> 2
+        }
+        
+        android.app.AlertDialog.Builder(this)
+            .setTitle("Choose Theme")
+            .setSingleChoiceItems(options, checkedItem) { dialog, which ->
+                val newMode = when (which) {
+                    0 -> ThemeManager.THEME_LIGHT
+                    1 -> ThemeManager.THEME_DARK
+                    2 -> ThemeManager.THEME_SYSTEM
+                    else -> ThemeManager.THEME_SYSTEM
+                }
+                
+                if (newMode != currentMode) {
+                    ThemeManager.setThemeMode(this, newMode)
+                    
+                    val message = when (newMode) {
+                        ThemeManager.THEME_LIGHT -> "☀️ Light mode enabled"
+                        ThemeManager.THEME_DARK -> "🌙 Dark mode enabled"
+                        ThemeManager.THEME_SYSTEM -> "📱 Following system theme"
+                        else -> "Theme updated"
+                    }
+                    
+                    Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+                    dialog.dismiss()
+                    
+                    // Recreate activity to apply theme
+                    recreate()
+                } else {
+                    dialog.dismiss()
+                }
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
     }
 
     private fun showDetailedStatisticsDialog() {
