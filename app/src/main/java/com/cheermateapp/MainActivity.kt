@@ -2789,7 +2789,7 @@ class MainActivity : AppCompatActivity() {
 
             try {
                 // ✅ STYLING - Apply theme-aware background and text colors
-                calendarView.setBackgroundColor(context.getColor(R.color.calendar_background))
+                calendarView.setBackgroundColor(this@MainActivity.getColor(R.color.calendar_background))
                 
                 // ✅ Apply theme-aware text colors to CalendarView
                 // Note: CalendarView text colors are controlled by the app theme
