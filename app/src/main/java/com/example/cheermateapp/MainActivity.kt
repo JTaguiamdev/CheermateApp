@@ -1751,17 +1751,25 @@ class MainActivity : AppCompatActivity() {
         datePickerDialog.show()
     }
 
-    // ✅ TIME PICKER HELPER
+    // ✅ FIXED: TIME PICKER HELPER - 12-hour format with AM/PM
     private fun showTimePicker(editText: EditText) {
         val calendar = Calendar.getInstance()
 
         // Parse current time if exists
         if (editText.text.isNotEmpty()) {
             try {
-                val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
+                // Try parsing both 12-hour and 24-hour formats
+                val timeFormat = SimpleDateFormat("h:mm a", Locale.getDefault())
                 val currentTime = timeFormat.parse(editText.text.toString())
                 if (currentTime != null) {
                     calendar.time = currentTime
+                } else {
+                    // Fallback to 24-hour format for existing data
+                    val fallbackFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
+                    val fallbackTime = fallbackFormat.parse(editText.text.toString())
+                    if (fallbackTime != null) {
+                        calendar.time = fallbackTime
+                    }
                 }
             } catch (e: Exception) {
                 // Use current time if parsing fails
@@ -1771,7 +1779,8 @@ class MainActivity : AppCompatActivity() {
         val timePickerDialog = android.app.TimePickerDialog(
             this,
             { _, hourOfDay, minute ->
-                val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
+                // ✅ FIX: Use 12-hour format with AM/PM for Philippines
+                val timeFormat = SimpleDateFormat("h:mm a", Locale.getDefault())
                 val selectedTime = Calendar.getInstance()
                 selectedTime.set(Calendar.HOUR_OF_DAY, hourOfDay)
                 selectedTime.set(Calendar.MINUTE, minute)
@@ -1779,7 +1788,7 @@ class MainActivity : AppCompatActivity() {
             },
             calendar.get(Calendar.HOUR_OF_DAY),
             calendar.get(Calendar.MINUTE),
-            true // 24-hour format
+            false // ✅ FIX: 12-hour format with AM/PM
         )
 
         timePickerDialog.show()
@@ -1845,7 +1854,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // ✅ CREATE TASK REMINDER
+    // ✅ FIXED: CREATE TASK REMINDER with ReminderType
     private fun createTaskReminder(
         taskId: Int,
         dueDate: String,
@@ -1863,6 +1872,14 @@ class MainActivity : AppCompatActivity() {
                 if (dueDateTime != null) {
                     val dueTimeMillis = dueDateTime.time
 
+                    // ✅ FIX: Map reminderOption to ReminderType enum
+                    val reminderType = when (reminderOption) {
+                        "10 minutes before" -> com.example.cheermateapp.data.model.ReminderType.TEN_MINUTES_BEFORE
+                        "30 minutes before" -> com.example.cheermateapp.data.model.ReminderType.THIRTY_MINUTES_BEFORE
+                        "At specific time" -> com.example.cheermateapp.data.model.ReminderType.AT_SPECIFIC_TIME
+                        else -> null
+                    }
+
                     // Calculate reminder time based on option
                     val remindAtMillis = when (reminderOption) {
                         "10 minutes before" -> dueTimeMillis - (10 * 60 * 1000)
@@ -1877,11 +1894,13 @@ class MainActivity : AppCompatActivity() {
                         if (existingReminders.isEmpty()) 1 else existingReminders.maxOf { it.TaskReminder_ID } + 1
                     }
 
+                    // ✅ FIX: Include ReminderType in the reminder object
                     val reminder = com.example.cheermateapp.data.model.TaskReminder(
                         TaskReminder_ID = reminderId,
                         Task_ID = taskId,
                         User_ID = userId,
                         RemindAt = remindAtMillis,
+                        ReminderType = reminderType,
                         IsActive = true
                     )
 
@@ -1889,7 +1908,7 @@ class MainActivity : AppCompatActivity() {
                         db.taskReminderDao().insert(reminder)
                     }
 
-                    android.util.Log.d("MainActivity", "✅ Created reminder for task $taskId at $remindAtMillis")
+                    android.util.Log.d("MainActivity", "✅ Created reminder for task $taskId at $remindAtMillis with type: $reminderType")
                 }
 
             } catch (e: Exception) {

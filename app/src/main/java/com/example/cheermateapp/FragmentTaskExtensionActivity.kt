@@ -443,7 +443,7 @@ class FragmentTaskExtensionActivity : AppCompatActivity() {
         timePickerDialog.show()
     }
 
-    // ✅ NEW: Save reminder to TaskReminder table
+    // ✅ FIXED: Save or update reminder in TaskReminder table (prevents duplication)
     private fun saveReminderToDatabase(task: Task, reminderType: ReminderType, specificTime: Long? = null) {
         lifecycleScope.launch {
             try {
@@ -463,25 +463,37 @@ class FragmentTaskExtensionActivity : AppCompatActivity() {
                         }
                     }
                     
-                    // Get next reminder ID
-                    val nextId = db.taskReminderDao().getNextReminderIdForUser(userId)
+                    // ✅ FIX: Check for existing active reminders first
+                    val existingReminders = db.taskReminderDao().activeForTask(task.Task_ID, task.User_ID)
                     
-                    // Create new reminder
-                    val reminder = TaskReminder(
-                        TaskReminder_ID = nextId,
-                        Task_ID = task.Task_ID,
-                        User_ID = task.User_ID,
-                        RemindAt = remindAt,
-                        ReminderType = reminderType,
-                        IsActive = true,
-                        CreatedAt = System.currentTimeMillis(),
-                        UpdatedAt = System.currentTimeMillis()
-                    )
-                    
-                    // Insert reminder
-                    db.taskReminderDao().insert(reminder)
-                    
-                    android.util.Log.d("FragmentTaskExtension", "✅ Reminder saved: $reminderType at $remindAt")
+                    if (existingReminders.isNotEmpty()) {
+                        // Update the first existing reminder instead of creating a new one
+                        val existingReminder = existingReminders.first()
+                        val updatedReminder = existingReminder.copy(
+                            RemindAt = remindAt,
+                            ReminderType = reminderType,
+                            UpdatedAt = System.currentTimeMillis()
+                        )
+                        db.taskReminderDao().update(updatedReminder)
+                        android.util.Log.d("FragmentTaskExtension", "✅ Reminder updated: $reminderType at $remindAt")
+                    } else {
+                        // No existing reminder, create a new one
+                        val nextId = db.taskReminderDao().getNextReminderIdForUser(userId)
+                        
+                        val reminder = TaskReminder(
+                            TaskReminder_ID = nextId,
+                            Task_ID = task.Task_ID,
+                            User_ID = task.User_ID,
+                            RemindAt = remindAt,
+                            ReminderType = reminderType,
+                            IsActive = true,
+                            CreatedAt = System.currentTimeMillis(),
+                            UpdatedAt = System.currentTimeMillis()
+                        )
+                        
+                        db.taskReminderDao().insert(reminder)
+                        android.util.Log.d("FragmentTaskExtension", "✅ Reminder created: $reminderType at $remindAt")
+                    }
                 }
                 
             } catch (e: Exception) {

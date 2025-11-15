@@ -384,16 +384,25 @@ class TaskDetailActivity : AppCompatActivity() {
         datePickerDialog.show()
     }
 
+    // ✅ FIXED: Show time picker dialog - 12-hour format with AM/PM
     private fun showTimePickerDialog(editText: EditText) {
         val calendar = java.util.Calendar.getInstance()
 
         // Parse current time if exists
         if (editText.text.isNotEmpty()) {
             try {
-                val timeFormat = java.text.SimpleDateFormat("HH:mm", java.util.Locale.getDefault())
+                // Try parsing both 12-hour and 24-hour formats
+                val timeFormat = java.text.SimpleDateFormat("h:mm a", java.util.Locale.getDefault())
                 val currentTime = timeFormat.parse(editText.text.toString())
                 if (currentTime != null) {
                     calendar.time = currentTime
+                } else {
+                    // Fallback to 24-hour format for existing data
+                    val fallbackFormat = java.text.SimpleDateFormat("HH:mm", java.util.Locale.getDefault())
+                    val fallbackTime = fallbackFormat.parse(editText.text.toString())
+                    if (fallbackTime != null) {
+                        calendar.time = fallbackTime
+                    }
                 }
             } catch (e: Exception) {
                 // Use current time if parsing fails
@@ -403,7 +412,8 @@ class TaskDetailActivity : AppCompatActivity() {
         val timePickerDialog = android.app.TimePickerDialog(
             this,
             { _, hourOfDay, minute ->
-                val timeFormat = java.text.SimpleDateFormat("HH:mm", java.util.Locale.getDefault())
+                // ✅ FIX: Use 12-hour format with AM/PM for Philippines
+                val timeFormat = java.text.SimpleDateFormat("h:mm a", java.util.Locale.getDefault())
                 val selectedTime = java.util.Calendar.getInstance()
                 selectedTime.set(java.util.Calendar.HOUR_OF_DAY, hourOfDay)
                 selectedTime.set(java.util.Calendar.MINUTE, minute)
@@ -411,7 +421,7 @@ class TaskDetailActivity : AppCompatActivity() {
             },
             calendar.get(java.util.Calendar.HOUR_OF_DAY),
             calendar.get(java.util.Calendar.MINUTE),
-            true
+            false // ✅ FIX: 12-hour format with AM/PM
         )
 
         timePickerDialog.show()
