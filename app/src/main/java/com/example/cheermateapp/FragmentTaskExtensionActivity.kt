@@ -203,6 +203,9 @@ class FragmentTaskExtensionActivity : AppCompatActivity() {
         // Update due date button
         updateDueDateButton(task.DueAt)
 
+        // ✅ Load and display reminder if exists
+        loadTaskReminder(task)
+
         // Check if task is overdue
         if (task.isOverdue()) {
             overdueRow.visibility = View.VISIBLE
@@ -488,6 +491,45 @@ class FragmentTaskExtensionActivity : AppCompatActivity() {
                     "Error saving reminder: ${e.message}",
                     Toast.LENGTH_SHORT
                 ).show()
+            }
+        }
+    }
+
+    // ✅ NEW: Load and display existing reminder for the task
+    private fun loadTaskReminder(task: Task) {
+        lifecycleScope.launch {
+            try {
+                val db = AppDb.get(this@FragmentTaskExtensionActivity)
+                
+                val reminders = withContext(Dispatchers.IO) {
+                    db.taskReminderDao().activeForTask(task.Task_ID, task.User_ID)
+                }
+                
+                if (reminders.isNotEmpty()) {
+                    val reminder = reminders.first()
+                    
+                    // Display reminder based on type
+                    val reminderText = when (reminder.ReminderType) {
+                        ReminderType.TEN_MINUTES_BEFORE -> "⏰ 10 minutes before"
+                        ReminderType.THIRTY_MINUTES_BEFORE -> "⏰ 30 minutes before"
+                        ReminderType.AT_SPECIFIC_TIME -> {
+                            val timeFormat = SimpleDateFormat("h:mm a", Locale.getDefault())
+                            val time = Date(reminder.RemindAt)
+                            "⏰ At ${timeFormat.format(time)}"
+                        }
+                        null -> "⏰ Reminder"
+                    }
+                    
+                    btnTaskReminder.text = reminderText
+                    
+                    android.util.Log.d("FragmentTaskExtension", "✅ Loaded reminder: $reminderText")
+                } else {
+                    btnTaskReminder.text = "⏰ Reminder"
+                }
+                
+            } catch (e: Exception) {
+                android.util.Log.e("FragmentTaskExtension", "Error loading reminder", e)
+                btnTaskReminder.text = "⏰ Reminder"
             }
         }
     }
