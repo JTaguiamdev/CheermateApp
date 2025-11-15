@@ -8,19 +8,19 @@
     <!-- Text colors -->
     <color name="text_secondary_white_70">#B3FFFFFF</color>
     
-    <!-- Text colors for light mode -->
-    <color name="text_primary">#FF000000</color>
-    <color name="text_secondary">#99000000</color>
+    <!-- Text colors for light mode - white text on gradient background -->
+    <color name="text_primary">#FFFFFFFF</color>
+    <color name="text_secondary">#B3FFFFFF</color>
     
     <!-- Calendar colors -->
     <color name="calendar_today">#FF00B4D8</color>
     <color name="calendar_selected">#FFA667C3</color>
     
     <!-- Calendar background for light mode -->
-    <color name="calendar_background">#FFFFFFFF</color>
+    <color name="calendar_background">#00FFFFFF</color>
     
-    <!-- Toolbar icon color for light mode -->
-    <color name="toolbar_icon">#FF000000</color>
+    <!-- Toolbar icon color for light mode - white for gradient background -->
+    <color name="toolbar_icon">#FFFFFFFF</color>
 
 
 </resources>
