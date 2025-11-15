@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.cheermateapp"
+    namespace = "com.cheermateapp"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.example.cheermateapp"
+        applicationId = "com.cheermateapp"
         minSdk = 24
         targetSdk = 36
         versionCode = 1
