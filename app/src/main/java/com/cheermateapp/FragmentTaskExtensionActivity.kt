@@ -99,6 +99,11 @@ class FragmentTaskExtensionActivity : AppCompatActivity() {
         setSupportActionBar(toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setDisplayShowHomeEnabled(true)
+        
+        // Set navigation icon color based on theme
+        val iconColor = resources.getColor(R.color.toolbar_icon, theme)
+        toolbar.navigationIcon?.setTint(iconColor)
+        
         toolbar.setNavigationOnClickListener { 
             setResult(RESULT_OK)
             finish() 
