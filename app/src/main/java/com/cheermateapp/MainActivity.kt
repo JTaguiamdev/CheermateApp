@@ -2788,8 +2788,12 @@ class MainActivity : AppCompatActivity() {
             calendarView.date = System.currentTimeMillis()
 
             try {
-                // ✅ STYLING - Apply transparent background (text colors are theme-aware via system)
-                calendarView.setBackgroundColor(android.graphics.Color.TRANSPARENT)
+                // ✅ STYLING - Apply theme-aware background and text colors
+                calendarView.setBackgroundColor(context.getColor(R.color.calendar_background))
+                
+                // ✅ Apply theme-aware text colors to CalendarView
+                // Note: CalendarView text colors are controlled by the app theme
+                // but we ensure the background is theme-aware
 
                 // ✅ DATE SELECTION LISTENER with visual feedback
                 calendarView.setOnDateChangeListener { _, year, month, dayOfMonth ->

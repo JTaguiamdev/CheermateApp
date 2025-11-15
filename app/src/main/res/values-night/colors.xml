@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Text colors for dark mode -->
-    <color name="text_primary">#FFFFFFFF</color>
-    <color name="text_secondary">#B3FFFFFF</color>
+    <!-- Text colors for dark mode - black text on light background -->
+    <color name="text_primary">#FF000000</color>
+    <color name="text_secondary">#99000000</color>
     
     <!-- Calendar background for dark mode -->
-    <color name="calendar_background">#FF1A1A1A</color>
+    <color name="calendar_background">#FFFFFFFF</color>
     
-    <!-- Toolbar icon color for dark mode -->
-    <color name="toolbar_icon">#FFFFFFFF</color>
+    <!-- Toolbar icon color for dark mode - black for light background -->
+    <color name="toolbar_icon">#FF000000</color>
 </resources>
