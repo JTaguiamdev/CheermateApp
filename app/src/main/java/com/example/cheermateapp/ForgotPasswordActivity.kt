@@ -167,9 +167,8 @@ class ForgotPasswordActivity : AppCompatActivity() {
                         return@withContext false
                     }
 
-                    // Verify the answer (case-insensitive comparison)
-                    // For now, comparing plain text. In production, this should be hashed too
-                    savedAnswer.AnswerHash.equals(securityAnswer, ignoreCase = true)
+                    // Verify the answer using BCrypt (same as password verification)
+                    PasswordHashUtil.verifyPassword(securityAnswer, savedAnswer.AnswerHash)
                 }
 
                 binding.btnContinue.isEnabled = true

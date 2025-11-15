@@ -26,9 +26,18 @@ enum class RecurringFrequency {
             parentColumns = ["User_ID"],
             childColumns = ["User_ID"],
             onDelete = ForeignKey.CASCADE
+        ),
+        ForeignKey(
+            entity = Task::class,
+            parentColumns = ["Task_ID", "User_ID"],
+            childColumns = ["Task_ID", "User_ID"],
+            onDelete = ForeignKey.SET_NULL
         )
     ],
-    indices = [Index("User_ID")]
+    indices = [
+        Index("User_ID"),
+        Index(value = ["Task_ID", "User_ID"])
+    ]
 )
 data class RecurringTask(
     @ColumnInfo(name = "RecurringTask_ID")
@@ -36,6 +45,9 @@ data class RecurringTask(
 
     @ColumnInfo(name = "User_ID")
     val User_ID: Int,
+
+    @ColumnInfo(name = "Task_ID")
+    val Task_ID: Int? = null,
 
     @ColumnInfo(name = "Title")
     val Title: String,
@@ -80,6 +92,7 @@ data class RecurringTask(
         fun create(
             recurringTaskId: Int = 0,
             userId: Int,
+            taskId: Int? = null,
             title: String,
             description: String? = null,
             priority: Priority = Priority.Medium,
@@ -94,6 +107,7 @@ data class RecurringTask(
         ) = RecurringTask(
             RecurringTask_ID = recurringTaskId,
             User_ID = userId,
+            Task_ID = taskId,
             Title = title,
             Description = description,
             Priority = priority,
