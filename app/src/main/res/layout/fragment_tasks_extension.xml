@@ -326,13 +326,12 @@
                     android:visibility="gone"/>
 
                 <!-- Runtime container (kept hidden initially) -->
-                <ListView
+                <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/subtasks_container"
                     android:layout_width="match_parent"
-                    android:layout_height="224dp"
+                    android:layout_height="wrap_content"
                     android:visibility="visible"
-                    android:divider="@null"
-                    android:dividerHeight="0dp" />
+                    android:nestedScrollingEnabled="false" />
             </LinearLayout>
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>

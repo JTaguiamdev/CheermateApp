@@ -14,6 +14,8 @@ import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import androidx.lifecycle.lifecycleScope
 import com.cheermateapp.data.db.AppDb
 import com.cheermateapp.data.model.*
@@ -52,8 +54,8 @@ class FragmentTaskExtensionActivity : AppCompatActivity() {
     private lateinit var subtaskCard: LinearLayout
     private lateinit var etSubtaskInput: EditText
     private lateinit var btnAddSubtask: Button
-    private lateinit var subtasksContainer: ListView
-    private lateinit var subtaskAdapter: SubtaskAdapter
+    private lateinit var subtasksContainer: androidx.recyclerview.widget.RecyclerView
+    private lateinit var subtaskAdapter: SubTaskAdapter
     private lateinit var tvNoSubtasks: TextView
     private lateinit var tvItemsCount: TextView
 
@@ -97,20 +99,20 @@ class FragmentTaskExtensionActivity : AppCompatActivity() {
         tvItemsCount = findViewById(R.id.tv_items_count)
 
         // Initialize subtask adapter
-        subtaskAdapter = SubtaskAdapter(
-            this,
+        subtaskAdapter = SubTaskAdapter(
             subtasks,
-            onCheckChanged = { subtask, isChecked ->
+            onSubTaskToggle = { subtask ->
                 val updatedSubtask = subtask.copy(
-                    IsCompleted = isChecked,
+                    IsCompleted = !subtask.IsCompleted,
                     UpdatedAt = System.currentTimeMillis()
                 )
                 updateSubtask(updatedSubtask)
             },
-            onDelete = { subtask ->
+            onSubTaskDelete = { subtask ->
                 showDeleteSubtaskConfirmation(subtask)
             }
         )
+        subtasksContainer.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(this)
         subtasksContainer.adapter = subtaskAdapter
 
         // Setup toolbar
