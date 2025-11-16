@@ -25,6 +25,7 @@ class FragmentSettingsActivity : AppCompatActivity() {
     private var userId: Int = 0
     private lateinit var staticDataRepository: StaticDataRepository
     private var currentSettings: com.cheermateapp.data.model.Settings? = null
+    private var isApplyingSettings = false  // Flag to prevent triggering listeners during initialization
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -222,12 +223,14 @@ class FragmentSettingsActivity : AppCompatActivity() {
      */
     private fun applySettingsToUI() {
         currentSettings?.let { settings ->
+            isApplyingSettings = true  // Set flag to prevent listener triggering
+            
             // Apply appearance settings (dark mode switch)
             val switchDarkMode = findViewById<Switch>(R.id.switchDarkMode)
             val isDarkMode = settings.Appearance?.theme == 1
             switchDarkMode?.isChecked = isDarkMode
             
-            // Apply theme
+            // Apply theme (without recreating activity if already correct)
             val themeMode = if (isDarkMode) ThemeManager.THEME_DARK else ThemeManager.THEME_LIGHT
             if (ThemeManager.getThemeMode(this) != themeMode) {
                 ThemeManager.setThemeMode(this, themeMode)
@@ -239,6 +242,8 @@ class FragmentSettingsActivity : AppCompatActivity() {
             switchNotifications?.isChecked = notificationsEnabled
             
             android.util.Log.d("FragmentSettingsActivity", "Applied settings to UI - Dark mode: $isDarkMode, Notifications: $notificationsEnabled")
+            
+            isApplyingSettings = false  // Reset flag
         }
     }
     
@@ -416,6 +421,9 @@ class FragmentSettingsActivity : AppCompatActivity() {
             // Don't set initial state here - it will be set by loadSettingsFromDatabase
             
             switchDarkMode?.setOnCheckedChangeListener { _, isChecked ->
+                // Skip if we're just applying settings from database
+                if (isApplyingSettings) return@setOnCheckedChangeListener
+                
                 // Update database with new theme value (0 = light, 1 = dark)
                 val themeValue = if (isChecked) 1 else 0
                 updateAppearanceSetting(themeValue)
@@ -436,6 +444,9 @@ class FragmentSettingsActivity : AppCompatActivity() {
 
             // Notifications Switch - Now with database persistence
             findViewById<Switch>(R.id.switchNotifications)?.setOnCheckedChangeListener { _, isChecked ->
+                // Skip if we're just applying settings from database
+                if (isApplyingSettings) return@setOnCheckedChangeListener
+                
                 // Update database with new notification value (0 = disabled, 1 = enabled)
                 val notificationValue = if (isChecked) 1 else 0
                 updateNotificationSetting(notificationValue)
@@ -953,6 +964,7 @@ class FragmentSettingsActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        loadSettingsFromDatabase()
         loadSettingsUserData()
     }
 }
