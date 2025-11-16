@@ -135,7 +135,7 @@ class TaskDetailActivity : AppCompatActivity() {
         tvTaskCategory.text = task.Category.getDisplayText()
 
         // Set priority
-        tvTaskPriority.text = "🎯 ${task.Priority.name}"
+        tvTaskPriority.text = task.getPriorityText()
 
         // Set status
         tvTaskStatus.text = "${task.getStatusEmoji()} ${task.Status.name}"

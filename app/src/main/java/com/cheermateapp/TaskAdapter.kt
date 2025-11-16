@@ -53,7 +53,7 @@ class TaskAdapter(
         holder.tvStatus.text = "${task.getStatusEmoji()} ${task.Status.name}"
 
         // Set priority with color
-        holder.tvPriority.text = "🎯 ${task.Priority.name}"
+        holder.tvPriority.text = task.getPriorityText()
 
         // Set due date
         if (task.DueAt != null) {

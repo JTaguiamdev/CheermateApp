@@ -74,7 +74,7 @@ class TaskListAdapter(
         holder.tvCategory.text = task.Category.getDisplayText()
 
         // Set priority with emoji
-        holder.tvPriority.text = "🎯 ${task.Priority.name}"
+        holder.tvPriority.text = task.getPriorityText()
 
         // Set status with emoji
         holder.tvStatus.text = "${task.getStatusEmoji()} ${task.Status.name}"

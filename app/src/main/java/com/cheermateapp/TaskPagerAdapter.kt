@@ -43,17 +43,7 @@ class TaskPagerAdapter(
         holder.tvTaskCategory.text = task.Category.getDisplayText()
         
         // Set priority with color-coded indicator
-        when (task.Priority) {
-            Priority.High -> {
-                holder.tvTaskPriority.text = "🔴 High"
-            }
-            Priority.Medium -> {
-                holder.tvTaskPriority.text = "🟡 Medium"
-            }
-            Priority.Low -> {
-                holder.tvTaskPriority.text = "🟢 Low"
-            }
-        }
+        holder.tvTaskPriority.text = task.getPriorityText()
         
         // Set status
         when (task.Status) {

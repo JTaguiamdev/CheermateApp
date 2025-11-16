@@ -64,7 +64,7 @@
     <string name="avatar">Avatar</string>
     <string name="no_tasks_available_n_ntap_the_button_to_create_your_first_task">📋 No tasks available\n\nTap the + button to create your first task!</string>
     <string name="task_description">Task Description</string>
-    <string name="high">🎯 High</string>
+    <string name="high">🔴 High</string>
     <string name="pending1">⏳ Pending</string>
     <string name="duedate">DueDate</string>
     <string name="_0_of_0_tasks_completed">0 of 0 tasks completed</string>
