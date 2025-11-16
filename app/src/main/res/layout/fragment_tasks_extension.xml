@@ -322,14 +322,12 @@
                     android:textColor="@color/text_secondary_white_70"
                     android:textSize="14sp" />
 
-                <!-- ListView container with fixed height -->
-                <ListView
-                    android:id="@+id/subtasks_listview"
+                <!-- Runtime container (kept hidden initially) -->
+                <LinearLayout
+                    android:id="@+id/subtasks_container"
                     android:layout_width="match_parent"
-                    android:layout_height="200dp"
-                    android:layout_marginTop="8dp"
-                    android:divider="@android:color/transparent"
-                    android:dividerHeight="4dp"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
                     android:visibility="visible" />
             </LinearLayout>
         </androidx.constraintlayout.widget.ConstraintLayout>
