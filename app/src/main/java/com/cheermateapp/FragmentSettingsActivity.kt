@@ -24,6 +24,8 @@ class FragmentSettingsActivity : AppCompatActivity() {
 
     private var userId: Int = 0
     private lateinit var staticDataRepository: StaticDataRepository
+    private var currentSettings: com.cheermateapp.data.model.Settings? = null
+    private var isApplyingSettings = false  // Flag to prevent triggering listeners during initialization
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,6 +39,7 @@ class FragmentSettingsActivity : AppCompatActivity() {
 
         setupToolbar()
         setupBottomNavigation()
+        loadSettingsFromDatabase()
         loadSettingsUserData()
         setupSettingsInteractions()
     }
@@ -160,6 +163,180 @@ class FragmentSettingsActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Load settings from database or create default settings if none exist
+     */
+    private fun loadSettingsFromDatabase() {
+        if (userId == 0) return
+        
+        lifecycleScope.launch {
+            try {
+                val db = AppDb.get(this@FragmentSettingsActivity)
+                
+                // Try to get existing settings for the user
+                currentSettings = withContext(Dispatchers.IO) {
+                    db.settingsDao().getSettingsByUser(userId)
+                }
+                
+                // If no settings exist, create default settings
+                if (currentSettings == null) {
+                    val defaultSettings = com.cheermateapp.data.model.Settings(
+                        Settings_ID = 1,
+                        User_ID = userId,
+                        Personality_ID = null,
+                        Appearance = com.cheermateapp.data.model.Appearance(
+                            theme = 0,  // 0 = light mode (default)
+                            fontSize = "medium",
+                            colorScheme = "default"
+                        ),
+                        Notification = com.cheermateapp.data.model.NotificationPref(
+                            enabled = 1,  // 1 = enabled (default)
+                            soundEnabled = true,
+                            vibrationEnabled = true
+                        ),
+                        DataManagement = null,
+                        Statistics = null
+                    )
+                    
+                    withContext(Dispatchers.IO) {
+                        db.settingsDao().upsert(defaultSettings)
+                    }
+                    
+                    currentSettings = defaultSettings
+                    android.util.Log.d("FragmentSettingsActivity", "Created default settings for user $userId")
+                } else {
+                    android.util.Log.d("FragmentSettingsActivity", "Loaded existing settings for user $userId")
+                }
+                
+                // Apply the loaded settings to UI
+                applySettingsToUI()
+                
+            } catch (e: Exception) {
+                android.util.Log.e("FragmentSettingsActivity", "Error loading settings from database", e)
+                Toast.makeText(this@FragmentSettingsActivity, "Error loading settings", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+    
+    /**
+     * Apply loaded settings to UI components
+     */
+    private fun applySettingsToUI() {
+        currentSettings?.let { settings ->
+            isApplyingSettings = true  // Set flag to prevent listener triggering
+            
+            // Apply appearance settings (dark mode switch)
+            val switchDarkMode = findViewById<Switch>(R.id.switchDarkMode)
+            val isDarkMode = settings.Appearance?.theme == 1
+            switchDarkMode?.isChecked = isDarkMode
+            
+            // Apply theme (without recreating activity if already correct)
+            val themeMode = if (isDarkMode) ThemeManager.THEME_DARK else ThemeManager.THEME_LIGHT
+            if (ThemeManager.getThemeMode(this) != themeMode) {
+                ThemeManager.setThemeMode(this, themeMode)
+            }
+            
+            // Apply notification settings
+            val switchNotifications = findViewById<Switch>(R.id.switchNotifications)
+            val notificationsEnabled = settings.Notification?.enabled == 1
+            switchNotifications?.isChecked = notificationsEnabled
+            
+            android.util.Log.d("FragmentSettingsActivity", "Applied settings to UI - Dark mode: $isDarkMode, Notifications: $notificationsEnabled")
+            
+            isApplyingSettings = false  // Reset flag
+        }
+    }
+    
+    /**
+     * Update appearance setting in database
+     */
+    private fun updateAppearanceSetting(theme: Int) {
+        if (userId == 0) return
+        
+        lifecycleScope.launch {
+            try {
+                val db = AppDb.get(this@FragmentSettingsActivity)
+                
+                // Get current settings or create new one
+                val settings = currentSettings ?: com.cheermateapp.data.model.Settings(
+                    Settings_ID = 1,
+                    User_ID = userId,
+                    Personality_ID = null,
+                    Appearance = com.cheermateapp.data.model.Appearance(),
+                    Notification = com.cheermateapp.data.model.NotificationPref(),
+                    DataManagement = null,
+                    Statistics = null
+                )
+                
+                // Update appearance with new theme value
+                val updatedSettings = settings.copy(
+                    Appearance = com.cheermateapp.data.model.Appearance(
+                        theme = theme,
+                        fontSize = settings.Appearance?.fontSize ?: "medium",
+                        colorScheme = settings.Appearance?.colorScheme ?: "default"
+                    )
+                )
+                
+                // Save to database
+                withContext(Dispatchers.IO) {
+                    db.settingsDao().upsert(updatedSettings)
+                }
+                
+                currentSettings = updatedSettings
+                android.util.Log.d("FragmentSettingsActivity", "Updated appearance setting - theme: $theme")
+                
+            } catch (e: Exception) {
+                android.util.Log.e("FragmentSettingsActivity", "Error updating appearance setting", e)
+                Toast.makeText(this@FragmentSettingsActivity, "Error saving appearance setting", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+    
+    /**
+     * Update notification setting in database
+     */
+    private fun updateNotificationSetting(enabled: Int) {
+        if (userId == 0) return
+        
+        lifecycleScope.launch {
+            try {
+                val db = AppDb.get(this@FragmentSettingsActivity)
+                
+                // Get current settings or create new one
+                val settings = currentSettings ?: com.cheermateapp.data.model.Settings(
+                    Settings_ID = 1,
+                    User_ID = userId,
+                    Personality_ID = null,
+                    Appearance = com.cheermateapp.data.model.Appearance(),
+                    Notification = com.cheermateapp.data.model.NotificationPref(),
+                    DataManagement = null,
+                    Statistics = null
+                )
+                
+                // Update notification with new enabled value
+                val updatedSettings = settings.copy(
+                    Notification = com.cheermateapp.data.model.NotificationPref(
+                        enabled = enabled,
+                        soundEnabled = settings.Notification?.soundEnabled ?: true,
+                        vibrationEnabled = settings.Notification?.vibrationEnabled ?: true
+                    )
+                )
+                
+                // Save to database
+                withContext(Dispatchers.IO) {
+                    db.settingsDao().upsert(updatedSettings)
+                }
+                
+                currentSettings = updatedSettings
+                android.util.Log.d("FragmentSettingsActivity", "Updated notification setting - enabled: $enabled")
+                
+            } catch (e: Exception) {
+                android.util.Log.e("FragmentSettingsActivity", "Error updating notification setting", e)
+                Toast.makeText(this@FragmentSettingsActivity, "Error saving notification setting", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
     // ✅ FIXED - MATCHES YOUR ACTUAL XML LAYOUT
     private fun updateSettingsStatistics(stats: Map<String, Int>) {
         try {
@@ -238,15 +415,23 @@ class FragmentSettingsActivity : AppCompatActivity() {
                 showDetailedStatisticsDialog()
             }
 
-            // Dark Mode Switch - Now with functional implementation
+            // Dark Mode Switch - Now with database persistence
             val switchDarkMode = findViewById<Switch>(R.id.switchDarkMode)
             
-            // Set initial state based on current theme
-            switchDarkMode?.isChecked = ThemeManager.isDarkModeActive(this)
+            // Don't set initial state here - it will be set by loadSettingsFromDatabase
             
             switchDarkMode?.setOnCheckedChangeListener { _, isChecked ->
+                // Skip if we're just applying settings from database
+                if (isApplyingSettings) return@setOnCheckedChangeListener
+                
+                // Update database with new theme value (0 = light, 1 = dark)
+                val themeValue = if (isChecked) 1 else 0
+                updateAppearanceSetting(themeValue)
+                
+                // Apply theme
                 val newMode = if (isChecked) ThemeManager.THEME_DARK else ThemeManager.THEME_LIGHT
                 ThemeManager.setThemeMode(this, newMode)
+                
                 Toast.makeText(
                     this, 
                     if (isChecked) "🌙 Dark mode enabled" else "☀️ Light mode enabled", 
@@ -257,13 +442,25 @@ class FragmentSettingsActivity : AppCompatActivity() {
                 recreate()
             }
 
-            // Notifications Row and Switch
+            // Notifications Switch - Now with database persistence
+            findViewById<Switch>(R.id.switchNotifications)?.setOnCheckedChangeListener { _, isChecked ->
+                // Skip if we're just applying settings from database
+                if (isApplyingSettings) return@setOnCheckedChangeListener
+                
+                // Update database with new notification value (0 = disabled, 1 = enabled)
+                val notificationValue = if (isChecked) 1 else 0
+                updateNotificationSetting(notificationValue)
+                
+                Toast.makeText(
+                    this, 
+                    if (isChecked) "🔔 Notifications enabled" else "🔕 Notifications disabled", 
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+            
+            // Notifications Row Click
             findViewById<LinearLayout>(R.id.rowNotifications)?.setOnClickListener {
                 showNotificationSettings()
-            }
-
-            findViewById<Switch>(R.id.switchNotifications)?.setOnCheckedChangeListener { _, isChecked ->
-                Toast.makeText(this, if (isChecked) "🔔 Notifications enabled" else "🔕 Notifications disabled", Toast.LENGTH_SHORT).show()
             }
 
             // Sign Out
@@ -767,6 +964,7 @@ class FragmentSettingsActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        loadSettingsFromDatabase()
         loadSettingsUserData()
     }
 }
