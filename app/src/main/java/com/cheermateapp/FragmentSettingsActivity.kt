@@ -392,7 +392,6 @@ class FragmentSettingsActivity : AppCompatActivity() {
         dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
         dialog.show()
     }
-    }
     
     private fun showEditNameDialog() {
         val editText = android.widget.EditText(this)
