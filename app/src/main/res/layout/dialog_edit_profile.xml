@@ -4,7 +4,8 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:padding="16dp">
+    android:padding="16dp"
+    android:background="@drawable/dialog_rounded_background">
 
     <!-- Username -->
     <com.google.android.material.textfield.TextInputLayout

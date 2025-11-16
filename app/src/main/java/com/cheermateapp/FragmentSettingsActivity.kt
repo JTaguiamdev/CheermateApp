@@ -323,14 +323,17 @@ class FragmentSettingsActivity : AppCompatActivity() {
                     Keep up the great work! 💪
                 """.trimIndent()
 
-                android.app.AlertDialog.Builder(this@FragmentSettingsActivity)
+                val dialog = android.app.AlertDialog.Builder(this@FragmentSettingsActivity)
                     .setTitle("Task Statistics")
                     .setMessage(message)
                     .setPositiveButton("Manage Tasks") { _, _ ->
                         navigateToTasks()
                     }
                     .setNegativeButton("Close", null)
-                    .show()
+                    .create()
+                
+                dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+                dialog.show()
 
             } catch (e: Exception) {
                 Toast.makeText(this@FragmentSettingsActivity, "Error loading detailed statistics", Toast.LENGTH_SHORT).show()
@@ -341,7 +344,7 @@ class FragmentSettingsActivity : AppCompatActivity() {
     private fun showProfileEditDialog() {
         val options = arrayOf("Change Profile Picture", "Edit Name", "Cancel")
         
-        android.app.AlertDialog.Builder(this)
+        val dialog = android.app.AlertDialog.Builder(this)
             .setTitle("Edit Profile")
             .setItems(options) { _, which ->
                 when (which) {
@@ -350,13 +353,16 @@ class FragmentSettingsActivity : AppCompatActivity() {
                     2 -> {} // Cancel - do nothing
                 }
             }
-            .show()
+            .create()
+        
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        dialog.show()
     }
     
     private fun showProfilePictureOptions() {
         val options = arrayOf("Take Photo", "Choose from Gallery", "Remove Picture", "Cancel")
         
-        android.app.AlertDialog.Builder(this)
+        val dialog = android.app.AlertDialog.Builder(this)
             .setTitle("Profile Picture")
             .setItems(options) { _, which ->
                 when (which) {
@@ -381,7 +387,11 @@ class FragmentSettingsActivity : AppCompatActivity() {
                     3 -> {} // Cancel
                 }
             }
-            .show()
+            .create()
+        
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        dialog.show()
+    }
     }
     
     private fun showEditNameDialog() {
@@ -401,7 +411,7 @@ class FragmentSettingsActivity : AppCompatActivity() {
             }
         }
         
-        android.app.AlertDialog.Builder(this)
+        val dialog = android.app.AlertDialog.Builder(this)
             .setTitle("Edit Name")
             .setView(editText)
             .setPositiveButton("Save") { _, _ ->
@@ -413,7 +423,10 @@ class FragmentSettingsActivity : AppCompatActivity() {
                 }
             }
             .setNegativeButton("Cancel", null)
-            .show()
+            .create()
+        
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        dialog.show()
     }
     
     private fun updateUserName(newName: String) {
@@ -465,7 +478,7 @@ class FragmentSettingsActivity : AppCompatActivity() {
                 // Track the selected personality
                 var selectedPersonalityIndex: Int = checkedItem
 
-                android.app.AlertDialog.Builder(this@FragmentSettingsActivity)
+                val dialog = android.app.AlertDialog.Builder(this@FragmentSettingsActivity)
                     .setTitle("Choose Your Personality")
                     .setSingleChoiceItems(personalityNames, checkedItem) { _, which ->
                         selectedPersonalityIndex = which
@@ -477,7 +490,10 @@ class FragmentSettingsActivity : AppCompatActivity() {
                         }
                     }
                     .setNegativeButton("Cancel", null)
-                    .show()
+                    .create()
+                
+                dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+                dialog.show()
 
             } catch (e: Exception) {
                 Toast.makeText(this@FragmentSettingsActivity, "Error loading personalities", Toast.LENGTH_SHORT).show()
@@ -516,7 +532,7 @@ class FragmentSettingsActivity : AppCompatActivity() {
 
         val checkedItems = booleanArrayOf(true, true, false, true)
 
-        android.app.AlertDialog.Builder(this)
+        val dialog = android.app.AlertDialog.Builder(this)
             .setTitle("Notification Settings")
             .setMultiChoiceItems(options, checkedItems) { _, which, isChecked ->
                 checkedItems[which] = isChecked
@@ -526,7 +542,10 @@ class FragmentSettingsActivity : AppCompatActivity() {
                 Toast.makeText(this, "🔔 Notification settings saved", Toast.LENGTH_SHORT).show()
             }
             .setNegativeButton("Cancel", null)
-            .show()
+            .create()
+        
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        dialog.show()
     }
 
     private fun saveNotificationSettings(settings: BooleanArray) {
@@ -547,7 +566,7 @@ class FragmentSettingsActivity : AppCompatActivity() {
             "🔄 Sync with Cloud"
         )
 
-        android.app.AlertDialog.Builder(this)
+        val dialog = android.app.AlertDialog.Builder(this)
             .setTitle("Data Management")
             .setItems(options) { _, which ->
                 when (which) {
@@ -558,7 +577,10 @@ class FragmentSettingsActivity : AppCompatActivity() {
                 }
             }
             .setNegativeButton("Cancel", null)
-            .show()
+            .create()
+        
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        dialog.show()
     }
 
     private fun exportUserData() {
@@ -588,25 +610,31 @@ class FragmentSettingsActivity : AppCompatActivity() {
 
     private fun importUserData() {
         // Simple implementation: inform user about import functionality
-        android.app.AlertDialog.Builder(this)
+        val dialog = android.app.AlertDialog.Builder(this)
             .setTitle("📥 Import Data")
             .setMessage("Data import functionality allows you to restore your tasks from a backup file.\n\nTo use this feature:\n1. Ensure you have a backup file (.json)\n2. Grant file access permissions\n3. Select the backup file to import\n\nNote: This will merge with existing data. Use with caution.")
             .setPositiveButton("OK") { _, _ ->
                 Toast.makeText(this, "Import feature: Please ensure you have a valid backup file and necessary permissions.", Toast.LENGTH_LONG).show()
             }
             .setNegativeButton("Cancel", null)
-            .show()
+            .create()
+        
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        dialog.show()
     }
 
     private fun showClearAllTasksConfirmation() {
-        android.app.AlertDialog.Builder(this)
+        val dialog = android.app.AlertDialog.Builder(this)
             .setTitle("⚠️ Clear All Tasks")
             .setMessage("This will permanently delete all your tasks. This action cannot be undone.")
             .setPositiveButton("DELETE ALL") { _, _ ->
                 clearAllUserTasks()
             }
             .setNegativeButton("Cancel", null)
-            .show()
+            .create()
+        
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        dialog.show()
     }
 
     private fun clearAllUserTasks() {
@@ -627,7 +655,7 @@ class FragmentSettingsActivity : AppCompatActivity() {
     }
 
     private fun syncWithCloud() {
-        android.app.AlertDialog.Builder(this)
+        val dialog = android.app.AlertDialog.Builder(this)
             .setTitle("🔄 Cloud Sync")
             .setMessage("Cloud synchronization allows you to:\n• Backup your data to the cloud\n• Access your tasks from multiple devices\n• Automatically sync changes\n\nTo enable cloud sync:\n1. Sign in with a cloud provider (Google Drive, Dropbox, etc.)\n2. Grant necessary permissions\n3. Enable auto-sync in settings\n\nNote: Cloud sync requires an internet connection and appropriate cloud storage permissions.")
             .setPositiveButton("Learn More") { _, _ ->
@@ -637,7 +665,10 @@ class FragmentSettingsActivity : AppCompatActivity() {
                 Toast.makeText(this, "Cloud sync settings: Configure your cloud provider in app settings.", Toast.LENGTH_SHORT).show()
             }
             .setNegativeButton("Cancel", null)
-            .show()
+            .create()
+        
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        dialog.show()
     }
 
     private fun showAboutDialog() {
@@ -658,11 +689,14 @@ class FragmentSettingsActivity : AppCompatActivity() {
             Made with ❤️ for productivity enthusiasts
         """.trimIndent()
 
-        android.app.AlertDialog.Builder(this)
+        val dialog = android.app.AlertDialog.Builder(this)
             .setTitle("About CheerMate")
             .setMessage(message)
             .setPositiveButton("OK", null)
-            .show()
+            .create()
+        
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        dialog.show()
     }
 
     private fun showStatisticsInDialog(stats: Map<String, Int>) {
@@ -684,22 +718,28 @@ class FragmentSettingsActivity : AppCompatActivity() {
             Statistics loaded successfully!
         """.trimIndent()
 
-        android.app.AlertDialog.Builder(this)
+        val dialog = android.app.AlertDialog.Builder(this)
             .setTitle("Task Statistics")
             .setMessage(message)
             .setPositiveButton("OK", null)
-            .show()
+            .create()
+        
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        dialog.show()
     }
 
     private fun showLogoutConfirmation() {
-        android.app.AlertDialog.Builder(this)
+        val dialog = android.app.AlertDialog.Builder(this)
             .setTitle("Sign Out")
             .setMessage("Are you sure you want to sign out?")
             .setPositiveButton("Sign Out") { _, _ ->
                 performLogout()
             }
             .setNegativeButton("Cancel", null)
-            .show()
+            .create()
+        
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        dialog.show()
     }
 
     private fun performLogout() {

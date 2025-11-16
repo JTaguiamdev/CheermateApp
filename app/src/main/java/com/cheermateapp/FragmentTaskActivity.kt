@@ -779,13 +779,16 @@ class FragmentTaskActivity : AppCompatActivity() {
             "📈 Progress"
         )
 
-        AlertDialog.Builder(this)
+        val dialog = AlertDialog.Builder(this)
             .setTitle("Sort Tasks By")
             .setItems(sortOptions) { _, which ->
                 sortTasks(which)
             }
             .setNegativeButton("Cancel", null)
-            .show()
+            .create()
+        
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        dialog.show()
     }
 
     private fun sortTasks(sortType: Int) {
@@ -918,6 +921,9 @@ class FragmentTaskActivity : AppCompatActivity() {
                 .setView(dialogView)
                 .create()
             
+            // Apply rounded corners to dialog window
+            dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+            
             // Set up button click listeners
             btnComplete.setOnClickListener {
                 dialog.dismiss()
@@ -965,13 +971,16 @@ class FragmentTaskActivity : AppCompatActivity() {
         ${if (task.isToday()) "📅 DUE TODAY" else ""}
     """.trimIndent()
 
-        AlertDialog.Builder(this)
+        val dialog = AlertDialog.Builder(this)
             .setTitle("Task Details")
             .setMessage(message)
             .setPositiveButton("Edit") { _, _ -> showEditTaskDialog(task) }
             .setNeutralButton("Close", null)
             .setNegativeButton("Delete") { _, _ -> deleteTask(task) }
-            .show()
+            .create()
+        
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        dialog.show()
     }
 
     // ✅ CRUD OPERATION: UPDATE - Complete Edit Dialog with all fields
@@ -1232,7 +1241,7 @@ class FragmentTaskActivity : AppCompatActivity() {
 
     // ✅ CRUD OPERATION: DELETE - Delete task with confirmation
     private fun deleteTask(task: Task) {
-        AlertDialog.Builder(this)
+        val dialog = AlertDialog.Builder(this)
             .setTitle("Delete Task")
             .setMessage("Are you sure you want to delete '${task.Title}'?")
             .setPositiveButton("Delete") { _, _ ->
@@ -1253,7 +1262,10 @@ class FragmentTaskActivity : AppCompatActivity() {
                 }
             }
             .setNegativeButton("Cancel", null)
-            .show()
+            .create()
+        
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        dialog.show()
     }
 
     // ✅ CRUD OPERATION: CREATE - Add new task dialog
@@ -1315,6 +1327,7 @@ class FragmentTaskActivity : AppCompatActivity() {
             builder.setNegativeButton("Cancel", null)
             
             val dialog = builder.create()
+            dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
             dialog.show()
             
             // Override positive button to prevent auto-dismiss on validation errors
