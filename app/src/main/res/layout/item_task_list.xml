@@ -63,7 +63,7 @@
                     android:fontFamily="@font/sf_pro_rounded_bold"
                     android:paddingHorizontal="8dp"
                     android:paddingVertical="4dp"
-                    android:text="Work"
+                    android:text="@string/task_title"
                     android:textColor="@android:color/white"
                     android:textSize="11sp" />
 

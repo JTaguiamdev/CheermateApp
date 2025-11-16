@@ -330,7 +330,7 @@
                     android:layout_marginTop="8dp"
                     android:divider="@android:color/transparent"
                     android:dividerHeight="4dp"
-                    android:visibility="gone" />
+                    android:visibility="visible" />
             </LinearLayout>
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>
