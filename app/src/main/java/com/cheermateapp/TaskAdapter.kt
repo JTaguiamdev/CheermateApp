@@ -9,6 +9,7 @@ import com.cheermateapp.data.model.Task
 import com.cheermateapp.data.model.Status
 import com.cheermateapp.data.model.Priority
 import com.cheermateapp.data.model.getPriorityColor
+import com.cheermateapp.data.model.getDisplayText
 import com.cheermateapp.data.model.isOverdue
 
 import java.text.SimpleDateFormat
@@ -25,6 +26,7 @@ class TaskAdapter(
     class TaskViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val tvTitle: TextView = itemView.findViewById(R.id.tvTaskTitle)
         val tvDescription: TextView = itemView.findViewById(R.id.tvTaskDescription)
+        val tvCategory: TextView = itemView.findViewById(R.id.tvTaskCategory)
         val tvStatus: TextView = itemView.findViewById(R.id.tvTaskStatus)
         val tvPriority: TextView = itemView.findViewById(R.id.tvTaskPriority)
         val tvDueDate: TextView = itemView.findViewById(R.id.tvTaskDueDate)
@@ -48,6 +50,9 @@ class TaskAdapter(
         holder.tvTitle.text = task.Title
         holder.tvDescription.text = if (task.Description.isNullOrBlank()) "No description" else task.Description
         holder.tvDescription.visibility = if (task.Description.isNullOrBlank()) View.GONE else View.VISIBLE
+
+        // Set category with emoji
+        holder.tvCategory.text = task.Category.getDisplayText()
 
         // Set status with emoji
         holder.tvStatus.text = "${task.getStatusEmoji()} ${task.Status.name}"
