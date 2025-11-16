@@ -75,6 +75,9 @@ dependencies {
 
     // ViewPager2 for swipeable tasks
     implementation("androidx.viewpager2:viewpager2:1.0.0")
+    
+    // RecyclerView
+    implementation("androidx.recyclerview:recyclerview:1.3.2")
 
     // SwipeRefreshLayout
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
