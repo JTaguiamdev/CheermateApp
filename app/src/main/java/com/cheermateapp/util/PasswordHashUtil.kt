@@ -12,7 +12,7 @@ import javax.crypto.spec.PBEKeySpec
 object PasswordHashUtil {
     
     private const val PBKDF2_ALGORITHM = "PBKDF2WithHmacSHA256"
-    private const val ITERATIONS = 100000 // OWASP recommended minimum
+    private const val ITERATIONS = 100000 // OWASP recommended iterations
     private const val MIN_ITERATIONS = 10000 // Minimum acceptable iterations
     private const val SALT_LENGTH = 16 // 128 bits
     private const val HASH_LENGTH = 32 // 256 bits
