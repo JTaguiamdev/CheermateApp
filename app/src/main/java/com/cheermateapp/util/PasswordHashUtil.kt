@@ -1,5 +1,6 @@
 package com.cheermateapp.util
 
+import java.security.MessageDigest
 import java.security.SecureRandom
 import java.util.Base64
 import javax.crypto.SecretKeyFactory
@@ -12,6 +13,7 @@ object PasswordHashUtil {
     
     private const val PBKDF2_ALGORITHM = "PBKDF2WithHmacSHA256"
     private const val ITERATIONS = 100000 // OWASP recommended minimum
+    private const val MIN_ITERATIONS = 10000 // Minimum acceptable iterations
     private const val SALT_LENGTH = 16 // 128 bits
     private const val HASH_LENGTH = 32 // 256 bits
     
@@ -50,14 +52,20 @@ object PasswordHashUtil {
             }
             
             val iterations = parts[0].toIntOrNull() ?: return false
+            
+            // Validate minimum iteration count to prevent bypass attacks
+            if (iterations < MIN_ITERATIONS) {
+                return false
+            }
+            
             val salt = Base64.getDecoder().decode(parts[1])
             val storedHash = Base64.getDecoder().decode(parts[2])
             
             // Hash the provided password with the same salt and iterations
             val testHash = pbkdf2Hash(password, salt, iterations, storedHash.size)
             
-            // Compare the hashes using constant-time comparison
-            return storedHash.contentEquals(testHash)
+            // Compare the hashes using constant-time comparison to prevent timing attacks
+            return MessageDigest.isEqual(storedHash, testHash)
         } catch (e: Exception) {
             android.util.Log.e("PasswordHashUtil", "Error verifying password", e)
             false
@@ -69,7 +77,12 @@ object PasswordHashUtil {
      */
     private fun pbkdf2Hash(password: String, salt: ByteArray, iterations: Int, keyLength: Int): ByteArray {
         val spec = PBEKeySpec(password.toCharArray(), salt, iterations, keyLength * 8)
-        val factory = SecretKeyFactory.getInstance(PBKDF2_ALGORITHM)
-        return factory.generateSecret(spec).encoded
+        try {
+            val factory = SecretKeyFactory.getInstance(PBKDF2_ALGORITHM)
+            return factory.generateSecret(spec).encoded
+        } finally {
+            // Clear the password from memory to prevent exposure in memory dumps
+            spec.clearPassword()
+        }
     }
 }
