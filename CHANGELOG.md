@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Security Update - November 2025
+
+#### Changed
+- **Password Hashing Migration**: Migrated from BCrypt to PBKDF2-HMAC-SHA256
+  - Replaced BCrypt implementation with PBKDF2-HMAC-SHA256 (100,000 iterations)
+  - Removed BCrypt dependency from build configuration
+  - Updated all password hashing and verification logic
+  - Hash format: `iterations:salt:hash` (Base64 encoded)
+  - Maintains same security level with Java standard library algorithms
+
 ### Phase 2 Implementation (v1.5) - January 2025
 
 #### Added
