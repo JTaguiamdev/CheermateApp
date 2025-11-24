@@ -64,9 +64,6 @@ dependencies {
     // GSON
     implementation("com.google.code.gson:gson:2.13.2")
 
-    // BCrypt for password hashing
-    implementation("at.favre.lib:bcrypt:0.10.2")
-
     // Kotlin Reflection for schema validation
     implementation(libs.kotlin.reflect)
 

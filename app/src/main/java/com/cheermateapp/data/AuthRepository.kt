@@ -12,7 +12,7 @@ import kotlinx.coroutines.withContext
 class AuthRepository(private val db: AppDb) {
 
     /**
-     * Validate user credentials with BCrypt password verification
+     * Validate user credentials with PBKDF2-HMAC-SHA256 password verification
      * @param username The username to validate
      * @param password The plain text password to verify
      * @param onResult Callback with the validated user or null if invalid
@@ -27,7 +27,7 @@ class AuthRepository(private val db: AppDb) {
                 val user = db.userDao().findByUsername(username)
                 
                 if (user != null) {
-                    // Verify password using BCrypt
+                    // Verify password using PBKDF2-HMAC-SHA256
                     val isValid = PasswordHashUtil.verifyPassword(password, user.PasswordHash)
                     onResult(if (isValid) user else null)
                 } else {

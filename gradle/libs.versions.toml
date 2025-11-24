@@ -1,5 +1,5 @@
 [versions]
-agp = "8.13.0"
+agp = "8.7.3"
 kotlin = "2.2.21"
 
 coreKtx = "1.17.0"
@@ -11,7 +11,6 @@ material = "1.13.0"
 activity = "1.11.0"
 constraintlayout = "2.2.1"
 room = "2.8.1"
-bcrypt = "0.10.2"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -27,9 +26,6 @@ androidx-constraintlayout = { group = "androidx.constraintlayout", name = "const
 room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
 room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
 room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
-
-# BCrypt
-bcrypt = { group = "at.favre.lib", name = "bcrypt", version.ref = "bcrypt" }
 
 # Kotlin Reflection
 kotlin-reflect = { group = "org.jetbrains.kotlin", name = "kotlin-reflect", version.ref = "kotlin" }

@@ -196,7 +196,7 @@ class SignUpActivity : AppCompatActivity() {
                     val firstName = fullName.substringBefore(' ').ifEmpty { fullName }
                     val lastName = fullName.substringAfter(' ', missingDelimiterValue = "")
 
-                    // Hash the password using BCrypt
+                    // Hash the password using PBKDF2-HMAC-SHA256
                     val hashedPassword = PasswordHashUtil.hashPassword(password)
 
                     // Create user
@@ -218,7 +218,7 @@ class SignUpActivity : AppCompatActivity() {
                     val questionId = questions.find { it.Prompt == securityQuestion }?.SecurityQuestion_ID
 
                     if (questionId != null) {
-                        // Hash the security answer using BCrypt (same as password)
+                        // Hash the security answer using PBKDF2-HMAC-SHA256 (same as password)
                         val hashedAnswer = PasswordHashUtil.hashPassword(securityAnswer)
                         val userAnswer = UserSecurityAnswer(
                             Answer_ID = 0,

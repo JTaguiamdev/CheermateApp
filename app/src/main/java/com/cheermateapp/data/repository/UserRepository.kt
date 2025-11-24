@@ -151,7 +151,7 @@ class UserRepository(private val userDao: UserDao) {
                 )
             }
 
-            // Verify password using BCrypt
+            // Verify password using PBKDF2-HMAC-SHA256
             val isValid = PasswordHashUtil.verifyPassword(password, user.PasswordHash)
             
             if (!isValid) {
