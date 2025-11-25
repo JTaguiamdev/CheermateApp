@@ -167,7 +167,7 @@ class ForgotPasswordActivity : AppCompatActivity() {
                         return@withContext false
                     }
 
-                    // Verify the answer using BCrypt (same as password verification)
+                    // Verify the answer using PBKDF2-HMAC-SHA256 (same as password verification)
                     PasswordHashUtil.verifyPassword(securityAnswer, savedAnswer.AnswerHash)
                 }
 

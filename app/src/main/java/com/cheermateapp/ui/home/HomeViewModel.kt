@@ -22,7 +22,7 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
                 User_ID = 0, // Auto-generated
                 Username = "alice",
                 Email = "alice@example.com",
-                PasswordHash = "<bcrypt>",
+                PasswordHash = "<pbkdf2>",
                 FirstName = "Alice",
                 LastName = "Lee",
                 Birthdate = "2001-01-01",

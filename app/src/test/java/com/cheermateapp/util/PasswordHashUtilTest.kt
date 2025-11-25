@@ -5,7 +5,7 @@ import org.junit.Assert.*
 
 /**
  * Unit tests for PasswordHashUtil
- * Note: These tests require BCrypt library to be available
+ * Note: These tests use PBKDF2-HMAC-SHA256 for password hashing
  */
 class PasswordHashUtilTest {
 
@@ -55,7 +55,7 @@ class PasswordHashUtilTest {
         val hash = PasswordHashUtil.hashPassword(password)
         
         assertTrue(hash.isNotEmpty())
-        assertTrue(hash.length > 20) // BCrypt hashes are typically 60 characters
+        assertTrue(hash.length > 20) // PBKDF2 hashes in format iterations:salt:hash are typically longer
     }
 
     @Test
@@ -86,7 +86,7 @@ class PasswordHashUtilTest {
     @Test
     fun `test verification with invalid hash returns false`() {
         val password = "testPassword"
-        val invalidHash = "not_a_valid_bcrypt_hash"
+        val invalidHash = "not_a_valid_pbkdf2_hash"
         
         assertFalse(PasswordHashUtil.verifyPassword(password, invalidHash))
     }
