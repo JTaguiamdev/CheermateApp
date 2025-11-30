@@ -4,13 +4,18 @@
     <style name="CalendarViewStyle" parent="android:Widget.Material.CalendarView">
         <item name="android:dateTextAppearance">@style/CalendarViewDateTextAppearance</item>
         <item name="android:weekDayTextAppearance">@style/CalendarViewWeekDayTextAppearance</item>
+        <item name="android:headerTextAppearance">@style/CalendarViewHeaderTextAppearance</item>
     </style>
 
     <style name="CalendarViewDateTextAppearance" parent="android:TextAppearance.Material.Small">
-        <item name="android:textColor">@android:color/black</item>
+        <item name="android:textColor">@android:color/white</item>
     </style>
 
     <style name="CalendarViewWeekDayTextAppearance" parent="android:TextAppearance.Material.Small">
-        <item name="android:textColor">@android:color/black</item>
+        <item name="android:textColor">@android:color/white</item>
+    </style>
+
+    <style name="CalendarViewHeaderTextAppearance" parent="android:TextAppearance.Material.Medium">
+        <item name="android:textColor">@android:color/white</item>
     </style>
 </resources>
