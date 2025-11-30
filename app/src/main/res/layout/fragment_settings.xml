@@ -293,15 +293,15 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/sf_pro_rounded_bold"
-                    android:text="Dark Mode"
-                    android:textColor="@color/text_primary"
+                    android:text="@string/dark_mode"
+                    android:textColor="@color/white"
                     android:textSize="14sp" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Toggle dark/light theme"
-                    android:textColor="@color/text_secondary"
+                    android:text="@string/toggle_dark_light_theme"
+                    android:textColor="@color/white"
                     android:textSize="12sp" />
             </LinearLayout>
 

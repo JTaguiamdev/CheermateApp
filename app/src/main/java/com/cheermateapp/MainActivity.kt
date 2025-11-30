@@ -1,38 +1,63 @@
-import androidx.core.content.ContextCompat
 package com.cheermateapp
 
 import android.app.AlertDialog
+import android.app.DatePickerDialog
+import android.app.TimePickerDialog
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
-import com.cheermateapp.data.model.Priority.High
-import com.cheermateapp.data.model.Priority.Low
-import com.cheermateapp.data.model.Priority.Medium
-import com.cheermateapp.data.model.Status
-import com.cheermateapp.data.model.Category
-import com.cheermateapp.data.model.getDisplayText
-import android.widget.*
+import android.view.ViewGroup
+import android.widget.ArrayAdapter
+import android.widget.Button
+import android.widget.CalendarView
+import android.widget.DatePicker // Added
+import android.widget.EditText
+import android.widget.FrameLayout
+import android.widget.GridLayout
+import android.widget.LinearLayout
+import android.widget.ProgressBar
+import android.widget.ScrollView
+import android.widget.SeekBar
+import android.widget.Spinner
+import android.widget.Switch
+import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
+import com.cheermateapp.ActivityLogin
+import com.cheermateapp.FragmentTaskExtensionActivity
+import com.cheermateapp.TaskAdapter
+import com.cheermateapp.TaskPagerAdapter
 import com.cheermateapp.data.db.AppDb
+import com.cheermateapp.data.model.Category
 import com.cheermateapp.data.model.Personality
-import com.cheermateapp.data.model.Task
 import com.cheermateapp.data.model.Priority
+import com.cheermateapp.data.model.Status
+import com.cheermateapp.data.model.Task
+import com.cheermateapp.data.model.TaskReminder
 import com.cheermateapp.data.model.User
+import com.cheermateapp.data.model.getDisplayText
 import com.cheermateapp.ui.tasks.TasksViewModel
 import com.cheermateapp.ui.tasks.TasksViewModelFactory
+import com.cheermateapp.util.InputValidationUtil
+import com.cheermateapp.util.PasswordHashUtil
+import com.cheermateapp.util.ThemeManager
 import com.cheermateapp.util.ToastManager
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import androidx.lifecycle.lifecycleScope
+import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.textfield.TextInputLayout
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
@@ -40,6 +65,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.*
+
 
 class MainActivity : AppCompatActivity() {
 
@@ -1711,7 +1737,7 @@ class MainActivity : AppCompatActivity() {
 
         val datePickerDialog = android.app.DatePickerDialog(
             this,
-            { _, year, month, dayOfMonth ->
+            { _: DatePicker, year: Int, month: Int, dayOfMonth: Int ->
                 val selectedDate = Calendar.getInstance()
                 selectedDate.set(year, month, dayOfMonth)
                 val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())

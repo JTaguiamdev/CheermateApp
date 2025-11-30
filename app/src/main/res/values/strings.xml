@@ -76,6 +76,8 @@
     <string name="confirm_password">Confirm Password</string>
     <string name="password_must_be_at_least_6_characters">Password must be at least 6 characters</string>
     <string name="current_password">Current Password</string>
+    <string name="dark_mode">Dark Mode</string>
+    <string name="toggle_dark_light_theme">Toggle dark/light theme</string>
 
 
 </resources>
