@@ -17,6 +17,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
@@ -25,11 +26,15 @@ import com.cheermateapp.data.model.Personality
 import com.cheermateapp.data.model.Task
 import com.cheermateapp.data.model.Priority
 import com.cheermateapp.data.model.User
+import com.cheermateapp.ui.tasks.TasksViewModel
+import com.cheermateapp.ui.tasks.TasksViewModelFactory
+import com.cheermateapp.util.ToastManager
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
@@ -44,6 +49,19 @@ class MainActivity : AppCompatActivity() {
 
     private val uiScope = CoroutineScope(Dispatchers.Main)
     private var userId: Int = 0
+    private lateinit var tasksViewModel: TasksViewModel
+
+    private lateinit var progressCompleted: View
+    private lateinit var progressInProgress: View
+    private lateinit var progressSubtitle: TextView
+    private lateinit var progressPercent: TextView
+
+    private var isTasksScreenInitialized: Boolean = false
+    private var isSettingsScreenInitialized: Boolean = false
+
+    // Cached roots for embedded "fragments" to avoid re-inflation
+    private var tasksRootView: View? = null
+    private var settingsRootView: View? = null
 
     // ✅ RecyclerView and TaskAdapter for fragment_tasks
     private var taskRecyclerView: RecyclerView? = null
@@ -59,25 +77,17 @@ class MainActivity : AppCompatActivity() {
         fabAddTask?.visibility = if (visible) View.VISIBLE else View.GONE
     }
 
-    // ✅ LIVE TASK UPDATE SYSTEM
-    private var taskUpdateHandler = android.os.Handler(android.os.Looper.getMainLooper())
-    private var taskUpdateRunnable: Runnable? = null
-    private var isTaskUpdateActive = false
-
     // ✅ Activity Result Launcher for task details
     private val taskDetailLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
-        // When returning from task detail activity, refresh the data
-        if (result.resultCode == RESULT_OK) {
-            android.util.Log.d("MainActivity", "✅ Returned from task detail, refreshing data")
-            refreshCurrentView()
-        }
+        // When returning from task detail activity, the UI will update reactively.
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        com.cheermateapp.util.ThemeManager.initializeTheme(this)
 
         try {
             val showDashboard = intent?.getBooleanExtra(EXTRA_SHOW_DASHBOARD, false) == true
@@ -85,6 +95,16 @@ class MainActivity : AppCompatActivity() {
 
             if (showDashboard && userId != 0) {
                 setContentView(R.layout.activity_main)
+
+                val db = AppDb.get(this)
+                val viewModelFactory = TasksViewModelFactory(db, userId)
+                tasksViewModel = ViewModelProvider(this, viewModelFactory)[TasksViewModel::class.java]
+
+                // Initialize views that relate to the progress bar
+                progressCompleted = findViewById(R.id.progressCompleted)
+                progressInProgress = findViewById(R.id.progressInProgress)
+                progressSubtitle = findViewById(R.id.progressSubtitle)
+                progressPercent = findViewById(R.id.progressPercent)
 
                 setupToolbar()
                 setupGreeting()
@@ -95,18 +115,12 @@ class MainActivity : AppCompatActivity() {
                 // Load dashboard data
                 loadUserData()
                 loadTaskStatistics()
-                loadRecentTasks()
-
-                // ✅ START LIVE TASK UPDATES
-                startLiveTaskUpdates()
-
-                // ✅ OBSERVE TASK CHANGES FOR LIVE PROGRESS BAR UPDATES
-                observeTaskChangesForProgressBar()
-
-                // ✅ OBSERVE RECENT TASKS FOR LIVE UPDATES
                 observeRecentTasks()
 
                 showHomeScreen()
+
+                // Observe DB changes for live daily progress bar updates
+                observeTaskChangesForProgressBar()
 
             } else {
                 // Redirect to login if not properly authenticated
@@ -116,157 +130,30 @@ class MainActivity : AppCompatActivity() {
 
         } catch (e: Exception) {
             android.util.Log.e("MainActivity", "Critical error in onCreate", e)
-            Toast.makeText(this, "Loading dashboard...", Toast.LENGTH_SHORT).show()
+            ToastManager.showToast(this, "Loading dashboard...", Toast.LENGTH_SHORT)
             createFallbackLayout()
-        }
-    }
-
-    // ✅ START LIVE TASK UPDATES (Call this in onCreate)
-    private fun startLiveTaskUpdates() {
-        stopLiveTaskUpdates() // Stop any existing updates
-
-        isTaskUpdateActive = true
-        taskUpdateRunnable = object : Runnable {
-            override fun run() {
-                if (isTaskUpdateActive) {
-                    // Update overdue tasks
-                    updateOverdueTasks()
-
-                    // Refresh dashboard if on home screen
-                    if (findViewById<ScrollView>(R.id.homeScroll)?.visibility == View.VISIBLE) {
-                        loadTaskStatistics()
-                        loadRecentTasks()
-                    }
-
-                    // Refresh tasks fragment if active
-                    if (findViewById<FrameLayout>(R.id.contentContainer)?.visibility == View.VISIBLE) {
-                        loadTasksFragmentData()
-                    }
-
-                    // Schedule next update in 30 seconds
-                    taskUpdateHandler.postDelayed(this, 30000) // Update every 30 seconds
-                }
-            }
-        }
-
-        // Start immediate update, then every 30 seconds
-        taskUpdateHandler.post(taskUpdateRunnable!!)
-
-        android.util.Log.d("MainActivity", "✅ Live task updates started")
-    }
-
-    // ✅ STOP LIVE TASK UPDATES (Call this in onDestroy)
-    private fun stopLiveTaskUpdates() {
-        isTaskUpdateActive = false
-        taskUpdateRunnable?.let { taskUpdateHandler.removeCallbacks(it) }
-        android.util.Log.d("MainActivity", "⏹️ Live task updates stopped")
-    }
-
-    // ✅ OBSERVE TASK CHANGES FOR LIVE PROGRESS BAR UPDATES
-    private fun observeTaskChangesForProgressBar() {
-        lifecycleScope.launch {
-            try {
-                val db = AppDb.get(this@MainActivity)
-
-                // Get today's date string for filtering
-                val todayStr = dateToString(Calendar.getInstance().time)
-
-                // ✅ FIX: Observe tasks due today and completed today (matching numerator/denominator)
-                kotlinx.coroutines.flow.combine(
-                    db.taskDao().getTodayTasksCountFlow(userId, todayStr),
-                    db.taskDao().getCompletedTodayTasksCountFlow(userId, todayStr),
-                    db.taskDao().getInProgressTodayTasksCountFlow(userId, todayStr)
-                ) { totalToday, completedToday, inProgressToday ->
-                    Triple(totalToday, completedToday, inProgressToday)
-                }.collect { (totalToday, completedToday, inProgressToday) ->
-                    // Update progress bar on main thread
-                    withContext(Dispatchers.Main) {
-                        updateProgressDisplay(completedToday, inProgressToday, totalToday)
-                        android.util.Log.d("MainActivity", "🔄 Progress bar updated live: $completedToday/$inProgressToday/$totalToday (tasks due today)")
-                    }
-                }
-
-            } catch (e: Exception) {
-                android.util.Log.e("MainActivity", "Error observing task changes for progress bar", e)
-            }
         }
     }
 
     // ✅ OBSERVE RECENT TASKS FOR LIVE UPDATES
     private fun observeRecentTasks() {
         lifecycleScope.launch {
-            try {
-                val db = AppDb.get(this@MainActivity)
-                
-                // Observe pending tasks (which are shown in recent tasks)
-                db.taskDao().getPendingTasksFlow(userId).collect { tasks ->
-                    withContext(Dispatchers.Main) {
-                        updateRecentTasksDisplay(tasks)
-                        android.util.Log.d("MainActivity", "🔄 Recent tasks updated live: ${tasks.size} tasks")
-                    }
-                }
-                
-            } catch (e: Exception) {
-                android.util.Log.e("MainActivity", "Error observing recent tasks", e)
+            // This now observes the shared ViewModel
+            tasksViewModel.tasks.collectLatest { tasks ->
+                updateRecentTasksDisplay(tasks)
+                android.util.Log.d("MainActivity", "🔄 Recent tasks updated live: ${tasks.size} tasks")
             }
         }
     }
 
-    // ✅ REFRESH CURRENT VIEW - Called when returning from task details
+    // ✅ This method is now obsolete for tasks, but might be used for other things.
     private fun refreshCurrentView() {
-        try {
-            val homeScroll = findViewById<ScrollView>(R.id.homeScroll)
-            val contentContainer = findViewById<FrameLayout>(R.id.contentContainer)
-            
-            when {
-                homeScroll?.visibility == View.VISIBLE -> {
-                    // Refresh home screen
-                    android.util.Log.d("MainActivity", "🔄 Refreshing home screen")
-                    loadTaskStatistics()
-                    loadRecentTasks()
-                }
-                contentContainer?.visibility == View.VISIBLE -> {
-                    // Refresh tasks fragment
-                    android.util.Log.d("MainActivity", "🔄 Refreshing tasks fragment")
-                    loadTasksFragmentData()
-                }
-            }
-        } catch (e: Exception) {
-            android.util.Log.e("MainActivity", "Error refreshing current view", e)
-        }
+        // Obsolete for tasks as it's reactive now.
     }
 
     // ✅ SIMPLIFIED VERSION - WITHOUT OVERDUE STATUS
     private fun updateOverdueTasks() {
-        uiScope.launch {
-            try {
-                val db = AppDb.get(this@MainActivity)
-                val updatedCount: Int = withContext(Dispatchers.IO) {
-                    val currentDateTime: Long = System.currentTimeMillis()
-
-                    // Get all pending tasks that are overdue
-                    val overdueTasks: List<Task> = db.taskDao().getPendingTasks(userId)
-                        .filter { task ->
-                            task.DueAt != null && task.DueAt!!.isNotEmpty() &&
-                                    isTaskOverdue(task, currentDateTime)
-                        }
-
-                    // Since no Overdue status, just log them for now
-                    overdueTasks.forEach { task ->
-                        android.util.Log.d("MainActivity", "📅 Task '${task.Title}' is overdue")
-                    }
-
-                    overdueTasks.size
-                }
-
-                if (updatedCount > 0) {
-                    android.util.Log.d("MainActivity", "📅 Found $updatedCount overdue tasks")
-                }
-
-            } catch (e: Exception) {
-                android.util.Log.e("MainActivity", "Error checking overdue tasks", e)
-            }
-        }
+        // This logic could be moved to a repository or use case
     }
 
 
@@ -420,7 +307,6 @@ class MainActivity : AppCompatActivity() {
         try {
             findViewById<ScrollView>(R.id.homeScroll)?.visibility = View.VISIBLE
             val container = findViewById<FrameLayout>(R.id.contentContainer)
-            container?.removeAllViews()
             container?.visibility = View.GONE
             
             // Show FAB on home screen
@@ -439,23 +325,35 @@ class MainActivity : AppCompatActivity() {
 
             // Show content container
             val container = findViewById<FrameLayout>(R.id.contentContainer)
-            container?.removeAllViews()
             container?.visibility = View.VISIBLE
 
-            // Inflate tasks fragment layout into the container
-            LayoutInflater.from(this).inflate(R.layout.fragment_tasks, container, true)
+            // Reuse cached Tasks root view to avoid re-inflation and flicker
+            if (tasksRootView == null) {
+                tasksRootView = LayoutInflater.from(this).inflate(R.layout.fragment_tasks, container, false)
+                container?.removeAllViews()
+                container?.addView(tasksRootView)
+                setupTasksFragment()
+                isTasksScreenInitialized = true
+                android.util.Log.d("MainActivity", "✅ Tasks Fragment inflated and initialized")
+            } else {
+                // If the cached view is not currently attached, attach it without re-initializing
+                if (container?.childCount == 0 || container.getChildAt(0) !== tasksRootView) {
+                    container?.removeAllViews()
+                    container?.addView(tasksRootView)
+                    android.util.Log.d("MainActivity", "✅ Tasks Fragment reused from cache")
+                } else {
+                    android.util.Log.d("MainActivity", "ℹ️ Tasks Fragment already visible, no re-attach")
+                }
+            }
 
-            // Initialize task-specific functionality
-            setupTasksFragment()
+            isSettingsScreenInitialized = false
 
             // Show FAB on tasks screen
             setFabVisibility(true)
 
-            android.util.Log.d("MainActivity", "✅ Loaded Tasks Fragment")
-
         } catch (e: Exception) {
             android.util.Log.e("MainActivity", "Error loading tasks fragment", e)
-            Toast.makeText(this, "Error loading tasks", Toast.LENGTH_SHORT).show()
+            ToastManager.showToast(this, "Error loading tasks", Toast.LENGTH_SHORT)
             showHomeScreen() // Fallback to home
         }
     }
@@ -467,23 +365,35 @@ class MainActivity : AppCompatActivity() {
 
             // Show content container
             val container = findViewById<FrameLayout>(R.id.contentContainer)
-            container?.removeAllViews()
             container?.visibility = View.VISIBLE
 
-            // Inflate settings fragment layout into the container
-            LayoutInflater.from(this).inflate(R.layout.fragment_settings, container, true)
+            // Reuse cached Settings root view to avoid re-inflation and flicker
+            if (settingsRootView == null) {
+                settingsRootView = LayoutInflater.from(this).inflate(R.layout.fragment_settings, container, false)
+                container?.removeAllViews()
+                container?.addView(settingsRootView)
+                setupSettingsFragment()
+                isSettingsScreenInitialized = true
+                android.util.Log.d("MainActivity", "✅ Settings Fragment inflated and initialized")
+            } else {
+                // If the cached view is not currently attached, attach it without re-initializing
+                if (container?.childCount == 0 || container.getChildAt(0) !== settingsRootView) {
+                    container?.removeAllViews()
+                    container?.addView(settingsRootView)
+                    android.util.Log.d("MainActivity", "✅ Settings Fragment reused from cache")
+                } else {
+                    android.util.Log.d("MainActivity", "ℹ️ Settings Fragment already visible, no re-attach")
+                }
+            }
 
-            // Initialize settings-specific functionality
-            setupSettingsFragment()
+            isTasksScreenInitialized = false
 
             // Hide FAB on settings screen
             setFabVisibility(false)
 
-            android.util.Log.d("MainActivity", "✅ Loaded Settings Fragment")
-
         } catch (e: Exception) {
             android.util.Log.e("MainActivity", "Error loading settings fragment", e)
-            Toast.makeText(this, "Error loading settings", Toast.LENGTH_SHORT).show()
+            ToastManager.showToast(this, "Error loading settings", Toast.LENGTH_SHORT)
             showHomeScreen() // Fallback to home
         }
     }
@@ -527,51 +437,110 @@ class MainActivity : AppCompatActivity() {
 
             // Search functionality
             etSearch?.addTextChangedListener(object : android.text.TextWatcher {
-                override fun beforeTextChanged(
-                    s: CharSequence?,
-                    start: Int,
-                    count: Int,
-                    after: Int
-                ) {
-                }
-
+                override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
                 override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
                 override fun afterTextChanged(s: android.text.Editable?) {
-                    searchTasks(s?.toString())
+                    // tasksViewModel.setSearchQuery(s.toString())
                 }
             })
 
             // Filter tabs
             tabAll?.setOnClickListener {
-                setTaskFilter("ALL")
+                tasksViewModel.setTaskFilter("ALL")
                 updateTaskTabSelection(tabAll)
             }
 
             tabToday?.setOnClickListener {
-                setTaskFilter("TODAY")
+                tasksViewModel.setTaskFilter("TODAY")
                 updateTaskTabSelection(tabToday)
             }
 
             tabPending?.setOnClickListener {
-                setTaskFilter("PENDING")
+                tasksViewModel.setTaskFilter("PENDING")
                 updateTaskTabSelection(tabPending)
             }
 
             tabDone?.setOnClickListener {
-                setTaskFilter("DONE")
+                tasksViewModel.setTaskFilter("DONE")
                 updateTaskTabSelection(tabDone)
             }
 
-            // Load initial task data
-            loadTasksFragmentData()
+            observeTasks()
 
             android.util.Log.d("MainActivity", "✅ Tasks fragment initialized with RecyclerView")
 
         } catch (e: Exception) {
             android.util.Log.e("MainActivity", "Error setting up tasks fragment", e)
-            Toast.makeText(this, "Error loading tasks", Toast.LENGTH_SHORT).show()
+            ToastManager.showToast(this, "Error loading tasks", Toast.LENGTH_SHORT)
         }
     }
+
+    private fun observeTasks() {
+        lifecycleScope.launch {
+            tasksViewModel.tasks.collectLatest { tasks ->
+                taskAdapter?.updateTasks(tasks)
+                findViewById<TextView>(R.id.chipFound)?.text = "${tasks.size} found"
+
+                val tvEmptyState = findViewById<TextView>(R.id.tvEmptyState)
+                if (tasks.isEmpty()) {
+                    taskRecyclerView?.visibility = View.GONE
+                    tvEmptyState?.visibility = View.VISIBLE
+                    tvEmptyState?.text = when (tasksViewModel.taskFilter.value) {
+                        "TODAY" -> "No tasks for today\n\nTap the + button to create your first task"
+                        "PENDING" -> "No pending tasks\n\nAll caught up!"
+                        "DONE" -> "No completed tasks yet\n\nComplete a task to see it here"
+                        else -> "No tasks available\n\nTap the + button to create your first task"
+                    }
+                } else {
+                    taskRecyclerView?.visibility = View.VISIBLE
+                    tvEmptyState?.visibility = View.GONE
+                }
+            }
+        }
+        
+        lifecycleScope.launch {
+            tasksViewModel.allTasksCount.collectLatest {
+                findViewById<TextView>(R.id.tabAll)?.text = "All ($it)"
+                findViewById<TextView>(R.id.tvTasksSub)?.text = "$it total tasks"
+            }
+        }
+        lifecycleScope.launch {
+            tasksViewModel.todayTasksCount.collectLatest {
+                findViewById<TextView>(R.id.tabToday)?.text = "Today ($it)"
+            }
+        }
+        lifecycleScope.launch {
+            tasksViewModel.pendingTasksCount.collectLatest {
+                findViewById<TextView>(R.id.tabPending)?.text = "Pending ($it)"
+            }
+        }
+        lifecycleScope.launch {
+            tasksViewModel.completedTasksCount.collectLatest {
+                findViewById<TextView>(R.id.tabDone)?.text = "Done ($it)"
+            }
+        }
+    }
+    
+    private fun updateTaskTabSelection(selectedTab: TextView) {
+        try {
+            // Reset all tabs
+            val tabs = listOf(findViewById<TextView>(R.id.tabAll), findViewById<TextView>(R.id.tabToday), findViewById<TextView>(R.id.tabPending), findViewById<TextView>(R.id.tabDone))
+            tabs.forEach {
+                tab ->
+                tab?.apply {
+                    setBackgroundResource(android.R.color.transparent)
+                    alpha = 0.7f
+                }
+            }
+
+            // Highlight selected tab
+            selectedTab.setBackgroundResource(R.drawable.bg_chip_glass)
+            selectedTab.alpha = 1.0f
+        } catch (e: Exception) {
+            android.util.Log.e("MainActivity", "Error updating tab selection", e)
+        }
+    }
+
 
     private fun setupSettingsFragment() {
         try {
@@ -604,20 +573,24 @@ class MainActivity : AppCompatActivity() {
                 showPersonalitySelectionDialog()
             }
 
+            // Get current dark mode state and set the switch
+            switchDarkMode?.isChecked = com.cheermateapp.util.ThemeManager.isDarkModeActive(this)
+
             switchDarkMode?.setOnCheckedChangeListener { _, isChecked ->
-                Toast.makeText(
-                    this,
-                    if (isChecked) "🌙 Dark mode enabled" else "☀️ Light mode enabled",
-                    Toast.LENGTH_SHORT
-                ).show()
+                val newMode = if (isChecked) {
+                    com.cheermateapp.util.ThemeManager.THEME_DARK
+                } else {
+                    com.cheermateapp.util.ThemeManager.THEME_LIGHT
+                }
+                com.cheermateapp.util.ThemeManager.setThemeMode(this, newMode)
             }
 
             switchNotifications?.setOnCheckedChangeListener { _, isChecked ->
-                Toast.makeText(
+                ToastManager.showToast(
                     this,
                     if (isChecked) "🔔 Notifications enabled" else "🔕 Notifications disabled",
                     Toast.LENGTH_SHORT
-                ).show()
+                )
             }
 
             cardSignOut?.setOnClickListener {
@@ -631,124 +604,7 @@ class MainActivity : AppCompatActivity() {
 
         } catch (e: Exception) {
             android.util.Log.e("MainActivity", "Error setting up settings fragment", e)
-            Toast.makeText(this, "Error loading settings", Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    // ✅ TASK FRAGMENT DATA METHODS
-    private var currentTaskFilter = "ALL"
-    private var currentTasks = mutableListOf<Task>()
-
-    private fun loadTasksFragmentData() {
-        uiScope.launch {
-            try {
-                val db = AppDb.get(this@MainActivity)
-                val tasks: List<Task> = withContext(Dispatchers.IO) {
-                    when (currentTaskFilter) {
-                        "ALL" -> db.taskDao().getAllTasksForUser(userId)
-                        "TODAY" -> {
-                            val todayStr = dateToString(Date())
-                            db.taskDao().getTodayTasks(userId, todayStr)
-                        }
-                        "PENDING" -> db.taskDao().getPendingTasks(userId)
-                        "DONE" -> db.taskDao().getCompletedTasks(userId)
-                        else -> db.taskDao().getAllTasksForUser(userId)
-                    }
-                }
-
-                currentTasks.clear()
-                currentTasks.addAll(tasks)
-                updateTasksFragmentUI()
-
-            } catch (e: Exception) {
-                android.util.Log.e("MainActivity", "Error loading tasks fragment data", e)
-            }
-        }
-    }
-
-    private fun updateTasksFragmentUI() {
-        uiScope.launch {
-            try {
-                val db = AppDb.get(this@MainActivity)
-                val counts: Map<String, Int> = withContext(Dispatchers.IO) {
-                    val todayStr = dateToString(Date())
-                    mapOf(
-                        "all" to db.taskDao().getAllTasksCount(userId),
-                        "today" to db.taskDao().getTodayTasksCount(userId, todayStr),
-                        "pending" to db.taskDao().getPendingTasksCount(userId),
-                        "done" to db.taskDao().getCompletedTasksCount(userId)
-                    )
-                }
-
-                // Update UI elements
-                findViewById<TextView>(R.id.tvTasksSub)?.text = "${counts["all"]} total tasks"
-                findViewById<TextView>(R.id.chipFound)?.text = "${currentTasks.size} found"
-
-                findViewById<TextView>(R.id.tabAll)?.text = "All (${counts["all"]})"
-                findViewById<TextView>(R.id.tabToday)?.text = "Today (${counts["today"]})"
-                findViewById<TextView>(R.id.tabPending)?.text = "Pending (${counts["pending"]})"
-                findViewById<TextView>(R.id.tabDone)?.text = "Done (${counts["done"]})"
-
-                // ✅ Update RecyclerView with tasks
-                val tvEmptyState = findViewById<TextView>(R.id.tvEmptyState)
-                if (currentTasks.isEmpty()) {
-                    taskRecyclerView?.visibility = View.GONE
-                    tvEmptyState?.visibility = View.VISIBLE
-                    tvEmptyState?.text = when (currentTaskFilter) {
-                        "TODAY" -> "No tasks for today\n\nTap the + button to create your first task"
-                        "PENDING" -> "No pending tasks\n\nAll caught up!"
-                        "DONE" -> "No completed tasks yet\n\nComplete a task to see it here"
-                        else -> "No tasks available\n\nTap the + button to create your first task"
-                    }
-                } else {
-                    taskRecyclerView?.visibility = View.VISIBLE
-                    tvEmptyState?.visibility = View.GONE
-                    taskAdapter?.updateTasks(currentTasks)
-                }
-
-                android.util.Log.d("MainActivity", "✅ Updated RecyclerView with ${currentTasks.size} tasks")
-
-            } catch (e: Exception) {
-                android.util.Log.e("MainActivity", "Error updating tasks fragment UI", e)
-            }
-        }
-    }
-
-    private fun setTaskFilter(filter: String) {
-        currentTaskFilter = filter
-        loadTasksFragmentData()
-    }
-
-    private fun updateTaskTabSelection(selectedTab: TextView) {
-        try {
-            // Reset all tabs
-            listOf(R.id.tabAll, R.id.tabToday, R.id.tabPending, R.id.tabDone).forEach { tabId ->
-                findViewById<TextView>(tabId)?.apply {
-                    setBackgroundResource(android.R.color.transparent)
-                    alpha = 0.7f
-                }
-            }
-
-            // Highlight selected tab
-            selectedTab.setBackgroundResource(R.drawable.bg_chip_glass)
-            selectedTab.alpha = 1.0f
-        } catch (e: Exception) {
-            android.util.Log.e("MainActivity", "Error updating tab selection", e)
-        }
-    }
-
-    private fun searchTasks(query: String?) {
-        // Simple search implementation
-        if (query.isNullOrBlank()) {
-            loadTasksFragmentData()
-        } else {
-            val filteredTasks: List<Task> = currentTasks.filter { task ->
-                task.Title.contains(query, ignoreCase = true) ||
-                        (task.Description?.contains(query, ignoreCase = true) == true)
-            }
-            currentTasks.clear()
-            currentTasks.addAll(filteredTasks)
-            updateTasksFragmentUI()
+            ToastManager.showToast(this, "Error loading settings", Toast.LENGTH_SHORT)
         }
     }
 
@@ -774,17 +630,11 @@ class MainActivity : AppCompatActivity() {
                     db.taskDao().update(updatedTask)
                 }
                 
-                Toast.makeText(this@MainActivity, "✅ Task completed!", Toast.LENGTH_SHORT).show()
-                
-                // ✅ FIXED: Update progress bar immediately
-                loadTaskStatistics()
-                
-                // Reload tasks to refresh the list
-                loadTasksFragmentData()
+                ToastManager.showToast(this@MainActivity, "✅ Task completed!", Toast.LENGTH_SHORT)
                 
             } catch (e: Exception) {
                 android.util.Log.e("MainActivity", "Error completing task", e)
-                Toast.makeText(this@MainActivity, "Failed to complete task", Toast.LENGTH_SHORT).show()
+                ToastManager.showToast(this@MainActivity, "Failed to complete task", Toast.LENGTH_SHORT)
             }
         }
     }
@@ -865,7 +715,7 @@ class MainActivity : AppCompatActivity() {
 
             // Progress Slider
             val progressLabel = TextView(this)
-            progressLabel.text = "Progress: ${task.TaskProgress}%"
+            progressLabel.text = "Progress: ${task.TaskProgress} %"
             progressLabel.setPadding(0, 16, 0, 8)
             container.addView(progressLabel)
 
@@ -874,7 +724,7 @@ class MainActivity : AppCompatActivity() {
             progressSeekBar.progress = task.TaskProgress
             progressSeekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
                 override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-                    progressLabel.text = "Progress: $progress%"
+                    progressLabel.text = "Progress: $progress %"
                 }
                 override fun onStartTrackingTouch(seekBar: SeekBar?) {}
                 override fun onStopTrackingTouch(seekBar: SeekBar?) {}
@@ -940,7 +790,7 @@ class MainActivity : AppCompatActivity() {
 
         } catch (e: Exception) {
             android.util.Log.e("MainActivity", "Error showing edit task dialog", e)
-            Toast.makeText(this, "❌ Edit task dialog error", Toast.LENGTH_SHORT).show()
+            ToastManager.showToast(this, "❌ Edit task dialog error", Toast.LENGTH_SHORT)
         }
     }
     
@@ -986,21 +836,16 @@ class MainActivity : AppCompatActivity() {
                 withContext(Dispatchers.IO) {
                     db.taskDao().update(updatedTask)
                 }
-
-                // Reload tasks
-                loadTasksFragmentData()
-                loadTaskStatistics()
-                loadRecentTasks()
-
-                Toast.makeText(
+                
+                ToastManager.showToast(
                     this@MainActivity,
                     "✅ Task '$title' updated successfully!",
                     Toast.LENGTH_LONG
-                ).show()
+                )
 
             } catch (e: Exception) {
                 android.util.Log.e("MainActivity", "Error updating task", e)
-                Toast.makeText(this@MainActivity, "❌ Update Error: ${e.message}", Toast.LENGTH_SHORT).show()
+                ToastManager.showToast(this@MainActivity, "❌ Update Error: ${e.message}", Toast.LENGTH_SHORT)
             }
         }
     }
@@ -1016,16 +861,11 @@ class MainActivity : AppCompatActivity() {
                         withContext(Dispatchers.IO) {
                             db.taskDao().delete(task)
                         }
-                        Toast.makeText(this@MainActivity, "🗑️ Task deleted", Toast.LENGTH_SHORT).show()
-                        loadTasksFragmentData() // Reload to refresh the list
+                        ToastManager.showToast(this@MainActivity, "🗑️ Task deleted", Toast.LENGTH_SHORT)
                         
-                        // ✅ Update home screen progress bar if on home screen
-                        if (findViewById<ScrollView>(R.id.homeScroll)?.visibility == View.VISIBLE) {
-                            loadTaskStatistics()
-                        }
                     } catch (e: Exception) {
                         android.util.Log.e("MainActivity", "Error deleting task", e)
-                        Toast.makeText(this@MainActivity, "Failed to delete task", Toast.LENGTH_SHORT).show()
+                        ToastManager.showToast(this@MainActivity, "Failed to delete task", Toast.LENGTH_SHORT)
                     }
                 }
             }
@@ -1051,6 +891,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun sortTasks(sortType: Int) {
+        val currentTasks = taskAdapter?.tasks ?: return
         try {
             val sortedTasks: List<Task> = when (sortType) {
                 0 -> { // Due Date
@@ -1085,14 +926,14 @@ class MainActivity : AppCompatActivity() {
                         val status1 = when (task1.Status) {
                             com.cheermateapp.data.model.Status.Pending -> 1
                             com.cheermateapp.data.model.Status.InProgress -> 2
-                            com.cheermateapp.data.model.Status.OverDue -> 3  // ✅ FIXED: OverDue (capital D)
+                            com.cheermateapp.data.model.Status.OverDue -> 3
                             com.cheermateapp.data.model.Status.Completed -> 4
                             com.cheermateapp.data.model.Status.Cancelled -> 5
                         }
                         val status2 = when (task2.Status) {
                             com.cheermateapp.data.model.Status.Pending -> 1
                             com.cheermateapp.data.model.Status.InProgress -> 2
-                            com.cheermateapp.data.model.Status.OverDue -> 3  // ✅ FIXED: OverDue (capital D)
+                            com.cheermateapp.data.model.Status.OverDue -> 3
                             com.cheermateapp.data.model.Status.Completed -> 4
                             com.cheermateapp.data.model.Status.Cancelled -> 5
                         }
@@ -1106,25 +947,55 @@ class MainActivity : AppCompatActivity() {
                 }
                 else -> currentTasks
             }
-            currentTasks.clear()
-            currentTasks.addAll(sortedTasks)
-            updateTasksFragmentUI()
+            taskAdapter?.updateTasks(sortedTasks)
 
             val sortNames = arrayOf("Due Date", "Priority", "Title", "Status", "Progress")
             val sortName = if (sortType in sortNames.indices) sortNames[sortType] else "Unknown"
-            Toast.makeText(this, "📊 Sorted by $sortName", Toast.LENGTH_SHORT).show()
+            ToastManager.showToast(this, "📊 Sorted by $sortName", Toast.LENGTH_SHORT)
 
         } catch (e: Exception) {
             android.util.Log.e("FragmentTaskActivity", "Error sorting tasks", e)
-            Toast.makeText(this, "Error sorting tasks", Toast.LENGTH_SHORT).show()
+            ToastManager.showToast(this, "Error sorting tasks", Toast.LENGTH_SHORT)
         }
     }
 
 
     // ✅ FIXED SETTINGS FRAGMENT DATA METHODS
-    private fun loadSettingsFragmentData() {
+    // Cached settings data so we don't re-fetch or flicker when navigating
+    private data class SettingsCache(
+        val profileName: String,
+        val profileEmail: String,
+        val personaName: String?,
+        val chipPersonaText: String?,
+        val statTotal: Int,
+        val statCompleted: Int,
+        val statSuccess: Int
+    )
+
+    private var settingsCache: SettingsCache? = null
+
+    private fun applySettingsCacheToViews(cache: SettingsCache) {
+        findViewById<TextView>(R.id.tvProfileName)?.text = cache.profileName
+        findViewById<TextView>(R.id.tvProfileEmail)?.text = cache.profileEmail
+        findViewById<TextView>(R.id.tvCurrentPersona)?.text = cache.personaName ?: ""
+        findViewById<TextView>(R.id.chipPersona)?.text = cache.chipPersonaText ?: "Your Personality"
+        findViewById<TextView>(R.id.tvStatTotal)?.text = cache.statTotal.toString()
+        findViewById<TextView>(R.id.tvStatCompleted)?.text = cache.statCompleted.toString()
+        findViewById<TextView>(R.id.tvStatSuccess)?.text = "${cache.statSuccess}%"
+    }
+
+    private fun loadSettingsFragmentData(forceRefresh: Boolean = false) {
         uiScope.launch {
             try {
+                // If we already have up-to-date values and we're not forcing a refresh,
+                // just re-bind the existing cache to the (re)inflated views.
+                val cached = settingsCache
+                if (cached != null && !forceRefresh) {
+                    applySettingsCacheToViews(cached)
+                    android.util.Log.d("MainActivity", "Using cached settings data (no DB fetch)")
+                    return@launch
+                }
+
                 val db = AppDb.get(this@MainActivity)
 
                 val user = withContext(Dispatchers.IO) {
@@ -1135,7 +1006,6 @@ class MainActivity : AppCompatActivity() {
                     db.personalityDao().getByUser(userId)
                 }
 
-                // ✅ FIXED: Define completedTasks properly
                 val stats: Map<String, Int> = withContext(Dispatchers.IO) {
                     val totalTasks = db.taskDao().getAllTasksCount(userId)
                     val completedTasks = db.taskDao().getCompletedTasksCount(userId)
@@ -1146,35 +1016,41 @@ class MainActivity : AppCompatActivity() {
                     )
                 }
 
-                // Update profile info
+                // Build display values
+                val profileName: String
+                val profileEmail: String
                 if (user != null) {
-                    val displayName = when {
+                    profileName = when {
                         !user.FirstName.isNullOrBlank() && !user.LastName.isNullOrBlank() ->
                             "${user.FirstName} ${user.LastName}"
-
                         !user.FirstName.isNullOrBlank() -> user.FirstName
                         else -> user.Username
                     }
-                    findViewById<TextView>(R.id.tvProfileName)?.text = displayName
-                    findViewById<TextView>(R.id.tvProfileEmail)?.text =
-                        user.Email ?: "user@example.com"
+                    profileEmail = user.Email ?: "user@example.com"
+                } else {
+                    profileName = "User"
+                    profileEmail = "user@example.com"
                 }
 
-                // Update personality info
-                if (personality != null) {
-                    findViewById<TextView>(R.id.tvCurrentPersona)?.text = personality.Name
-                    findViewById<TextView>(R.id.chipPersona)?.text =
-                        "${personality.Name} Personality"
-                }
+                val personaName = personality?.Name
+                val chipPersonaText = personality?.let { "${it.Name} Personality" }
 
-                // Update statistics
                 val successRate = if (stats["total"]!! > 0) {
                     (stats["completed"]!! * 100) / stats["total"]!!
                 } else 0
 
-                findViewById<TextView>(R.id.tvStatTotal)?.text = "${stats["total"]}"
-                findViewById<TextView>(R.id.tvStatCompleted)?.text = "${stats["completed"]}"
-                findViewById<TextView>(R.id.tvStatSuccess)?.text = "$successRate%"
+                val newCache = SettingsCache(
+                    profileName = profileName,
+                    profileEmail = profileEmail,
+                    personaName = personaName,
+                    chipPersonaText = chipPersonaText,
+                    statTotal = stats["total"] ?: 0,
+                    statCompleted = stats["completed"] ?: 0,
+                    statSuccess = successRate
+                )
+
+                settingsCache = newCache
+                applySettingsCacheToViews(newCache)
 
             } catch (e: Exception) {
                 android.util.Log.e("MainActivity", "Error loading settings fragment data", e)
@@ -1191,7 +1067,7 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 if (user == null) {
-                    Toast.makeText(this@MainActivity, "Error loading user profile", Toast.LENGTH_SHORT).show()
+                    ToastManager.showToast(this@MainActivity, "Error loading user profile", Toast.LENGTH_SHORT)
                     return@launch
                 }
 
@@ -1267,7 +1143,7 @@ class MainActivity : AppCompatActivity() {
 
             } catch (e: Exception) {
                 android.util.Log.e("MainActivity", "Error showing profile edit dialog", e)
-                Toast.makeText(this@MainActivity, "Error loading profile", Toast.LENGTH_SHORT).show()
+                ToastManager.showToast(this@MainActivity, "Error loading profile", Toast.LENGTH_SHORT)
             }
         }
     }
@@ -1283,7 +1159,7 @@ class MainActivity : AppCompatActivity() {
         newLastName: String
     ) {
         if (newFirstName.isBlank() || newLastName.isBlank()) {
-            Toast.makeText(this, "First and last name cannot be empty", Toast.LENGTH_SHORT).show()
+            ToastManager.showToast(this, "First and last name cannot be empty", Toast.LENGTH_SHORT)
             return
         }
 
@@ -1297,11 +1173,11 @@ class MainActivity : AppCompatActivity() {
                         val existingUser = db.userDao().findByUsername(newUsername)
                         if (existingUser != null && existingUser.User_ID != user.User_ID) {
                             withContext(Dispatchers.Main) {
-                                Toast.makeText(
+                                ToastManager.showToast(
                                     this@MainActivity,
                                     "Username already exists",
                                     Toast.LENGTH_SHORT
-                                ).show()
+                                )
                             }
                             return@withContext
                         }
@@ -1318,14 +1194,15 @@ class MainActivity : AppCompatActivity() {
                     db.userDao().update(updatedUser)
                 }
 
-                Toast.makeText(this@MainActivity, "Profile updated successfully", Toast.LENGTH_SHORT).show()
+                ToastManager.showToast(this@MainActivity, "Profile updated successfully", Toast.LENGTH_SHORT)
                 
-                // Reload settings fragment to show updated info
-                loadSettingsFragmentData()
+                // Reload settings fragment to show updated info (force DB refresh)
+                loadSettingsFragmentData(forceRefresh = true)
+                loadUserData()
 
             } catch (e: Exception) {
                 android.util.Log.e("MainActivity", "Error saving profile changes", e)
-                Toast.makeText(this@MainActivity, "Error updating profile: ${e.message}", Toast.LENGTH_LONG).show()
+                ToastManager.showToast(this@MainActivity, "Error updating profile: ${e.message}", Toast.LENGTH_LONG)
             }
         }
     }
@@ -1342,14 +1219,17 @@ class MainActivity : AppCompatActivity() {
         val etConfirmPassword = dialogView.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.etConfirmPassword)
         val tilConfirmPassword = dialogView.findViewById<com.google.android.material.textfield.TextInputLayout>(R.id.tilConfirmPassword)
 
-        // Set initial state
+        // Set initial state for transformation methods (password hidden)
         etCurrentPassword.transformationMethod = android.text.method.PasswordTransformationMethod.getInstance()
-        tilCurrentPassword.isEndIconVisible = false
         etNewPassword.transformationMethod = android.text.method.PasswordTransformationMethod.getInstance()
-        tilNewPassword.isEndIconVisible = false
         etConfirmPassword.transformationMethod = android.text.method.PasswordTransformationMethod.getInstance()
+
+        // Hide the end icon initially
+        tilCurrentPassword.isEndIconVisible = false
+        tilNewPassword.isEndIconVisible = false
         tilConfirmPassword.isEndIconVisible = false
 
+        // Handle end icon visibility based on text presence
         etCurrentPassword.addTextChangedListener(object : android.text.TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
@@ -1360,12 +1240,15 @@ class MainActivity : AppCompatActivity() {
 
         tilCurrentPassword.setEndIconOnClickListener {
             if (etCurrentPassword.transformationMethod == null) {
+                // Currently visible, hide it and set icon to off
                 etCurrentPassword.transformationMethod = android.text.method.PasswordTransformationMethod.getInstance()
                 tilCurrentPassword.setEndIconDrawable(R.drawable.ic_visibility_off)
             } else {
+                // Currently hidden, show it and set icon to on
                 etCurrentPassword.transformationMethod = null
                 tilCurrentPassword.setEndIconDrawable(R.drawable.ic_visibility_on)
             }
+            // Move cursor to end
             etCurrentPassword.setSelection(etCurrentPassword.text?.length ?: 0)
         }
 
@@ -1407,6 +1290,7 @@ class MainActivity : AppCompatActivity() {
             etConfirmPassword.setSelection(etConfirmPassword.text?.length ?: 0)
         }
 
+
         val dialog = androidx.appcompat.app.AlertDialog.Builder(this@MainActivity)
             .setTitle("Change Password")
             .setView(dialogView)
@@ -1423,17 +1307,17 @@ class MainActivity : AppCompatActivity() {
 
                 // Validate inputs
                 if (currentPassword.isEmpty() || newPassword.isEmpty() || confirmPassword.isEmpty()) {
-                    Toast.makeText(this@MainActivity, "Please fill in all fields", Toast.LENGTH_SHORT).show()
+                    ToastManager.showToast(this@MainActivity, "Please fill in all fields", Toast.LENGTH_SHORT)
                     return@setOnClickListener
                 }
 
                 if (newPassword != confirmPassword) {
-                    Toast.makeText(this@MainActivity, "New passwords do not match", Toast.LENGTH_SHORT).show()
+                    ToastManager.showToast(this@MainActivity, "New passwords do not match", Toast.LENGTH_SHORT)
                     return@setOnClickListener
                 }
 
                 if (!com.cheermateapp.util.InputValidationUtil.isValidPassword(newPassword)) {
-                    Toast.makeText(this@MainActivity, "Password must be at least 6 characters", Toast.LENGTH_SHORT).show()
+                    ToastManager.showToast(this@MainActivity, "Password must be at least 6 characters", Toast.LENGTH_SHORT)
                     return@setOnClickListener
                 }
 
@@ -1478,14 +1362,14 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 if (success) {
-                    Toast.makeText(this@MainActivity, "Password changed successfully", Toast.LENGTH_SHORT).show()
+                    ToastManager.showToast(this@MainActivity, "Password changed successfully", Toast.LENGTH_SHORT)
                 } else {
-                    Toast.makeText(this@MainActivity, "Current password is incorrect", Toast.LENGTH_SHORT).show()
+                    ToastManager.showToast(this@MainActivity, "Current password is incorrect", Toast.LENGTH_SHORT)
                 }
 
             } catch (e: Exception) {
                 android.util.Log.e("MainActivity", "Error changing password", e)
-                Toast.makeText(this@MainActivity, "Error changing password: ${e.message}", Toast.LENGTH_LONG).show()
+                ToastManager.showToast(this@MainActivity, "Error changing password: ${e.message}", Toast.LENGTH_LONG)
             }
         }
     }
@@ -1501,7 +1385,7 @@ class MainActivity : AppCompatActivity() {
                 }
                 
                 if (availablePersonalities.isEmpty()) {
-                    Toast.makeText(this@MainActivity, "No personalities available", Toast.LENGTH_SHORT).show()
+                    ToastManager.showToast(this@MainActivity, "No personalities available", Toast.LENGTH_SHORT)
                     return@launch
                 }
                 
@@ -1537,8 +1421,7 @@ class MainActivity : AppCompatActivity() {
                     .show()
 
             } catch (e: Exception) {
-                Toast.makeText(this@MainActivity, "Error loading personalities", Toast.LENGTH_SHORT)
-                    .show()
+                ToastManager.showToast(this@MainActivity, "Error loading personalities", Toast.LENGTH_SHORT)
             }
         }
     }
@@ -1555,16 +1438,14 @@ class MainActivity : AppCompatActivity() {
                     db.personalityDao().getById(personalityId)?.Name ?: "Unknown"
                 }
 
-                Toast.makeText(this@MainActivity, "✅ Personality updated to $personalityName!", Toast.LENGTH_SHORT)
-                    .show()
+                ToastManager.showToast(this@MainActivity, "✅ Personality updated to $personalityName!", Toast.LENGTH_SHORT)
                 
                 // ✅ Update both settings fragment AND home screen personality card
-                loadSettingsFragmentData()
+                loadSettingsFragmentData(forceRefresh = true)
                 loadUserData() // This updates the personality card on home screen
 
             } catch (e: Exception) {
-                Toast.makeText(this@MainActivity, "Error updating personality", Toast.LENGTH_SHORT)
-                    .show()
+                ToastManager.showToast(this@MainActivity, "Error updating personality", Toast.LENGTH_SHORT)
             }
         }
     }
@@ -1599,7 +1480,7 @@ class MainActivity : AppCompatActivity() {
             }
 
             findViewById<View>(R.id.cardCalendar)?.setOnClickListener {
-                Toast.makeText(this, "📅 Select a date to see tasks!", Toast.LENGTH_SHORT).show()
+                ToastManager.showToast(this, "📅 Select a date to see tasks!", Toast.LENGTH_SHORT)
             }
 
             findViewById<TextView>(R.id.quickAddChip)?.setOnClickListener {
@@ -1622,12 +1503,7 @@ class MainActivity : AppCompatActivity() {
                 showProgressDetails()
             }
 
-            // ✅ REMOVED: cardRecent click listener to fix navigation bug
-            // findViewById<View>(R.id.cardRecent)?.setOnClickListener {
-            //     navigateToTasks() // Navigate to full task management
-            // }
-
-           } catch (e: Exception) {
+        } catch (e: Exception) {
             android.util.Log.e("MainActivity", "Error setting up home interactions", e)
         }
     }
@@ -1793,7 +1669,7 @@ class MainActivity : AppCompatActivity() {
 
                 // Validate reminder requires time
                 if (reminderOption != "None" && dueTime.isEmpty()) {
-                    Toast.makeText(this@MainActivity, "❌ Reminder requires a due time to be set", Toast.LENGTH_SHORT).show()
+                    ToastManager.showToast(this@MainActivity, "❌ Reminder requires a due time to be set", Toast.LENGTH_SHORT)
                     return@setOnClickListener
                 }
 
@@ -1938,17 +1814,17 @@ class MainActivity : AppCompatActivity() {
 
                 val timeText = if (dueTime != null) " at $dueTime" else ""
                 val reminderText = if (reminderOption != "None") " (Reminder: $reminderOption)" else ""
-                Toast.makeText(
+                ToastManager.showToast(
                     this@MainActivity,
                     "✅ Task '$title' created for $dueDate$timeText$reminderText!",
                     Toast.LENGTH_LONG
-                ).show()
+                )
 
                 android.util.Log.d("MainActivity", "✅ Created detailed task: $title with category: $category")
 
             } catch (e: Exception) {
                 android.util.Log.e("MainActivity", "Error creating detailed task", e)
-                Toast.makeText(this@MainActivity, "❌ Error creating task", Toast.LENGTH_SHORT).show()
+                ToastManager.showToast(this@MainActivity, "❌ Error creating task", Toast.LENGTH_SHORT)
             }
         }
     }
@@ -2054,7 +1930,7 @@ class MainActivity : AppCompatActivity() {
             🔴 Overdue: ${actualStats["overdue"]}
             ⏳ Pending: ${actualStats["pending"]}
             
-            📈 Success Rate: ${actualStats["successRate"]}%
+            📈 Success Rate: ${actualStats["successRate"]}
             
             ${if (actualStats["total"] == 0) "Start creating tasks to track your progress!" else "Keep up the great work! 💪"}
             """.trimIndent()
@@ -2068,7 +1944,7 @@ class MainActivity : AppCompatActivity() {
 
             } catch (e: Exception) {
                 android.util.Log.e("MainActivity", "Error showing detailed statistics", e)
-                Toast.makeText(this@MainActivity, "Error loading statistics", Toast.LENGTH_SHORT).show()
+                ToastManager.showToast(this@MainActivity, "Error loading statistics", Toast.LENGTH_SHORT)
             }
         }
     }
@@ -2102,7 +1978,7 @@ class MainActivity : AppCompatActivity() {
             ✅ Completed: ${actualProgress["completed"]} tasks
             ⏳ Remaining: ${actualProgress["remaining"]} tasks
             
-            📊 Progress: ${actualProgress["percent"]}%
+            📊 Progress: ${actualProgress["percent"]}
             
             ${if (actualProgress["goal"] == 0) "Create tasks for today to track your progress!" else "Keep going! 💪"}
             """.trimIndent()
@@ -2141,76 +2017,75 @@ class MainActivity : AppCompatActivity() {
                         
                         if (motivationMessages.isNotEmpty()) {
                             val randomMessage = motivationMessages.random().TextTemplate
-                            Toast.makeText(this@MainActivity, randomMessage, Toast.LENGTH_LONG).show()
+                            ToastManager.showToast(this@MainActivity, randomMessage, Toast.LENGTH_LONG)
                         } else {
                             // Fallback to personality's default motivation message
                             val personality = withContext(Dispatchers.IO) {
                                 db.personalityDao().getById(personalityId)
                             }
                             val message = personality?.MotivationMessage ?: "💪 You've got this! Let's make today amazing!"
-                            Toast.makeText(this@MainActivity, message, Toast.LENGTH_LONG).show()
+                            ToastManager.showToast(this@MainActivity, message, Toast.LENGTH_LONG)
                         }
                     } else {
-                        Toast.makeText(this@MainActivity, "💪 You've got this! Let's make today amazing!", Toast.LENGTH_SHORT).show()
+                        ToastManager.showToast(this@MainActivity, "💪 You've got this! Let's make today amazing!", Toast.LENGTH_SHORT)
                     }
 
                 } catch (e: Exception) {
-                    Toast.makeText(this@MainActivity, "💪 You've got this! Let's make today amazing!", Toast.LENGTH_SHORT).show()
+                    ToastManager.showToast(this@MainActivity, "💪 You've got this! Let's make today amazing!", Toast.LENGTH_SHORT)
                 }
             }
         } catch (e: Exception) {
-            Toast.makeText(this, "💪 Stay motivated and keep pushing forward!", Toast.LENGTH_SHORT).show()
+            ToastManager.showToast(this, "💪 Stay motivated and keep pushing forward!", Toast.LENGTH_SHORT)
         }
     }
 
-    // ✅ DASHBOARD DATA LOADING - FULLY IMPLEMENTED
-    private fun loadUserData() {
-        uiScope.launch {
-            try {
-                val db = AppDb.get(this@MainActivity)
-
-                val user = withContext(Dispatchers.IO) {
-                    db.userDao().getById(userId)
-                }
-
-                val personality: Personality? = withContext(Dispatchers.IO) {
-                    db.personalityDao().getByUser(userId)
-                }
-
-                val tvUsername = findViewById<TextView>(R.id.tvUsername)
-
-                if (user != null) {
-                    val displayName = when {
-                        !user.FirstName.isNullOrBlank() && !user.LastName.isNullOrBlank() ->
-                            "${user.FirstName} ${user.LastName}"
-                        !user.FirstName.isNullOrBlank() -> user.FirstName
-                        else -> user.Username
+        // ✅ DASHBOARD DATA LOADING - FULLY IMPLEMENTED
+        private fun loadUserData() {
+            uiScope.launch {
+                try {
+                    val db = AppDb.get(this@MainActivity)
+    
+                    val user = withContext(Dispatchers.IO) {
+                        db.userDao().getById(userId)
                     }
-
-                    tvUsername?.text = displayName
-                } else {
-                    tvUsername?.text = "User"
+    
+                    val personality: Personality? = withContext(Dispatchers.IO) {
+                        db.personalityDao().getByUser(userId)
+                    }
+    
+                    val tvUsername = findViewById<TextView>(R.id.tvUsername)
+    
+                    if (user != null) {
+                        val displayName = when {
+                            !user.FirstName.isNullOrBlank() && !user.LastName.isNullOrBlank() ->
+                                "${user.FirstName} ${user.LastName}"
+                            !user.FirstName.isNullOrBlank() -> user.FirstName
+                            else -> user.Username
+                        }
+    
+                        tvUsername?.text = displayName
+                    } else {
+                        tvUsername?.text = "User"
+                    }
+    
+                    val title = findViewById<TextView>(R.id.personalityTitle)
+                    val desc = findViewById<TextView>(R.id.personalityDesc)
+    
+                    if (personality != null) {
+                        title?.text = "${personality.Name} Vibes"
+                        desc?.text = personality.Description
+                    } else {
+                        title?.text = "Your Personality"
+                        desc?.text = "No personality selected yet."
+                    }
+    
+                } catch (e: Exception) {
+                    android.util.Log.e("MainActivity", "Error loading user data", e)
+                    findViewById<TextView>(R.id.tvUsername)?.text = "User"
+                    ToastManager.showToast(this@MainActivity, "Error loading user data", Toast.LENGTH_SHORT)
                 }
-
-                val title = findViewById<TextView>(R.id.personalityTitle)
-                val desc = findViewById<TextView>(R.id.personalityDesc)
-
-                if (personality != null) {
-                    title?.text = "${personality.Name} Vibes"
-                    desc?.text = personality.Description
-                } else {
-                    title?.text = "Your Personality"
-                    desc?.text = "No personality selected yet."
-                }
-
-            } catch (e: Exception) {
-                android.util.Log.e("MainActivity", "Error loading user data", e)
-                findViewById<TextView>(R.id.tvUsername)?.text = "User"
-                Toast.makeText(this@MainActivity, "Error loading user data", Toast.LENGTH_SHORT).show()
             }
         }
-    }
-
     private fun loadTaskStatistics() {
         uiScope.launch {
             try {
@@ -2228,11 +2103,14 @@ class MainActivity : AppCompatActivity() {
                     // ✅ FIX: Count tasks DUE today AND completed (matching numerator to denominator)
                     val todayCompletedTasks = db.taskDao().getCompletedTodayTasksCount(userId, todayStr)
                     val todayInProgressTasks = db.taskDao().getInProgressTodayTasksCount(userId, todayStr)
-                    // ✅ FIXED: Use the correct method signature
+                    val pendingTasks = db.taskDao().getPendingTasksCount(userId)
                     val overdueTasks = db.taskDao().getOverdueTasksCount(userId)
 
                     android.util.Log.d("MainActivity", "✅ Dashboard statistics - Today: $todayStr")
-                    android.util.Log.d("MainActivity", "✅ Tasks due today: $todayTasks, Completed today (due today): $todayCompletedTasks, In Progress today: $todayInProgressTasks, Overdue: $overdueTasks")
+                    android.util.Log.d(
+                        "MainActivity",
+                        "✅ Tasks due today: $todayTasks, Completed today (due today): $todayCompletedTasks, In Progress today: $todayInProgressTasks, Pending: $pendingTasks, Overdue: $overdueTasks"
+                    )
 
                     mapOf(
                         "total" to totalTasks,
@@ -2240,7 +2118,7 @@ class MainActivity : AppCompatActivity() {
                         "today" to todayTasks,
                         "todayCompleted" to todayCompletedTasks,
                         "todayInProgress" to todayInProgressTasks,
-                        "overdue" to overdueTasks
+                        "pending" to pendingTasks
                     )
                 }
 
@@ -2252,7 +2130,7 @@ class MainActivity : AppCompatActivity() {
 
             } catch (e: Exception) {
                 android.util.Log.e("MainActivity", "Error loading dashboard statistics", e)
-                val fallbackStats: Map<String, Int> = mapOf("total" to 0, "completed" to 0, "today" to 0, "todayCompleted" to 0, "overdue" to 0)
+                val fallbackStats: Map<String, Int> = mapOf("total" to 0, "completed" to 0, "today" to 0, "todayCompleted" to 0, "pending" to 0)
                 updateStatisticsDisplay(fallbackStats)
             }
         }
@@ -2282,7 +2160,7 @@ class MainActivity : AppCompatActivity() {
                             "total" -> valueTextView?.text = stats["total"].toString()
                             "done" -> valueTextView?.text = stats["completed"].toString()
                             "today" -> valueTextView?.text = stats["today"].toString()
-                            "overdue" -> valueTextView?.text = stats["overdue"].toString()
+                            "pending" -> valueTextView?.text = stats["pending"].toString()
                         }
                     }
                 }
@@ -2294,46 +2172,34 @@ class MainActivity : AppCompatActivity() {
 
     private fun updateProgressDisplay(completed: Int, inProgress: Int, total: Int) {
         try {
-            val progressSubtitle = findViewById<TextView>(R.id.progressSubtitle)
-            val progressPercent = findViewById<TextView>(R.id.progressPercent)
-            val progressCompleted = findViewById<View>(R.id.progressCompleted)
-            val progressInProgress = findViewById<View>(R.id.progressInProgress)
-
             val percentage = if (total > 0) (completed * 100) / total else 0
             val inProgressPercentage = if (total > 0) (inProgress * 100) / total else 0
 
-            progressSubtitle?.text = "$completed of $total tasks completed today"
-            progressPercent?.text = "$percentage%"
+            progressSubtitle.text = "$completed of $total tasks completed today"
+            progressPercent.text = "$percentage%"
 
             // ✅ Update progress bar weight to reflect percentage
-            progressCompleted?.layoutParams?.let { params ->
-                if (params is LinearLayout.LayoutParams) {
-                    params.weight = percentage.toFloat()
-                    progressCompleted.layoutParams = params
-                }
+            (progressCompleted.layoutParams as? LinearLayout.LayoutParams)?.let { params ->
+                params.weight = percentage.toFloat()
+                progressCompleted.layoutParams = params
             }
 
-            progressInProgress?.layoutParams?.let { params ->
-                if (params is LinearLayout.LayoutParams) {
-                    params.weight = inProgressPercentage.toFloat()
-                    progressInProgress.layoutParams = params
-                }
+            (progressInProgress.layoutParams as? LinearLayout.LayoutParams)?.let { params ->
+                params.weight = inProgressPercentage.toFloat()
+                progressInProgress.layoutParams = params
             }
 
             // Update the remainder weight
-            val progressBar = progressCompleted?.parent as? LinearLayout
+            val progressBar = progressCompleted.parent as? LinearLayout
             if (progressBar != null && progressBar.childCount > 2) {
                 val remainder = progressBar.getChildAt(2)
-                remainder?.layoutParams?.let { remParams ->
-                    if (remParams is LinearLayout.LayoutParams) {
-                        remParams.weight = (100 - percentage - inProgressPercentage).toFloat()
-                        remainder.layoutParams = remParams
-                    }
+                (remainder.layoutParams as? LinearLayout.LayoutParams)?.let { remParams ->
+                    remParams.weight = (100 - percentage - inProgressPercentage).toFloat().coerceAtLeast(0f)
+                    remainder.layoutParams = remParams
                 }
                 // ✅ Request layout update to force redraw
                 progressBar.requestLayout()
             }
-
 
             android.util.Log.d("MainActivity", "✅ Progress updated: $percentage% completed, $inProgressPercentage% in progress ($completed/$inProgress/$total)")
 
@@ -2341,6 +2207,7 @@ class MainActivity : AppCompatActivity() {
             android.util.Log.e("MainActivity", "Error updating progress display", e)
         }
     }
+
 
     // ✅ LOAD ALL RECENT TASKS (NOT JUST 3) WITH LIVE UPDATES
     private fun loadRecentTasks() {
@@ -2452,7 +2319,7 @@ class MainActivity : AppCompatActivity() {
             }
         } catch (e: Exception) {
             android.util.Log.e("MainActivity", "Error updating recent tasks display", e)
-            Toast.makeText(this, "Error displaying tasks", Toast.LENGTH_SHORT).show()
+            ToastManager.showToast(this, "Error displaying tasks", Toast.LENGTH_SHORT)
         }
     }
 
@@ -2515,7 +2382,7 @@ class MainActivity : AppCompatActivity() {
 
             // 7. Progress
             if (tvTaskProgress != null && progressBar != null) {
-                tvTaskProgress.text = "${task.TaskProgress}%"
+                tvTaskProgress.text = "${task.TaskProgress} %"
                 progressBar.progress = task.TaskProgress
                 
                 // Show progress bar for in-progress tasks
@@ -2742,15 +2609,14 @@ class MainActivity : AppCompatActivity() {
                     db.taskDao().updateTaskProgress(task.User_ID, task.Task_ID, 100)
                 }
 
-                Toast.makeText(this@MainActivity, "✅ Task '${task.Title}' marked as done!", Toast.LENGTH_SHORT).show()
-                
-                // ✅ FIXED: Update progress bar immediately
+                ToastManager.showToast(this@MainActivity, "✅ Task '${task.Title}' marked as done!", Toast.LENGTH_SHORT)
+
+                // Refresh dashboard stats and progress bar
                 loadTaskStatistics()
                 loadRecentTasks()
-
             } catch (e: Exception) {
                 android.util.Log.e("MainActivity", "Error marking task as done", e)
-                Toast.makeText(this@MainActivity, "❌ Error updating task", Toast.LENGTH_SHORT).show()
+                ToastManager.showToast(this@MainActivity, "❌ Error updating task", Toast.LENGTH_SHORT)
             }
         }
     }
@@ -2764,13 +2630,14 @@ class MainActivity : AppCompatActivity() {
                     db.taskDao().softDelete(task.User_ID, task.Task_ID)
                 }
 
-                Toast.makeText(this@MainActivity, "🗑️ Task '${task.Title}' deleted!", Toast.LENGTH_SHORT).show()
+                ToastManager.showToast(this@MainActivity, "🗑️ Task '${task.Title}' deleted!", Toast.LENGTH_SHORT)
+
+                // Refresh dashboard stats and progress bar
                 loadTaskStatistics()
                 loadRecentTasks()
-
             } catch (e: Exception) {
                 android.util.Log.e("MainActivity", "Error deleting task", e)
-                Toast.makeText(this@MainActivity, "❌ Error deleting task", Toast.LENGTH_SHORT).show()
+                ToastManager.showToast(this@MainActivity, "❌ Error deleting task", Toast.LENGTH_SHORT)
             }
         }
     }
@@ -2788,13 +2655,14 @@ class MainActivity : AppCompatActivity() {
                     )
                 }
 
-                Toast.makeText(this@MainActivity, "🔄 Task '${task.Title}' is in progress!", Toast.LENGTH_SHORT).show()
+                ToastManager.showToast(this@MainActivity, "🔄 Task '${task.Title}' is in progress!", Toast.LENGTH_SHORT)
+
+                // Refresh dashboard stats and progress bar
                 loadTaskStatistics()
                 loadRecentTasks()
-
             } catch (e: Exception) {
                 android.util.Log.e("MainActivity", "Error marking task as in progress", e)
-                Toast.makeText(this@MainActivity, "❌ Error updating task", Toast.LENGTH_SHORT).show()
+                ToastManager.showToast(this@MainActivity, "❌ Error updating task", Toast.LENGTH_SHORT)
             }
         }
     }
@@ -2814,13 +2682,14 @@ class MainActivity : AppCompatActivity() {
                     )
                 }
 
-                Toast.makeText(this@MainActivity, "⏳ Task '${task.Title}' marked as pending!", Toast.LENGTH_SHORT).show()
+                ToastManager.showToast(this@MainActivity, "⏳ Task '${task.Title}' marked as pending!", Toast.LENGTH_SHORT)
+
+                // Refresh dashboard stats and progress bar
                 loadTaskStatistics()
                 loadRecentTasks()
-
             } catch (e: Exception) {
                 android.util.Log.e("MainActivity", "Error marking task as pending", e)
-                Toast.makeText(this@MainActivity, "❌ Error updating task", Toast.LENGTH_SHORT).show()
+                ToastManager.showToast(this@MainActivity, "❌ Error updating task", Toast.LENGTH_SHORT)
             }
         }
     }
@@ -2838,12 +2707,10 @@ class MainActivity : AppCompatActivity() {
                             db.taskDao().delete(task)
                         }
 
-                        Toast.makeText(this@MainActivity, "🗑️ Task deleted!", Toast.LENGTH_SHORT).show()
-                        loadTaskStatistics()
-                        loadRecentTasks()
+                        ToastManager.showToast(this@MainActivity, "🗑️ Task deleted!", Toast.LENGTH_SHORT)
 
                     } catch (e: Exception) {
-                        Toast.makeText(this@MainActivity, "❌ Error deleting task", Toast.LENGTH_SHORT).show()
+                        ToastManager.showToast(this@MainActivity, "❌ Error deleting task", Toast.LENGTH_SHORT)
                     }
                 }
             }
@@ -2893,7 +2760,7 @@ class MainActivity : AppCompatActivity() {
             dateInfoTextView.apply {
                 setPadding(16, 4, 16, 4) // Reduced padding to save space
                 textSize = 11f // Slightly smaller text
-                setTextColor(context.getColor(R.color.text_primary))
+                setTextColor(context.getColor(android.R.color.white))
                 gravity = android.view.Gravity.CENTER
                 text = "Tap a date to view tasks"
                 fontFeatureSettings = "smcp" // Small caps
@@ -2916,11 +2783,8 @@ class MainActivity : AppCompatActivity() {
                     // Show loading indicator
                     dateInfoTextView.text = "Loading tasks..."
                     
-                    // Load and display tasks for date
-                    showTasksForDate(year, month, dayOfMonth)
-                    
                     // Update helper text with task info
-                    updateDateInfoText(dateInfoTextView, year, month, dayOfMonth)
+                    updateDateInfoText(dateInfoTextView, year, month, dayOfMonth, findViewById(R.id.bottomNav))
                     
                     android.util.Log.d("MainActivity", "📅 Date selected: $dayOfMonth/${month + 1}/$year")
                 }
@@ -2934,7 +2798,7 @@ class MainActivity : AppCompatActivity() {
             // ✅ ADD CALENDAR AND HELPER TEXT TO CONTAINER
             calendarPlaceholder.addView(calendarView)
             calendarPlaceholder.addView(dateInfoTextView)
-            
+
             // ✅ Load task dates for current month to show info
             loadTaskDatesForCurrentMonth()
 
@@ -2947,7 +2811,7 @@ class MainActivity : AppCompatActivity() {
     }
     
     // ✅ NEW: Update date info text with task count and priority
-    private fun updateDateInfoText(textView: TextView, year: Int, month: Int, day: Int) {
+    private fun updateDateInfoText(textView: TextView, year: Int, month: Int, day: Int, bottomNav: BottomNavigationView?) {
         uiScope.launch {
             try {
                 val db = AppDb.get(this@MainActivity)
@@ -2960,6 +2824,9 @@ class MainActivity : AppCompatActivity() {
                 
                 if (tasksForDate.isEmpty()) {
                     textView.text = "No tasks for this date"
+                    textView.isClickable = false
+                    textView.setOnClickListener(null)
+                    textView.alpha = 0.6f // Indicate it's not clickable
                 } else {
                     val highestPriority = com.cheermateapp.util.CalendarDecorator.getHighestPriority(tasksForDate)
                     val priorityDot = com.cheermateapp.util.CalendarDecorator.getPriorityDot(highestPriority)
@@ -2969,10 +2836,19 @@ class MainActivity : AppCompatActivity() {
                     val formattedDate = dateFormat.format(calendar.time)
                     
                     textView.text = "$priorityDot $formattedDate: ${tasksForDate.size} task(s) - Tap to view"
+                    textView.isClickable = true
+                    textView.alpha = 1.0f // Restore full opacity
+                    textView.setOnClickListener {
+                        navigateToTasks()
+                        bottomNav?.selectedItemId = R.id.nav_tasks
+                    }
                 }
             } catch (e: Exception) {
                 android.util.Log.e("MainActivity", "Error updating date info text", e)
                 textView.text = "Error loading task info"
+                textView.isClickable = false
+                textView.setOnClickListener(null)
+                textView.alpha = 0.6f
             }
         }
     }
@@ -3035,11 +2911,19 @@ class MainActivity : AppCompatActivity() {
                     AlertDialog.Builder(this@MainActivity)
                         .setTitle("$priorityIndicator Tasks for $formattedDate")
                         .setMessage(message)
-                        .setPositiveButton("View All") { _, _ -> navigateToTasks() }
+                        .setPositiveButton("View All") { _, _ ->
+                            // Use bottom navigation selection so state & highlight stay in sync
+                            val bottomNav = findViewById<com.google.android.material.bottomnavigation.BottomNavigationView>(R.id.bottomNav)
+                            if (bottomNav != null) {
+                                bottomNav.selectedItemId = R.id.nav_tasks
+                            } else {
+                                navigateToTasks()
+                            }
+                        }
                         .setNegativeButton("Close", null)
                         .show()
                 } else {
-                    Toast.makeText(this@MainActivity, "No tasks for $formattedDate", Toast.LENGTH_SHORT).show()
+                    ToastManager.showToast(this@MainActivity, "No tasks for $formattedDate", Toast.LENGTH_SHORT)
                 }
 
                 android.util.Log.d("MainActivity", "Loaded ${tasksForDate.size} tasks for: $formattedDate")
@@ -3061,7 +2945,7 @@ class MainActivity : AppCompatActivity() {
             fallbackText.text = "📅 Calendar View\nTap dates to see tasks"
             fallbackText.gravity = android.view.Gravity.CENTER
             fallbackText.setPadding(20, 40, 20, 40)
-            fallbackText.setTextColor(getColor(R.color.text_primary))
+            fallbackText.setTextColor(getColor(android.R.color.white))
             fallbackText.textSize = 16f
 
             calendarPlaceholder?.addView(fallbackText)
@@ -3101,11 +2985,11 @@ class MainActivity : AppCompatActivity() {
             layout.addView(actionButton)
             setContentView(layout)
 
-            Toast.makeText(this, "Dashboard loaded in fallback mode", Toast.LENGTH_LONG).show()
+            ToastManager.showToast(this, "Dashboard loaded in fallback mode", Toast.LENGTH_LONG)
 
         } catch (e: Exception) {
             android.util.Log.e("MainActivity", "Fallback layout failed", e)
-            Toast.makeText(this, "Critical error - redirecting to login", Toast.LENGTH_LONG).show()
+            ToastManager.showToast(this, "Critical error - redirecting to login", Toast.LENGTH_LONG)
 
             try {
                 startActivity(Intent(this, ActivityLogin::class.java))
@@ -3133,21 +3017,47 @@ class MainActivity : AppCompatActivity() {
     // ✅ LIFECYCLE METHODS
     override fun onResume() {
         super.onResume()
-        // Restart live updates when app becomes visible
-        startLiveTaskUpdates()
         // Reload user data to reflect any personality changes
         loadUserData()
     }
 
     override fun onPause() {
         super.onPause()
-        // Pause live updates when app goes to background
-        stopLiveTaskUpdates()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        // Stop live updates when activity is destroyed
-        stopLiveTaskUpdates()
+    }
+
+    // ✅ OBSERVE TASK CHANGES FOR LIVE PROGRESS BAR UPDATES ON HOME SCREEN
+    private fun observeTaskChangesForProgressBar() {
+        lifecycleScope.launch {
+            try {
+                val db = AppDb.get(this@MainActivity)
+
+                val today = Calendar.getInstance()
+                val todayStr = dateToString(today.time)
+
+                // Observe today total, completed, and in-progress tasks
+                kotlinx.coroutines.flow.combine(
+                    db.taskDao().getTodayTasksCountFlow(userId, todayStr),
+                    db.taskDao().getCompletedTodayTasksCountFlow(userId, todayStr),
+                    db.taskDao().getInProgressTodayTasksCountFlow(userId, todayStr)
+                ) { totalToday, completedToday, inProgressToday ->
+                    Triple(totalToday, completedToday, inProgressToday)
+                }.collect { (totalToday, completedToday, inProgressToday) ->
+                    // Update UI on main thread
+                    withContext(Dispatchers.Main) {
+                        updateProgressDisplay(completedToday, inProgressToday, totalToday)
+                        android.util.Log.d(
+                            "MainActivity",
+                            "🔄 Live progress updated: completed=$completedToday, inProgress=$inProgressToday, total=$totalToday"
+                        )
+                    }
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("MainActivity", "Error observing task changes for progress bar", e)
+            }
+        }
     }
 }
