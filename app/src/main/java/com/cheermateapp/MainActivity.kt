@@ -1,3 +1,4 @@
+import androidx.core.content.ContextCompat
 package com.cheermateapp
 
 import android.app.AlertDialog
@@ -2773,6 +2774,7 @@ class MainActivity : AppCompatActivity() {
             try {
                 // ✅ STYLING - Apply theme-aware background and text colors
                 calendarView.setBackgroundColor(this@MainActivity.getColor(R.color.calendar_background))
+                changeCalendarViewHeaderTextColor(calendarView, android.R.color.white)
                 
                 // ✅ Apply theme-aware text colors to CalendarView
                 // Note: CalendarView text colors are controlled by the app theme
@@ -3057,6 +3059,65 @@ class MainActivity : AppCompatActivity() {
                 }
             } catch (e: Exception) {
                 android.util.Log.e("MainActivity", "Error observing task changes for progress bar", e)
+            }
+        }
+    }
+
+    /**
+     * Changes the header text color of a CalendarView programmatically.
+     * This method attempts to target both the month/year display and the weekday labels.
+     *
+     * IMPORTANT: This approach relies on the internal view hierarchy of CalendarView,
+     * which is not part of the public API and can change across Android versions or device manufacturers.
+     * Use with caution.
+     *
+     * @param calendarView The CalendarView instance to modify.
+     * @param colorResId The resource ID of the desired color (e.g., R.color.white).
+     */
+    private fun changeCalendarViewHeaderTextColor(calendarView: CalendarView, colorResId: Int) {
+        val desiredColor = ContextCompat.getColor(calendarView.context, colorResId)
+
+        // CalendarView's direct child is typically a LinearLayout containing all its internal parts.
+        val mainLinearLayout = calendarView.getChildAt(0) as? ViewGroup
+
+        mainLinearLayout?.let {
+            // Iterate through the children of the main LinearLayout
+            for (i in 0 until it.childCount) {
+                val child = it.getChildAt(i)
+
+                // --- Target the Month/Year Header Text ---
+                if (child is ViewGroup) {
+                    for (j in 0 until child.childCount) {
+                        val grandChild = child.getChildAt(j)
+                        if (grandChild is TextView) {
+                            val text = grandChild.text.toString()
+                            // Heuristic: Check if the text contains a 4-digit number (for the year)
+                            // and is longer than a single character (to exclude single-letter weekday initials).
+                            // This is an educated guess and might need adjustment based on Android version.
+                            if (text.contains(Regex("\\d{4}")) && text.length > 2) {
+                                grandChild.setTextColor(desiredColor)
+                            }
+                        }
+                    }
+                }
+
+                // --- Target the Weekday Labels (e.g., S, M, T, W, T, F, S) ---
+                if (child is ViewGroup && child.childCount == 7) {
+                    // Verify that all children in this ViewGroup are indeed TextViews
+                    var allChildrenAreTextViews = true
+                    for (j in 0 until child.childCount) {
+                        if (child.getChildAt(j) !is TextView) {
+                            allChildrenAreTextViews = false
+                            break
+                        }
+                    }
+                    if (allChildrenAreTextViews) {
+                        // This is very likely the row of weekday headers
+                        for (j in 0 until child.childCount) {
+                            (child.getChildAt(j) as TextView).setTextColor(desiredColor)
+                        }
+                    }
+                }
             }
         }
     }
