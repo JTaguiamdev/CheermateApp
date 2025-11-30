@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Text colors for dark mode - black text on light background -->
-    <color name="text_primary">#FF000000</color>
-    <color name="text_secondary">#99000000</color>
+    <!-- Text colors for dark mode -->
+    <color name="text_primary">#FFFFFFFF</color>
+    <color name="text_secondary">#B3FFFFFF</color>
     
     <!-- Calendar background for dark mode - transparent -->
     <color name="calendar_background">#00FFFFFF</color>
     
-    <!-- Toolbar icon color for dark mode - black for light background -->
-    <color name="toolbar_icon">#FF000000</color>
+    <!-- Toolbar icon color for dark mode -->
+    <color name="toolbar_icon">#FFFFFFFF</color>
 
     <!-- Bottom Sheet & Dialog colors for Dark Mode -->
     <color name="bottom_sheet_background">#1E1E1E</color>
@@ -17,4 +17,6 @@
     <color name="bottom_sheet_button_background">#2D2D2D</color>
     <color name="bottom_sheet_button_border">#444444</color>
     <color name="bottom_sheet_ripple">#1AFFFFFF</color>
+
+    <color name="calendar_placeholder_text_color">#FFFFFFFF</color>
 </resources>

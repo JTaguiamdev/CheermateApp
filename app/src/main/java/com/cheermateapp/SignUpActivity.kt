@@ -29,6 +29,7 @@ class SignUpActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        com.cheermateapp.util.ThemeManager.initializeTheme(this)
 
         try {
             binding = ActivitySignUpBinding.inflate(layoutInflater)
@@ -63,6 +64,7 @@ class SignUpActivity : AppCompatActivity() {
             setupSecurityQuestionDropdown()
             setupSignUpButton()
             setupNavigationLinks()
+            setupKeyboardAwareScroll()
 
         } catch (e: Exception) {
             Toast.makeText(this, "Error loading sign up screen", Toast.LENGTH_LONG).show()
@@ -136,6 +138,50 @@ class SignUpActivity : AppCompatActivity() {
             // Create user account
             createUserAccount(firstName, lastName, username, password, securityQuestion, securityAnswer)
         }
+    }
+
+    private fun setupKeyboardAwareScroll() {
+        // Animate the ScrollView itself when the security answer field is focused/edited
+        android.util.Log.d("SignUpActivity", "setupKeyboardAwareScroll called; etSecurityAnswer=${binding.etSecurityAnswer}")
+        val securityAnswer = binding.etSecurityAnswer ?: return
+        val scrollView = findViewById<android.widget.ScrollView>(R.id.signUpScrollView) ?: return
+
+        fun animateScrollToField(trigger: String) {
+            scrollView.post {
+                val targetY = (securityAnswer.bottom + 80).coerceAtLeast(0)
+                android.util.Log.d(
+                    "SignUpActivity",
+                    "animateScrollToField from=$trigger currentY=${scrollView.scrollY} targetY=$targetY"
+                )
+                android.animation.ObjectAnimator.ofInt(
+                    scrollView,
+                    "scrollY",
+                    scrollView.scrollY,
+                    targetY
+                ).apply {
+                    duration = 250
+                    interpolator = android.view.animation.DecelerateInterpolator()
+                }.start()
+            }
+        }
+
+        securityAnswer.setOnFocusChangeListener { _, hasFocus ->
+            android.util.Log.d("SignUpActivity", "etSecurityAnswer focus changed: hasFocus=$hasFocus")
+            if (hasFocus) {
+                animateScrollToField("focus")
+            }
+        }
+
+        securityAnswer.addTextChangedListener(object : android.text.TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun afterTextChanged(s: android.text.Editable?) {
+                if (securityAnswer.isFocused) {
+                    android.util.Log.d("SignUpActivity", "afterTextChanged on etSecurityAnswer; length=${s?.length ?: 0}")
+                    animateScrollToField("textChanged")
+                }
+            }
+        })
     }
 
     /**

@@ -44,6 +44,7 @@
         <activity
             android:name=".SignUpActivity"
             android:exported="false"
+            android:windowSoftInputMode="stateHidden|adjustPan"
             android:theme="@style/Theme.Material3.Light.NoActionBar" />
 
         <!-- Forgot Password Activity -->
@@ -52,11 +53,7 @@
             android:exported="false"
             android:theme="@style/Theme.Material3.Light.NoActionBar" />
 
-        <!-- Task Detail Activity -->
-        <activity
-            android:name=".TaskDetailActivity"
-            android:exported="false"
-            android:theme="@style/Theme.Material3.Light.NoActionBar" />
+
 
         <!-- Fragment Task Extension Activity -->
         <activity

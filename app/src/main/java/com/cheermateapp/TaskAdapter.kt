@@ -16,7 +16,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 class TaskAdapter(
-    private val tasks: MutableList<Task>,
+    val tasks: MutableList<Task>,
     private val onTaskClick: (Task) -> Unit,
     private val onTaskComplete: (Task) -> Unit,
     private val onTaskEdit: (Task) -> Unit,

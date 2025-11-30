@@ -54,19 +54,20 @@
                     android:id="@+id/tvGreeting"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Good afternoon"
+                    android:text="@string/greeting"
                     android:textColor="@android:color/white"
-                    android:textSize="16sp" />
+                    android:textSize="16sp"
+                    android:includeFontPadding="false" />
 
                 <TextView
                     android:id="@+id/tvUsername"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/jasper"
-                    android:textColor="@color/text_secondary_white_70"
+                    android:text="@string/user"
+                    android:textColor="@android:color/white"
                     android:visibility="visible"
                     android:textSize="12sp"
-                    />
+                    android:includeFontPadding="false" />
 
             </LinearLayout>
 
@@ -137,26 +138,27 @@
                 </LinearLayout>
 
                 <!-- Calendar placeholder - ENHANCED VERSION -->
+
+                <!-- Legend row (Done | Pending | Overdue) -->
                 <LinearLayout
                     android:id="@+id/calendarPlaceholder"
                     android:layout_width="match_parent"
                     android:layout_height="340dp"
-                    android:orientation="vertical"
                     android:layout_marginLeft="20dp"
-                    android:layout_marginRight="20dp">
+                    android:layout_marginRight="20dp"
+                    android:orientation="vertical">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="130dp"
                         android:layout_gravity="center"
+                        android:layout_marginTop="130dp"
                         android:fontFamily="@font/sf_pro_rounded_bold"
                         android:text="@string/calendar"
-                        android:textColor="@color/text_primary"
+                        android:textColor="@color/calendar_placeholder_text_color"
                         android:textSize="20sp" />
                 </LinearLayout>
 
-                <!-- Legend row (Done | Pending | Overdue) -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
@@ -367,7 +369,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:fontFamily="@font/sf_pro_rounded_regular"
-                            android:text="Overdue"
+                            android:text="Pending"
                             android:textColor="@color/text_secondary_white_70"
                             android:textSize="12sp" />
                     </LinearLayout>
@@ -404,7 +406,7 @@
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/sf_pro_rounded_regular"
                     android:paddingTop="6dp"
-                    android:text="@string/_0_of_0_tasks_completed"
+                    android:text="0 of 0 tasks completed"
                     android:textColor="@color/text_secondary_white_70"
                     android:textSize="12sp" />
 
@@ -501,15 +503,17 @@
     <!-- Bottom navigation (3 items) -->
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNav"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
         android:layout_gravity="center_horizontal"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
         android:layout_marginTop="1dp"
         android:background="@drawable/bg_card_glass_hover"
         app:itemGravity="center"
         app:itemIconTint="@android:color/white"
         app:itemTextColor="@android:color/white"
-        app:labelVisibilityMode="labeled"
+        app:labelVisibilityMode="unlabeled"
         app:menu="@menu/menu_bottom_nav" />
 </LinearLayout>
 
@@ -520,10 +524,10 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_marginEnd="20dp"
-        android:layout_marginBottom="110dp"
+        android:layout_marginBottom="100dp"
         android:backgroundTint="#6B48FF"
         android:elevation="6dp"
         android:src="@android:drawable/ic_input_add"
-        android:tint="@android:color/background_dark"
+        android:tint="@color/bottom_sheet_background"
         app:borderWidth="0dp" />
 </FrameLayout>

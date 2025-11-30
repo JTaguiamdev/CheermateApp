@@ -66,6 +66,7 @@ class FragmentTaskActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        com.cheermateapp.util.ThemeManager.initializeTheme(this)
         setContentView(R.layout.fragment_tasks)
 
         userId = intent?.getStringExtra(EXTRA_USER_ID)?.toIntOrNull() ?: 0

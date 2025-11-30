@@ -14,7 +14,6 @@ object ThemeManager {
     // Theme mode constants
     const val THEME_LIGHT = "light"
     const val THEME_DARK = "dark"
-    const val THEME_SYSTEM = "system"
 
     private fun getPreferences(context: Context): SharedPreferences {
         return context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
@@ -23,60 +22,49 @@ object ThemeManager {
     /**
      * Get current theme mode
      */
-    fun getThemeMode(context: Context): String {
-        return getPreferences(context).getString(KEY_THEME_MODE, THEME_SYSTEM) ?: THEME_SYSTEM
-    }
-
-    /**
-     * Set theme mode and apply it
-     */
-    fun setThemeMode(context: Context, mode: String) {
-        getPreferences(context).edit().putString(KEY_THEME_MODE, mode).apply()
-        applyTheme(mode)
-    }
-
-    /**
-     * Apply theme based on mode
-     */
-    fun applyTheme(mode: String) {
-        when (mode) {
-            THEME_LIGHT -> {
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+        fun getThemeMode(context: Context): String {
+            return getPreferences(context).getString(KEY_THEME_MODE, THEME_LIGHT) ?: THEME_LIGHT
+        }
+    
+        /**
+         * Apply theme based on mode
+         */
+            fun applyTheme(mode: String) {
+                when (mode) {
+                    THEME_LIGHT -> {
+                        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+                    }
+                    THEME_DARK -> {
+                        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+                    }
+                }
             }
-            THEME_DARK -> {
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+        
+            /**
+             * Set theme mode and apply it
+             */
+            fun setThemeMode(context: Context, mode: String) {
+                getPreferences(context).edit().putString(KEY_THEME_MODE, mode).apply()
+                applyTheme(mode)
             }
-            THEME_SYSTEM -> {
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
+        
+                /**
+                 * Initialize theme on app start
+                 */
+                fun initializeTheme(context: Context) {
+                    // Always start in light mode, ignoring saved preference, to ensure toggle is off
+                    applyTheme(THEME_LIGHT)
+                }        /**
+         * Check if dark mode is currently active
+         */
+        fun isDarkModeActive(context: Context): Boolean {
+            val mode = getThemeMode(context)
+            return when (mode) {
+                THEME_DARK -> true
+                THEME_LIGHT -> false
+                else -> false // Should not happen with current setup, but for safety
             }
         }
-    }
-
-    /**
-     * Initialize theme on app start
-     */
-    fun initializeTheme(context: Context) {
-        val savedMode = getThemeMode(context)
-        applyTheme(savedMode)
-    }
-
-    /**
-     * Check if dark mode is currently active
-     */
-    fun isDarkModeActive(context: Context): Boolean {
-        val mode = getThemeMode(context)
-        return when (mode) {
-            THEME_DARK -> true
-            THEME_LIGHT -> false
-            THEME_SYSTEM -> {
-                val nightMode = context.resources.configuration.uiMode and 
-                    android.content.res.Configuration.UI_MODE_NIGHT_MASK
-                nightMode == android.content.res.Configuration.UI_MODE_NIGHT_YES
-            }
-            else -> false
-        }
-    }
-
     /**
      * Toggle between light and dark mode
      */

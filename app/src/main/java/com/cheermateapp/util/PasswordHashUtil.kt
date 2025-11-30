@@ -1,8 +1,8 @@
 package com.cheermateapp.util
 
+import android.util.Base64
 import java.security.MessageDigest
 import java.security.SecureRandom
-import java.util.Base64
 import javax.crypto.SecretKeyFactory
 import javax.crypto.spec.PBEKeySpec
 
@@ -10,13 +10,13 @@ import javax.crypto.spec.PBEKeySpec
  * Utility class for password hashing and verification using PBKDF2-HMAC-SHA256
  */
 object PasswordHashUtil {
-    
+
     private const val PBKDF2_ALGORITHM = "PBKDF2WithHmacSHA256"
     private const val ITERATIONS = 100000 // OWASP recommended iterations
     private const val MIN_ITERATIONS = 10000 // Minimum acceptable iterations
     private const val SALT_LENGTH = 16 // 128 bits
     private const val HASH_LENGTH = 32 // 256 bits
-    
+
     /**
      * Hash a plain text password using PBKDF2-HMAC-SHA256
      * @param password The plain text password to hash
@@ -26,17 +26,17 @@ object PasswordHashUtil {
         // Generate a random salt
         val salt = ByteArray(SALT_LENGTH)
         SecureRandom().nextBytes(salt)
-        
+
         // Hash the password
         val hash = pbkdf2Hash(password, salt, ITERATIONS, HASH_LENGTH)
-        
+
         // Return the hash in the format: iterations:salt:hash (all Base64 encoded)
-        val saltEncoded = Base64.getEncoder().encodeToString(salt)
-        val hashEncoded = Base64.getEncoder().encodeToString(hash)
-        
+        val saltEncoded = Base64.encodeToString(salt, Base64.NO_WRAP)
+        val hashEncoded = Base64.encodeToString(hash, Base64.NO_WRAP)
+
         return "$ITERATIONS:$saltEncoded:$hashEncoded"
     }
-    
+
     /**
      * Verify a plain text password against a hashed password
      * @param password The plain text password to verify
@@ -50,20 +50,20 @@ object PasswordHashUtil {
             if (parts.size != 3) {
                 return false
             }
-            
+
             val iterations = parts[0].toIntOrNull() ?: return false
-            
+
             // Validate minimum iteration count to prevent bypass attacks
             if (iterations < MIN_ITERATIONS) {
                 return false
             }
-            
-            val salt = Base64.getDecoder().decode(parts[1])
-            val storedHash = Base64.getDecoder().decode(parts[2])
-            
+
+            val salt = Base64.decode(parts[1], Base64.NO_WRAP)
+            val storedHash = Base64.decode(parts[2], Base64.NO_WRAP)
+
             // Hash the provided password with the same salt and iterations
             val testHash = pbkdf2Hash(password, salt, iterations, storedHash.size)
-            
+
             // Compare the hashes using constant-time comparison to prevent timing attacks
             return MessageDigest.isEqual(storedHash, testHash)
         } catch (e: Exception) {
@@ -71,7 +71,7 @@ object PasswordHashUtil {
             false
         }
     }
-    
+
     /**
      * Internal function to perform PBKDF2 hashing
      */

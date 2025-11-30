@@ -17,6 +17,7 @@
         
         <!-- External storage should be excluded for privacy -->
         <exclude domain="external" path="." />
+
     </cloud-backup>
     
     <device-transfer>

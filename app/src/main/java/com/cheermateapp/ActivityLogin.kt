@@ -21,6 +21,7 @@ class ActivityLogin : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        com.cheermateapp.util.ThemeManager.initializeTheme(this)
 
         try {
             binding = ActivityLoginBinding.inflate(layoutInflater)

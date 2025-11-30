@@ -21,6 +21,7 @@ class PersonalityActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        com.cheermateapp.util.ThemeManager.initializeTheme(this)
         setContentView(R.layout.activity_personality)
 
         // Initialize repository

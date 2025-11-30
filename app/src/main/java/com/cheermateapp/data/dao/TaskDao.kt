@@ -95,6 +95,10 @@ interface TaskDao {
     @Query("SELECT COUNT(*) FROM Task WHERE User_ID = :userId AND Status = 'Completed' AND DeletedAt IS NULL")
     suspend fun getCompletedTasksCount(userId: Int): Int
 
+    @Query("SELECT COUNT(*) FROM Task WHERE User_ID = :userId AND Status IN ('Pending', 'InProgress') AND DeletedAt IS NULL")
+    fun getPendingTasksCountFlow(userId: Int): Flow<Int>
+
+
     @Query("SELECT COUNT(*) FROM Task WHERE User_ID = :userId AND Status = 'InProgress' AND DeletedAt IS NULL")
     suspend fun getInProgressTasksCount(userId: Int): Int
 

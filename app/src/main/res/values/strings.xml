@@ -67,9 +67,15 @@
     <string name="high">🔴 High</string>
     <string name="pending1">⏳ Pending</string>
     <string name="duedate">DueDate</string>
-    <string name="_0_of_0_tasks_completed">0 of 0 tasks completed</string>
+    <string name="_0_of_0_tasks_completed">%1$d of %2$d tasks completed</string>
     <string name="recent_tasks">Recent Tasks</string>
-    <string name="already_have_an_account_login_now">Already have an account? Login Now</string>
+    <string name="already_have_an_account_login_now">Already have an account? <b>Login Now</b></string>
+    <string name="user">User</string>
+    <string name="greeting">Greeting</string>
+    <string name="new_password">New Password</string>
+    <string name="confirm_password">Confirm Password</string>
+    <string name="password_must_be_at_least_6_characters">Password must be at least 6 characters</string>
+    <string name="current_password">Current Password</string>
 
 
 </resources>

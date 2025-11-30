@@ -27,6 +27,7 @@ class FragmentSettingsActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        com.cheermateapp.util.ThemeManager.initializeTheme(this)
         setContentView(R.layout.fragment_settings)
 
         // Get userId from intent
