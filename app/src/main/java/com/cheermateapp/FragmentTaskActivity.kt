@@ -118,7 +118,7 @@ class FragmentTaskActivity : AppCompatActivity() {
                 val db = AppDb.get(this@FragmentTaskActivity)
 
                 // Check if database exists
-                android.util.Log.d("DEBUG", "Database created successfully: ${db != null}")
+                android.util.Log.d("DEBUG", "Database created successfully.")
 
                 // Check all tasks in database
                 val allTasksInDb = withContext(Dispatchers.IO) {

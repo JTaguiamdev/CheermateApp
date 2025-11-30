@@ -78,6 +78,12 @@
     <string name="current_password">Current Password</string>
     <string name="dark_mode">Dark Mode</string>
     <string name="toggle_dark_light_theme">Toggle dark/light theme</string>
+    <string name="cheermate_v1_0_0">CheerMate v1.0.0</string>
+    <string name="sign_out">Sign Out</string>
+    <string name="push_notifications_for_reminders">Push notifications for reminders</string>
+    <string name="app_settings">App Settings</string>
+    <string name="your_personality">Your Personality</string>
+    <string name="personality">Personality</string>
 
 
 </resources>

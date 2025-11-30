@@ -246,7 +246,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/sf_pro_rounded_bold"
-                    android:text="Personality"
+                    android:text="@string/personality"
                     android:textColor="@android:color/white"
                     android:textSize="14sp" />
 
@@ -254,7 +254,7 @@
                     android:id="@+id/tvCurrentPersona"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Your Personality"
+                    android:text="@string/your_personality"
                     android:textColor="@color/text_secondary_white_70"
                     android:textSize="12sp" />
             </LinearLayout>
@@ -319,7 +319,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:text="App Settings"
+            android:text="@string/app_settings"
             android:layout_marginStart="10dp"
             android:textColor="@color/text_secondary_white_70"
             android:textSize="12sp" />
@@ -358,7 +358,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Push notifications for reminders"
+                    android:text="@string/push_notifications_for_reminders"
                     android:textColor="@color/text_secondary_white_70"
                     android:textSize="12sp" />
             </LinearLayout>
@@ -389,7 +389,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/sf_pro_rounded_bold"
-                android:text="Sign Out"
+                android:text="@string/sign_out"
                 android:textColor="@color/text_secondary_white_70"
                 android:textSize="14sp" />
         </LinearLayout>
@@ -400,7 +400,7 @@
             android:fontFamily="@font/sf_pro_rounded_regular"
             android:gravity="center"
             android:paddingTop="10dp"
-            android:text="CheerMate v1.0.0"
+            android:text="@string/cheermate_v1_0_0"
             android:textColor="@color/text_secondary_white_70"
 
             android:textSize="11sp" />
