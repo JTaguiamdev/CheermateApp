@@ -2,7 +2,7 @@
 package com.cheermateapp.data.model
 
 data class Appearance(
-    val theme: String = "dark",
+    val theme: String = "light",
     val fontSize: String = "medium",
     val colorScheme: String = "default"
 )

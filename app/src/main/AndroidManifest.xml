@@ -38,7 +38,9 @@
         <!-- MainActivity (Dashboard with Fragment Switching) -->
         <activity
             android:name=".MainActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:configChanges="orientation|screenSize"
+            android:theme="@style/Theme.CheermateApp" />
 
         <!-- Sign Up Activity -->
         <activity

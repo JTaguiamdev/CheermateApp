@@ -14,6 +14,7 @@ object ThemeManager {
     // Theme mode constants
     const val THEME_LIGHT = "light"
     const val THEME_DARK = "dark"
+    const val THEME_SYSTEM = "system"
 
     private fun getPreferences(context: Context): SharedPreferences {
         return context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
@@ -30,20 +31,24 @@ object ThemeManager {
          * Apply theme based on mode
          */
             fun applyTheme(mode: String) {
-                when (mode) {
-                    THEME_LIGHT -> {
-                        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
-                    }
-                    THEME_DARK -> {
-                        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
-                    }
+                val desired = when (mode) {
+                    THEME_LIGHT -> AppCompatDelegate.MODE_NIGHT_NO
+                    THEME_DARK -> AppCompatDelegate.MODE_NIGHT_YES
+                    else -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
                 }
+                // Avoid redundant setDefaultNightMode calls that cause relaunch
+                if (AppCompatDelegate.getDefaultNightMode() == desired) return
+                AppCompatDelegate.setDefaultNightMode(desired)
             }
         
             /**
              * Set theme mode and apply it
              */
             fun setThemeMode(context: Context, mode: String) {
+                val current = getThemeMode(context)
+                if (current == mode) {
+                    return // Avoid re-applying same mode to prevent unnecessary recreations/flicker
+                }
                 getPreferences(context).edit().putString(KEY_THEME_MODE, mode).apply()
                 applyTheme(mode)
             }
@@ -52,8 +57,9 @@ object ThemeManager {
                  * Initialize theme on app start
                  */
                 fun initializeTheme(context: Context) {
-                    // Always start in light mode, ignoring saved preference, to ensure toggle is off
-                    applyTheme(THEME_LIGHT)
+                    // Use saved preference; default to LIGHT to avoid phone theme overriding
+                    val mode = getThemeMode(context)
+                    applyTheme(mode)
                 }        /**
          * Check if dark mode is currently active
          */

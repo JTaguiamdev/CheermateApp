@@ -136,18 +136,52 @@ class MainActivity : AppCompatActivity() {
                 setupToolbar()
                 setupGreeting()
                 setupBottomNavigation()
-                setupHomeScreenInteractions()
-                setupCalendarView()
 
-                // Load dashboard data
-                loadUserData()
-                loadTaskStatistics()
-                observeRecentTasks()
+                // Restore Settings tab immediately after nav setup if theme toggle caused recreation
+                kotlin.runCatching {
+                    val prefs = getSharedPreferences("cheermate_theme_prefs", MODE_PRIVATE)
+                    if (prefs.getBoolean("return_to_settings", false)) {
+                        android.util.Log.d("MainActivity", "Restoring Settings after theme toggle (early)")
+                        findViewById<com.google.android.material.bottomnavigation.BottomNavigationView>(R.id.bottomNav)?.selectedItemId = R.id.nav_settings
+                        navigateToSettings()
+                        prefs.edit().putBoolean("return_to_settings", false).putBoolean("theme_applying", false).putBoolean("ignore_next_toggle", false).apply()
+                    } else {
+                        // Clear applying flag if set
+                        if (prefs.getBoolean("theme_applying", false)) {
+                            prefs.edit().putBoolean("theme_applying", false).putBoolean("ignore_next_toggle", false).apply()
+                        }
+                    }
+                }
 
-                showHomeScreen()
+                // Only initialize Home UI and data if Home tab is selected to prevent flicker on Settings
+                findViewById<com.google.android.material.bottomnavigation.BottomNavigationView>(R.id.bottomNav)?.let { nav ->
+                    if (nav.selectedItemId == R.id.nav_home) {
+                        setupHomeScreenInteractions()
+                        setupCalendarView()
+                        // Load dashboard data
+                        loadUserData()
+                        loadTaskStatistics()
+                        observeRecentTasks()
+                        showHomeScreen()
+                    }
+                }
 
-                // Observe DB changes for live daily progress bar updates
-                observeTaskChangesForProgressBar()
+                // If theme was toggled from Settings, restore Settings fragment after recreation
+                kotlin.runCatching {
+                    val prefs = getSharedPreferences("cheermate_theme_prefs", MODE_PRIVATE)
+                    if (prefs.getBoolean("return_to_settings", false)) {
+                        findViewById<com.google.android.material.bottomnavigation.BottomNavigationView>(R.id.bottomNav)?.selectedItemId = R.id.nav_settings
+                        navigateToSettings()
+                        prefs.edit().putBoolean("return_to_settings", false).apply()
+                    }
+                }
+
+                // Observe DB changes for live daily progress bar updates only on Home
+                findViewById<com.google.android.material.bottomnavigation.BottomNavigationView>(R.id.bottomNav)?.let { nav ->
+                    if (nav.selectedItemId == R.id.nav_home) {
+                        startObserveTaskChangesForProgressBar()
+                    }
+                }
 
             } else {
                 // Redirect to login if not properly authenticated
@@ -323,7 +357,15 @@ class MainActivity : AppCompatActivity() {
                 }
             }
 
-            bottomNav?.selectedItemId = R.id.nav_home
+            // Preserve or restore tab selection; default to Home only if not returning to Settings
+            val prefs = getSharedPreferences("cheermate_theme_prefs", MODE_PRIVATE)
+            val returnToSettings = prefs.getBoolean("return_to_settings", false)
+            if (returnToSettings) {
+                bottomNav?.selectedItemId = R.id.nav_settings
+                prefs.edit().putBoolean("return_to_settings", false).apply()
+            } else {
+                bottomNav?.selectedItemId = R.id.nav_home
+            }
 
         } catch (e: Exception) {
             android.util.Log.e("MainActivity", "Error setting up bottom navigation", e)
@@ -332,12 +374,21 @@ class MainActivity : AppCompatActivity() {
 
     private fun showHomeScreen() {
         try {
+            // Ensure calendar view is initialized when showing Home
+            setupCalendarView()
+
             findViewById<ScrollView>(R.id.homeScroll)?.visibility = View.VISIBLE
             val container = findViewById<FrameLayout>(R.id.contentContainer)
             container?.visibility = View.GONE
             
             // Show FAB on home screen
             setFabVisibility(true)
+            // Ensure FAB is clickable and above other views
+            findViewById<com.google.android.material.floatingactionbutton.FloatingActionButton>(R.id.fabAddTask)?.apply {
+                isEnabled = true
+                isClickable = true
+                bringToFront()
+            }
             
         } catch (e: Exception) {
             android.util.Log.e("MainActivity", "Error showing home screen", e)
@@ -429,8 +480,11 @@ class MainActivity : AppCompatActivity() {
     private fun setupTasksFragment() {
         try {
             // ✅ Setup FAB for adding tasks (in fragment view)
-            findViewById<com.google.android.material.floatingactionbutton.FloatingActionButton>(R.id.fabAddTask)?.setOnClickListener {
-                showQuickAddTaskDialog()
+            findViewById<com.google.android.material.floatingactionbutton.FloatingActionButton>(R.id.fabAddTask)?.apply {
+                isEnabled = true
+                isClickable = true
+                bringToFront()
+                setOnClickListener { showQuickAddTaskDialog() }
             }
 
             // Initialize all task fragment components
@@ -604,12 +658,50 @@ class MainActivity : AppCompatActivity() {
             switchDarkMode?.isChecked = com.cheermateapp.util.ThemeManager.isDarkModeActive(this)
 
             switchDarkMode?.setOnCheckedChangeListener { _, isChecked ->
+                val prefs = getSharedPreferences("cheermate_theme_prefs", MODE_PRIVATE)
+                // Ignore the next toggle triggered by programmatic state restore after recreate
+                if (prefs.getBoolean("ignore_next_toggle", false)) {
+                    prefs.edit().putBoolean("ignore_next_toggle", false).apply()
+                    return@setOnCheckedChangeListener
+                }
                 val newMode = if (isChecked) {
                     com.cheermateapp.util.ThemeManager.THEME_DARK
                 } else {
-                    com.cheermateapp.util.ThemeManager.THEME_LIGHT
+                    com.cheermateapp.util.ThemeManager.THEME_SYSTEM
                 }
+                // Skip if a theme apply is already in progress
+                if (prefs.getBoolean("theme_applying", false)) return@setOnCheckedChangeListener
+                val currentMode = com.cheermateapp.util.ThemeManager.getThemeMode(this)
+                val lastChangeTs = prefs.getLong("theme_change_ts", 0L)
+                val now = System.currentTimeMillis()
+                // Debounce rapid toggles and skip if mode unchanged
+                if (newMode == currentMode || (now - lastChangeTs) < 1000L) {
+                    return@setOnCheckedChangeListener
+                }
+                // Mark to return to Settings after activity recreation due to theme change
+                prefs.edit()
+                    .putBoolean("return_to_settings", true)
+                    .putLong("theme_change_ts", now)
+                    .putBoolean("theme_applying", true)
+                    .putBoolean("ignore_next_toggle", true)
+                    .apply()
                 com.cheermateapp.util.ThemeManager.setThemeMode(this, newMode)
+                // Persist to Settings.Appearance
+                lifecycleScope.launch {
+                    try {
+                        val db = com.cheermateapp.data.db.AppDb.get(this@MainActivity)
+                        val current = withContext(kotlinx.coroutines.Dispatchers.IO) { db.settingsDao().getSettingsByUser(userId) }
+                        val appearance = com.cheermateapp.data.model.Appearance(theme = if (isChecked) "dark" else "light")
+                        val newSettings = if (current != null) {
+                            current.copy(Appearance = appearance)
+                        } else {
+                            com.cheermateapp.data.model.Settings(User_ID = userId, Appearance = appearance)
+                        }
+                        withContext(kotlinx.coroutines.Dispatchers.IO) { db.settingsDao().upsert(newSettings) }
+                    } catch (_: Exception) {}
+                }
+                // Single controlled recreate to apply theme
+                recreate()
             }
 
             switchNotifications?.setOnCheckedChangeListener { _, isChecked ->
@@ -1001,7 +1093,14 @@ class MainActivity : AppCompatActivity() {
 
     private var settingsCache: SettingsCache? = null
 
+    private fun isThemeApplying(): Boolean {
+        return getSharedPreferences("cheermate_theme_prefs", MODE_PRIVATE)
+            .getBoolean("theme_applying", false)
+    }
+
     private fun applySettingsCacheToViews(cache: SettingsCache) {
+        // Avoid flicker during theme toggle
+        if (isThemeApplying()) return
         findViewById<TextView>(R.id.tvProfileName)?.text = cache.profileName
         findViewById<TextView>(R.id.tvProfileEmail)?.text = cache.profileEmail
         findViewById<TextView>(R.id.tvCurrentPersona)?.text = cache.personaName ?: ""
@@ -1077,7 +1176,10 @@ class MainActivity : AppCompatActivity() {
                 )
 
                 settingsCache = newCache
-                applySettingsCacheToViews(newCache)
+                // Avoid flicker during theme toggle
+                if (!isThemeApplying()) {
+                    applySettingsCacheToViews(newCache)
+                }
 
             } catch (e: Exception) {
                 android.util.Log.e("MainActivity", "Error loading settings fragment data", e)
@@ -1502,8 +1604,11 @@ class MainActivity : AppCompatActivity() {
     private fun setupHomeScreenInteractions() {
         try {
             // ✅ Setup FAB for adding tasks
-            findViewById<com.google.android.material.floatingactionbutton.FloatingActionButton>(R.id.fabAddTask)?.setOnClickListener {
-                showQuickAddTaskDialog()
+            findViewById<com.google.android.material.floatingactionbutton.FloatingActionButton>(R.id.fabAddTask)?.apply {
+                isEnabled = true
+                isClickable = true
+                bringToFront()
+                setOnClickListener { showQuickAddTaskDialog() }
             }
 
             findViewById<View>(R.id.cardCalendar)?.setOnClickListener {
@@ -2082,28 +2187,31 @@ class MainActivity : AppCompatActivity() {
     
                     val tvUsername = findViewById<TextView>(R.id.tvUsername)
     
-                    if (user != null) {
-                        val displayName = when {
-                            !user.FirstName.isNullOrBlank() && !user.LastName.isNullOrBlank() ->
-                                "${user.FirstName} ${user.LastName}"
-                            !user.FirstName.isNullOrBlank() -> user.FirstName
-                            else -> user.Username
+                    // Avoid flicker during theme toggle for username/persona
+                    if (!isThemeApplying()) {
+                        if (user != null) {
+                            val displayName = when {
+                                !user.FirstName.isNullOrBlank() && !user.LastName.isNullOrBlank() ->
+                                    "${user.FirstName} ${user.LastName}"
+                                !user.FirstName.isNullOrBlank() -> user.FirstName
+                                else -> user.Username
+                            }
+    
+                            tvUsername?.text = displayName
+                        } else {
+                            tvUsername?.text = "User"
                         }
     
-                        tvUsername?.text = displayName
-                    } else {
-                        tvUsername?.text = "User"
-                    }
+                        val title = findViewById<TextView>(R.id.personalityTitle)
+                        val desc = findViewById<TextView>(R.id.personalityDesc)
     
-                    val title = findViewById<TextView>(R.id.personalityTitle)
-                    val desc = findViewById<TextView>(R.id.personalityDesc)
-    
-                    if (personality != null) {
-                        title?.text = "${personality.Name} Vibes"
-                        desc?.text = personality.Description
-                    } else {
-                        title?.text = "Your Personality"
-                        desc?.text = "No personality selected yet."
+                        if (personality != null) {
+                            title?.text = "${personality.Name} Vibes"
+                            desc?.text = personality.Description
+                        } else {
+                            title?.text = "Your Personality"
+                            desc?.text = "No personality selected yet."
+                        }
                     }
     
                 } catch (e: Exception) {
@@ -2764,10 +2872,7 @@ class MainActivity : AppCompatActivity() {
 
             // ✅ CREATE AND CONFIGURE CalendarView with theme-aware styling
             // Create CalendarView with a themed context to ensure proper text colors
-            val isDarkMode = (resources.configuration.uiMode and 
-                android.content.res.Configuration.UI_MODE_NIGHT_MASK) == 
-                android.content.res.Configuration.UI_MODE_NIGHT_YES
-            
+            // Ignore system uiMode; theme controlled by app settings
             // Create a ContextThemeWrapper with the appropriate CalendarView style
             val themedContext = android.view.ContextThemeWrapper(this, R.style.CalendarViewStyle)
             val calendarView = CalendarView(themedContext)
@@ -3047,6 +3152,15 @@ class MainActivity : AppCompatActivity() {
         super.onResume()
         // Reload user data to reflect any personality changes
         loadUserData()
+        // Restore Settings tab if theme toggle caused recreation
+        kotlin.runCatching {
+            val prefs = getSharedPreferences("cheermate_theme_prefs", MODE_PRIVATE)
+            if (prefs.getBoolean("return_to_settings", false)) {
+                findViewById<com.google.android.material.bottomnavigation.BottomNavigationView>(R.id.bottomNav)?.selectedItemId = R.id.nav_settings
+                navigateToSettings()
+                prefs.edit().putBoolean("return_to_settings", false).apply()
+            }
+        }
     }
 
     override fun onPause() {
@@ -3058,8 +3172,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     // ✅ OBSERVE TASK CHANGES FOR LIVE PROGRESS BAR UPDATES ON HOME SCREEN
-    private fun observeTaskChangesForProgressBar() {
-        lifecycleScope.launch {
+    private var progressBarObserverJob: kotlinx.coroutines.Job? = null
+    private fun startObserveTaskChangesForProgressBar() {
+        progressBarObserverJob?.cancel()
+        progressBarObserverJob = lifecycleScope.launch {
             try {
                 val db = AppDb.get(this@MainActivity)
 
@@ -3087,6 +3203,10 @@ class MainActivity : AppCompatActivity() {
                 android.util.Log.e("MainActivity", "Error observing task changes for progress bar", e)
             }
         }
+    }
+    private fun stopObserveTaskChangesForProgressBar() {
+        progressBarObserverJob?.cancel()
+        progressBarObserverJob = null
     }
 
     /**
