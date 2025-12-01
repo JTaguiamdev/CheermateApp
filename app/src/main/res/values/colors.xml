@@ -19,8 +19,8 @@
     <!-- Calendar background for light mode -->
     <color name="calendar_background">#00FFFFFF</color>
     
-    <!-- Toolbar icon color for light mode -->
-    <color name="toolbar_icon">#FF000000</color>
+    <!-- Toolbar icon color for light mode (force white to match glass background) -->
+    <color name="toolbar_icon">#FFFFFFFF</color>
 
     <!-- Bottom Sheet & Dialog colors for Light Mode -->
     <color name="bottom_sheet_background">#FFFFFF</color>
