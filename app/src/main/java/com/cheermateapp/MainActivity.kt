@@ -94,6 +94,21 @@ class MainActivity : AppCompatActivity() {
     private var calendarTasksContainer: LinearLayout? = null
     private var selectedCalendarDateStr: String? = null
     private var calendarTasksObserverJob: kotlinx.coroutines.Job? = null
+    private var lastCalendarEventMs: Long = 0L
+    private var calendarDebounceJob: kotlinx.coroutines.Job? = null
+
+    // Lightweight cache for calendar summaries to reduce DB/UI churn
+    private data class CalendarSummary(val count: Int, val highest: Priority?)
+    private val calendarSummaryCache = java.util.concurrent.ConcurrentHashMap<String, CalendarSummary>()
+
+    // Reusable UI for calendar summary row
+    private var calendarRow: LinearLayout? = null
+    private var calendarRowIcon: TextView? = null
+    private var calendarRowInfo: TextView? = null
+
+    // Concurrency guards for fast navigation
+    private var calendarUpdateJob: kotlinx.coroutines.Job? = null
+    private var calendarUpdateSeq: Int = 0
 
     // ✅ RecyclerView and TaskAdapter for fragment_tasks
     private var taskRecyclerView: RecyclerView? = null
@@ -1625,6 +1640,7 @@ class MainActivity : AppCompatActivity() {
                 ensureCalendarTasksContainer()
                 val sdf = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault())
                 val initialDateStr = sdf.format(java.util.Date(cv.date))
+                android.util.Log.d("CalendarDebug", "Initial date=" + initialDateStr)
                 selectedCalendarDateStr = initialDateStr
                 updateCalendarSelectedTasks(initialDateStr)
                 startObserveCalendarSelectedTasks(initialDateStr)
@@ -1639,6 +1655,10 @@ class MainActivity : AppCompatActivity() {
                         set(java.util.Calendar.MILLISECOND, 0)
                     }
                     val newDateStr = sdf.format(cal.time)
+                    if (newDateStr == selectedCalendarDateStr) {
+                        return@setOnDateChangeListener
+                    }
+                    android.util.Log.d("CalendarDebug", "Date changed to " + newDateStr)
                     selectedCalendarDateStr = newDateStr
                     updateCalendarSelectedTasks(newDateStr)
                     startObserveCalendarSelectedTasks(newDateStr)
@@ -1672,47 +1692,22 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun ensureCalendarTasksContainer() {
-        if (calendarTasksContainer != null) return
         try {
-            val cardCalendar = findViewById<LinearLayout>(R.id.cardCalendar) ?: return
-            // Find CalendarView index to insert after
-            val index = (0 until cardCalendar.childCount).firstOrNull { i ->
-                cardCalendar.getChildAt(i) is CalendarView
-            } ?: return
-            val container = LinearLayout(this).apply {
-                orientation = LinearLayout.VERTICAL
-                // Match card inner horizontal padding (20dp left/right)
-                setPadding(20, 8, 20, 8)
-                gravity = android.view.Gravity.CENTER_HORIZONTAL
-            }
-            // Insert right after CalendarView
-            cardCalendar.addView(container, index + 1)
-            calendarTasksContainer = container
-        } catch (e: Exception) {
-            android.util.Log.e("MainActivity", "Failed to add calendar tasks container", e)
-        }
-    }
-
-    private fun updateCalendarSelectedTasks(dateStr: String) {
-        uiScope.launch {
-            try {
-                ensureCalendarTasksContainer()
-                val container = calendarTasksContainer ?: return@launch
-                container.removeAllViews()
-
-                val db = AppDb.get(this@MainActivity)
-                val tasksForDate = withContext(Dispatchers.IO) {
-                    db.taskDao().getTodayTasks(userId, dateStr)
+            if (calendarTasksContainer == null) {
+                val cardCalendar = findViewById<LinearLayout>(R.id.cardCalendar) ?: return
+                val index = (0 until cardCalendar.childCount).firstOrNull { i ->
+                    cardCalendar.getChildAt(i) is CalendarView
+                } ?: return
+                val container = LinearLayout(this).apply {
+                    orientation = LinearLayout.VERTICAL
+                    setPadding(20, 8, 20, 8)
+                    gravity = android.view.Gravity.CENTER_HORIZONTAL
                 }
-
-                // Build a single centered preview row rendered in the same spot for both cases
-                val dateLabel = try {
-                    val inFmt = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault())
-                    val outFmt = java.text.SimpleDateFormat("MMM dd", java.util.Locale.getDefault())
-                    (inFmt.parse(dateStr)?.let { outFmt.format(it) } ?: dateStr).lowercase()
-                } catch (_: Exception) { dateStr.lowercase() }
-
-                val row = LinearLayout(this@MainActivity).apply {
+                cardCalendar.addView(container, index + 1)
+                calendarTasksContainer = container
+            }
+            if (calendarRow == null) {
+                val row = LinearLayout(this).apply {
                     orientation = LinearLayout.HORIZONTAL
                     val lp = LinearLayout.LayoutParams(
                         LinearLayout.LayoutParams.WRAP_CONTENT,
@@ -1723,9 +1718,7 @@ class MainActivity : AppCompatActivity() {
                     setPadding(0, (4 * resources.displayMetrics.density).toInt(), 0, 0)
                     gravity = android.view.Gravity.CENTER_VERTICAL
                 }
-
-                // Priority emoji indicator when tasks exist (hidden if none)
-                val icon = TextView(this@MainActivity).apply {
+                val icon = TextView(this).apply {
                     val lp = LinearLayout.LayoutParams(
                         LinearLayout.LayoutParams.WRAP_CONTENT,
                         LinearLayout.LayoutParams.WRAP_CONTENT
@@ -1735,61 +1728,103 @@ class MainActivity : AppCompatActivity() {
                     textSize = 14f
                     visibility = View.GONE
                 }
-
-                val info = TextView(this@MainActivity).apply {
-                    val line = if (tasksForDate.isEmpty()) {
-                        "no tasks in this date"
-                    } else {
-                        "${tasksForDate.size} task(s) - tap to view"
-                    }
-                    text = line
+                val info = TextView(this).apply {
                     setTextColor(android.graphics.Color.WHITE)
-                    textSize = 12f
+                    setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 12f)
                     setAllCaps(true)
                 }
-
-                if (tasksForDate.isNotEmpty()) {
-                    val highest = when {
-                        tasksForDate.any { it.Priority == Priority.High } -> Priority.High
-                        tasksForDate.any { it.Priority == Priority.Medium } -> Priority.Medium
-                        else -> Priority.Low
-                    }
-                    icon.text = when (highest) {
-                        Priority.High -> "🔴"
-                        Priority.Medium -> "🟡"
-                        Priority.Low -> "🟢"
-                    }
-                    icon.visibility = View.VISIBLE
-                }
-
-                row.removeAllViews()
                 row.addView(icon)
                 row.addView(info)
-                row.setOnClickListener(
-                    if (tasksForDate.isNotEmpty()) {
-                        View.OnClickListener {
-                            findViewById<BottomNavigationView>(R.id.bottomNav)?.selectedItemId = R.id.nav_tasks
-                        }
-                    } else null
-                )
+                calendarTasksContainer?.addView(row)
+                calendarRow = row
+                calendarRowIcon = icon
+                calendarRowInfo = info
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("MainActivity", "Failed to add calendar tasks container", e)
+        }
+    }
 
-                container.removeAllViews()
-                container.addView(row)
+    private fun summarize(tasks: List<Task>): CalendarSummary {
+        if (tasks.isEmpty()) return CalendarSummary(0, null)
+        val highest = when {
+            tasks.any { it.Priority == Priority.High } -> Priority.High
+            tasks.any { it.Priority == Priority.Medium } -> Priority.Medium
+            else -> Priority.Low
+        }
+        return CalendarSummary(tasks.size, highest)
+    }
 
+    private fun updateCalendarRow(summary: CalendarSummary) {
+        ensureCalendarTasksContainer()
+        val icon = calendarRowIcon ?: return
+        val info = calendarRowInfo ?: return
+        when (summary.highest) {
+            Priority.High -> { icon.text = "🔴"; icon.visibility = View.VISIBLE }
+            Priority.Medium -> { icon.text = "🟡"; icon.visibility = View.VISIBLE }
+            Priority.Low -> { icon.text = "🟢"; icon.visibility = View.VISIBLE }
+            null -> { icon.text = ""; icon.visibility = View.GONE }
+        }
+        info.text = if (summary.count == 0) "no tasks in this date" else "${summary.count} task(s) - tap to view"
+        calendarRow?.setOnClickListener(
+            if (summary.count > 0) View.OnClickListener {
+                findViewById<BottomNavigationView>(R.id.bottomNav)?.selectedItemId = R.id.nav_tasks
+            } else null
+        )
+    }
+
+    private fun updateCalendarSelectedTasks(dateStr: String) {
+        calendarUpdateJob?.cancel()
+        val seq = ++calendarUpdateSeq
+        calendarUpdateJob = uiScope.launch {
+            try {
+                android.util.Log.d("CalendarDebug", "updateCalendarSelectedTasks start date=" + dateStr)
+                ensureCalendarTasksContainer()
+
+                // Always reset immediately to avoid any stale flash; render real data after fetch/flow
+                android.util.Log.d("CalendarDebug", "FastNav immediate reset for " + dateStr)
+                updateCalendarRow(CalendarSummary(0, null))
+
+                // Refresh in background
+                val db = AppDb.get(this@MainActivity)
+                val tasksForDate = withContext(Dispatchers.IO) {
+                    db.taskDao().getTodayTasks(userId, dateStr)
+                }
+                // Skip outdated results if user navigated away
+                if (seq != calendarUpdateSeq || selectedCalendarDateStr != dateStr) {
+                    android.util.Log.d("CalendarDebug", "FastNav discard outdated fetch for " + dateStr + " seq=" + seq + " currentSeq=" + calendarUpdateSeq + " selected=" + selectedCalendarDateStr)
+                    return@launch
+                }
+
+                android.util.Log.d("CalendarDebug", "Tasks fetched for " + dateStr + ": " + tasksForDate.size)
+                val newSummary = summarize(tasksForDate)
+                calendarSummaryCache[dateStr] = newSummary
+                updateCalendarRow(newSummary)
             } catch (e: Exception) {
-                android.util.Log.e("MainActivity", "Error updating calendar selected tasks", e)
+                // Ignore cancellation noise
+                if (e !is kotlinx.coroutines.CancellationException) {
+                    android.util.Log.e("MainActivity", "Error updating calendar selected tasks", e)
+                }
             }
         }
     }
 
     private fun startObserveCalendarSelectedTasks(dateStr: String) {
         calendarTasksObserverJob?.cancel()
+        // Always reset immediately to avoid any stale flash; render real data via flow
+        android.util.Log.d("CalendarDebug", "FastNav observe immediate reset for " + dateStr)
+        updateCalendarRow(CalendarSummary(0, null))
         calendarTasksObserverJob = lifecycleScope.launch {
             try {
                 val db = AppDb.get(this@MainActivity)
-                db.taskDao().getTodayTasksFlow(userId, dateStr).collect {
-                    if (selectedCalendarDateStr == dateStr) updateCalendarSelectedTasks(dateStr)
+                db.taskDao().getTodayTasksFlow(userId, dateStr).collect { tasks ->
+                    if (selectedCalendarDateStr != dateStr) return@collect
+                    val summary = summarize(tasks)
+                    calendarSummaryCache[dateStr] = summary
+                    updateCalendarRow(summary)
                 }
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                // Expected when switching dates; ignore
             } catch (e: Exception) {
                 android.util.Log.e("MainActivity", "Error observing calendar tasks", e)
             }

@@ -37,6 +37,7 @@
     <!-- Base style for the calendar date text -->
     <style name="CalendarView.Date" parent="android:TextAppearance.Material.Small">
         <item name="android:textColor">@android:color/white</item>
+        <item name="android:fontFamily">@font/sf_pro_rounded_regular</item>
     </style>
 
     <!-- Base style for the calendar weekday text (S, M, T, etc.) -->
