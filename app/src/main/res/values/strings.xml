@@ -11,7 +11,9 @@
     <string name="forgot_the_password">Forgot the password?</string>
     <string name="login">Login</string>
     <string name="forgot_password_underlined"><u>Forgot the password?</u></string>
+    <!-- Used in login screen with HTML bold formatting for "Sign up" link -->
     <string name="dont_have_account_bold_signup"><![CDATA[Don't have an account? <b>Sign up</b>]]></string>
+    <!-- Used as plain text prefix before a separate "Sign up" text element -->
     <string name="don_t_have_an_account">Don\'t have an account?</string>
     <string name="cd_show_password">Show password</string>
 

@@ -133,7 +133,7 @@
             app:boxStrokeWidthFocused="2dp"
             app:endIconMode="custom"
             app:endIconDrawable="@drawable/ic_visibility_off"
-            app:endIconContentDescription="@string/cd_show_password">
+            app:endIconContentDescription="@string/cd_show_password"
             app:endIconTint="@color/white">
 
             <com.google.android.material.textfield.TextInputEditText
