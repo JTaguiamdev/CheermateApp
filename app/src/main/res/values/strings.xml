@@ -1,20 +1,56 @@
 <resources>
+    <!-- App Info -->
     <string name="app_name">CheermateApp</string>
+    <string name="cheermate_v1_0_0">CheerMate v1.0.0</string>
+
+    <!-- Login Screen -->
     <string name="welcome">Welcome!</string>
     <string name="we_re_glad_to_see_you">We\'re Glad to see you</string>
     <string name="type_a_password">Type a password</string>
     <string name="username">Username</string>
     <string name="forgot_the_password">Forgot the password?</string>
     <string name="login">Login</string>
-    <string name="sign_up">Sign up</string>
     <string name="forgot_password_underlined"><u>Forgot the password?</u></string>
-    <string name="dont_have_account_bold_signup"><![CDATA[Don’t have an account? <b>Sign up</b>]]></string>
+    <string name="dont_have_account_bold_signup"><![CDATA[Don't have an account? <b>Sign up</b>]]></string>
+    <string name="don_t_have_an_account">Don\'t have an account?</string>
+    <string name="cd_show_password">Show password</string>
+
+    <!-- Sign Up Screen -->
+    <string name="sign_up">Sign up</string>
+    <string name="title_create_account">Create your account</string>
+    <string name="hint_first_name">First Name</string>
+    <string name="hint_last_name">Last Name</string>
+    <string name="enter_username">Enter Username</string>
+    <string name="select_security_question">Select Security Question</string>
+    <string name="enter_security_answer">Enter Security Answer</string>
+    <string name="already_have_an_account_login_now">Already have an account? <b>Login Now</b></string>
+
+    <!-- Password Management -->
+    <string name="forgot_password">Forgot Password</string>
+    <string name="new_password">New Password</string>
+    <string name="confirm_password">Confirm Password</string>
+    <string name="current_password">Current Password</string>
+    <string name="password_must_be_at_least_6_characters">Password must be at least 6 characters</string>
+    <string name="hint_confirm_new_password">Confirm New Password</string>
+
+    <!-- Personality Selection -->
     <string name="choose_your_cheermate">Choose Your CheerMate! ✨</string>
     <string name="pick_a_personality_that_will_motivate_and_nencourage_throughout_your_tasks">Pick a personality that will motivate and\nencourage throughout your tasks</string>
-    <string name="jasper_taguiam">Jasper Taguiam</string>
+    <string name="personality_type">Personality Type</string>
+    <string name="personality_description_goes_here">Personality description goes here!</string>
+    <string name="your_personality">Your Personality</string>
+    <string name="personality">Personality</string>
+
+    <!-- Content Descriptions (Accessibility) -->
     <string name="cd_toggle_sidebar">Toggle sidebar</string>
     <string name="cd_avatar">User avatar</string>
+
+    <!-- Navigation -->
     <string name="Continue">Continue</string>
+    <string name="jasper_taguiam">Jasper Taguiam</string>
+    <string name="jasper">Jasper</string>
+
+    <!-- Tasks Screen -->
     <string name="tasks">Tasks</string>
     <string name="done_0">Done (0)</string>
     <string name="no_tasks_found_create_your_first_task">No tasks found. Create your first task!</string>
@@ -25,19 +61,49 @@
     <string name="add">+</string>
     <string name="_0_found">0 found</string>
     <string name="today_0">Today (0)</string>
-    <string name="jasper">Jasper</string>
-    <string name="personality_type">Personality Type</string>
-    <string name="personality_description_goes_here">Personality description goes here!</string>
+    <string name="no_tasks_yet_create_your_first_task_to_get_started">No tasks yet. Create your first task to get started!</string>
+    <string name="no_tasks_available_n_ntap_the_button_to_create_your_first_task">📋 No tasks available\n\nTap the + button to create your first task!</string>
+    <string name="label_sort">Sort</string>
+
+    <!-- Task Details -->
+    <string name="task_title">Task Title</string>
+    <string name="task_description">Task Description</string>
+    <string name="tasks_description">Tasks Description</string>
+    <string name="tasks_title">Tasks Title</string>
+    <string name="hint_task_title">Task title</string>
+    <string name="hint_task_description">Task description</string>
+    <string name="label_overdue_placeholder">⏰ Overdue by 12 days</string>
+    <string name="label_work">Work</string>
+    <string name="label_medium">Medium</string>
+    <string name="label_date_placeholder">9/24/2025</string>
+    <string name="label_reminder">⏰ Reminder</string>
+    <string name="label_subtasks">Subtasks</string>
+    <string name="label_items_count">0 items</string>
+    <string name="action_add">Add</string>
+    <string name="label_no_subtasks_yet">No subtasks yet</string>
+    <string name="hint_enter_subtask">Enter subtask</string>
+
+    <!-- Task Actions -->
     <string name="mark_as_done">✅ Mark as Done</string>
+    <string name="action_complete">✅ Complete</string>
+    <string name="action_edit">✏️ Edit</string>
+    <string name="action_delete">🗑️ Delete</string>
     <string name="next">Next ▶</string>
     <string name="_1_3">1 / 3</string>
     <string name="previous">◀ Previous</string>
-    <string name="month_day_year_at_time">Month/Day/Year at Time</string>
-    <string name="_0">0%</string>
+
+    <!-- Task Properties -->
     <string name="medium">🟡 Medium</string>
-    <string name="no_tasks_yet_create_your_first_task_to_get_started">No tasks yet. Create your first task to get started!</string>
-    <string name="tasks_description">Tasks Description</string>
-    <string name="tasks_title">Tasks Title</string>
+    <string name="high">🔴 High</string>
+    <string name="pending1">⏳ Pending</string>
+    <string name="due">Due:</string>
+    <string name="duedate">DueDate</string>
+    <string name="month_day_year_at_time">Month/Day/Year at Time</string>
+    <string name="label_due_date_placeholder">📅 Due: Dec 25, 2024 at 3:30 PM</string>
+    <string name="label_work_category">📋 Work</string>
+    <string name="label_progress_placeholder">25%</string>
+
+    <!-- Reminder -->
     <string name="set_reminder_time">Set Reminder Time</string>
     <string name="or_choose_a_quick_option">Or choose a quick option:</string>
     <string name="_15_minutes_before_due_time">15 minutes before due time</string>
@@ -46,13 +112,25 @@
     <string name="_1_day_before_due_time">1 day before due time</string>
     <string name="custom_use_date_time_above">Custom (use date/time above)</string>
     <string name="no_reminder_time_selected">No reminder time selected</string>
+    <string name="action_select_date">Select Date</string>
+    <string name="action_select_time">Select Time</string>
+
+    <!-- Subtasks -->
     <string name="subtask_name">Subtask name</string>
-    <string name="due">Due:</string>
     <string name="delete_subtask">Delete subtask</string>
-    <string name="don_t_have_an_account">Don\'t have an account?</string>
-    <string name="enter_username">Enter Username</string>
-    <string name="select_security_question">Select Security Question</string>
-    <string name="enter_security_answer">Enter Security Answer</string>
+    <string name="label_subtask_helper">Add a subtask to break down this task into smaller steps</string>
+
+    <!-- Add Task Dialog -->
+    <string name="hint_task_title_required">Task Title *</string>
+    <string name="hint_description_optional">Description (Optional)</string>
+    <string name="label_category">Category</string>
+    <string name="label_priority">Priority</string>
+    <string name="hint_due_date_required">Due Date *</string>
+    <string name="hint_due_time_optional">Due Time (Optional)</string>
+    <string name="label_reminder_field">Reminder</string>
+    <string name="label_required_fields">* Required fields\nTap date/time fields to select</string>
+
+    <!-- Dashboard / Home Screen -->
     <string name="tap_to_add">Tap to add</string>
     <string name="quick_schedule">Quick Schedule</string>
     <string name="calendar">Calendar</string>
@@ -60,31 +138,44 @@
     <string name="overdue">● Overdue</string>
     <string name="pending">● Pending</string>
     <string name="addTask">+</string>
-    <string name="task_title">Task Title</string>
     <string name="avatar">Avatar</string>
-    <string name="no_tasks_available_n_ntap_the_button_to_create_your_first_task">📋 No tasks available\n\nTap the + button to create your first task!</string>
-    <string name="task_description">Task Description</string>
-    <string name="high">🔴 High</string>
-    <string name="pending1">⏳ Pending</string>
-    <string name="duedate">DueDate</string>
     <string name="_0_of_0_tasks_completed">%1$d of %2$d tasks completed</string>
     <string name="recent_tasks">Recent Tasks</string>
-    <string name="already_have_an_account_login_now">Already have an account? <b>Login Now</b></string>
     <string name="user">User</string>
     <string name="greeting">Greeting</string>
-    <string name="new_password">New Password</string>
-    <string name="confirm_password">Confirm Password</string>
-    <string name="password_must_be_at_least_6_characters">Password must be at least 6 characters</string>
-    <string name="current_password">Current Password</string>
+    <string name="_0">0%</string>
+    <string name="label_motivate_me">Motivate Me!</string>
+    <string name="label_total">Total</string>
+    <string name="label_done">Done</string>
+    <string name="label_today">Today</string>
+    <string name="label_pending">Pending</string>
+    <string name="label_daily_progress">Daily Progress</string>
+    <string name="label_tasks_completed_default">0 of 0 tasks completed</string>
+
+    <!-- Settings Screen -->
     <string name="dark_mode">Dark Mode</string>
     <string name="toggle_dark_light_theme">Toggle dark/light theme</string>
-    <string name="cheermate_v1_0_0">CheerMate v1.0.0</string>
     <string name="sign_out">Sign Out</string>
     <string name="push_notifications_for_reminders">Push notifications for reminders</string>
     <string name="app_settings">App Settings</string>
-    <string name="your_personality">Your Personality</string>
-    <string name="personality">Personality</string>
-    <string name="forgot_password">Forgot Password</string>
+    <string name="label_settings">Settings</string>
+    <string name="label_settings_subtitle">Customize your CheerMate experience</string>
+    <string name="label_user_email_placeholder">user@example.com</string>
+    <string name="label_total_tasks">Total Tasks</string>
+    <string name="label_completed">Completed</string>
+    <string name="label_success_rate">Success Rate</string>
+    <string name="label_personalization">Personalization</string>
+    <string name="label_notifications">Notifications</string>
 
+    <!-- Edit Profile Dialog -->
+    <string name="hint_username">Username</string>
+    <string name="hint_email">Email</string>
+
+    <!-- Row Settings -->
+    <string name="label_title">Title</string>
+    <string name="label_subtitle">Subtitle</string>
+
+    <!-- Icon/Spinner -->
+    <string name="icon_placeholder">📋</string>
 
 </resources>

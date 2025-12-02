@@ -28,7 +28,7 @@
             android:id="@+id/tvCreateAccount"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Create your account"
+            android:text="@string/title_create_account"
             android:textColor="@color/white"
             android:textSize="20sp"
             android:fontFamily="@font/sf_pro_rounded_bold"
@@ -55,7 +55,7 @@
                 android:id="@+id/etFirstName"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="First Name"
+                android:hint="@string/hint_first_name"
                 android:textColor="@color/white"
                 android:textColorHint="@color/glass_hint_color"
                 android:inputType="textPersonName"
@@ -82,7 +82,7 @@
                 android:id="@+id/etLastName"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Last Name"
+                android:hint="@string/hint_last_name"
                 android:textColor="@color/white"
                 android:textColorHint="@color/glass_hint_color"
                 android:inputType="textPersonName"
@@ -133,7 +133,7 @@
             app:boxStrokeWidthFocused="2dp"
             app:endIconMode="custom"
             app:endIconDrawable="@drawable/ic_visibility_off"
-            app:endIconContentDescription="Show password"
+            app:endIconContentDescription="@string/cd_show_password">
             app:endIconTint="@color/white">
 
             <com.google.android.material.textfield.TextInputEditText

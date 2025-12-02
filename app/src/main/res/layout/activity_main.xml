@@ -226,7 +226,7 @@
                     android:paddingTop="6dp"
                     android:paddingRight="12dp"
                     android:paddingBottom="6dp"
-                    android:text="Motivate Me!"
+                    android:text="@string/label_motivate_me"
                     android:textColor="@android:color/white"
                     android:textSize="12sp" />
             </LinearLayout>
@@ -275,7 +275,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:fontFamily="@font/sf_pro_rounded_regular"
-                            android:text="Total"
+                            android:text="@string/label_total"
                             android:textColor="@color/text_secondary_white_70"
                             android:textSize="12sp" />
                     </LinearLayout>
@@ -303,7 +303,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:fontFamily="@font/sf_pro_rounded_regular"
-                            android:text="Done"
+                            android:text="@string/label_done"
                             android:textColor="@color/text_secondary_white_70"
                             android:textSize="12sp" />
                     </LinearLayout>
@@ -329,7 +329,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:fontFamily="@font/sf_pro_rounded_regular"
-                            android:text="Today"
+                            android:text="@string/label_today"
                             android:textColor="@color/text_secondary_white_70"
                             android:textSize="12sp" />
                     </LinearLayout>
@@ -355,7 +355,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:fontFamily="@font/sf_pro_rounded_regular"
-                            android:text="Pending"
+                            android:text="@string/label_pending"
                             android:textColor="@color/text_secondary_white_70"
                             android:textSize="12sp" />
                     </LinearLayout>
@@ -382,7 +382,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/sf_pro_rounded_bold"
-                    android:text="Daily Progress"
+                    android:text="@string/label_daily_progress"
                     android:textColor="@android:color/white"
                     android:textSize="16sp" />
 
@@ -392,7 +392,7 @@
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/sf_pro_rounded_regular"
                     android:paddingTop="6dp"
-                    android:text="0 of 0 tasks completed"
+                    android:text="@string/label_tasks_completed_default"
                     android:textColor="@color/text_secondary_white_70"
                     android:textSize="12sp" />
 

@@ -91,7 +91,7 @@
                 android:fontFamily="@font/sf_pro_rounded_bold"
                 android:paddingHorizontal="10dp"
                 android:paddingVertical="6dp"
-                android:text="Sort"
+                android:text="@string/label_sort"
                 android:textColor="@android:color/white"
                 android:textSize="12sp" />
         </LinearLayout>

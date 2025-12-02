@@ -23,7 +23,7 @@
             android:id="@+id/etEditUsername"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Username"
+            android:hint="@string/hint_username"
             android:inputType="text"
             android:minHeight="48dp" />
     </com.google.android.material.textfield.TextInputLayout>
@@ -44,7 +44,7 @@
             android:id="@+id/etEditEmail"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Email"
+            android:hint="@string/hint_email"
             android:inputType="textEmailAddress"
             android:minHeight="48dp" />
     </com.google.android.material.textfield.TextInputLayout>
@@ -65,7 +65,7 @@
             android:id="@+id/etEditFirstName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="First Name"
+            android:hint="@string/hint_first_name"
             android:inputType="textPersonName"
             android:minHeight="48dp" />
     </com.google.android.material.textfield.TextInputLayout>
@@ -85,7 +85,7 @@
             android:id="@+id/etEditLastName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Last Name"
+            android:hint="@string/hint_last_name"
             android:inputType="textPersonName"
             android:minHeight="48dp" />
     </com.google.android.material.textfield.TextInputLayout>
