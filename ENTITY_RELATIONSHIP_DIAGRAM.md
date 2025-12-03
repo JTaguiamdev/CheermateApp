@@ -43,34 +43,33 @@ This document describes the normalized database schema for the CheermateApp task
     │    DeletedAt            │
     └────────────┬────────────┘
                  │
-    ┌────────────┼────────────┬─────────────────┬─────────────────┬─────────────────┐
-    │            │            │                 │                 │                 │
-    │ 1          │ 1          │ 1               │ 1               │ 1               │
-    ▼ N          ▼ N          ▼ N               ▼ N               ▼ N               │
-┌───────────┐ ┌─────────┐ ┌─────────────┐ ┌─────────────┐ ┌───────────────────┐      │
-│   Task    │ │Settings │ │RecurringTask│ │TaskTemplate │ │UserSecurityAnswer │      │
-├───────────┤ ├─────────┤ ├─────────────┤ ├─────────────┤ ├───────────────────┤      │
-│PK Task_ID │ │PK Set_ID│ │PK Rec_ID    │ │PK Temp_ID   │ │PK Answer_ID       │      │
-│PK User_ID │ │PK User_ID││PK User_ID   │ │PK User_ID   │ │FK User_ID         │      │
-│   Title   │ │FK Per_ID│ │FK Task_ID   │ │FK Task_ID   │ │FK Question_ID     │      │
-│Description│ │Appearance││   Title     │ │   Name      │ │   AnswerHash      │      │
-│  Category │ │Notif.   │ │Description  │ │ Description │ └─────────┬─────────┘      │
-│  Priority │ │DataMgmt │ │  Priority   │ │  Category   │           │                │
-│   DueAt   │ │Statistics││ Frequency   │ │   Title     │           │                │
-│  DueTime  │ └─────────┘ │ StartDate   │ │TaskDesc     │           │ N              │
-│   Status  │             │  EndDate    │ │  Priority   │           │                │
-│TaskProgress│            │ TimeOfDay   │ │EstDuration  │           ▼ 1              │
-│ CreatedAt │             │ DayOfWeek   │ │DefDueInDays │ ┌───────────────────┐      │
-│ UpdatedAt │             │ DayOfMonth  │ │  IsShared   │ │ SecurityQuestion  │      │
-│ DeletedAt │             │  IsActive   │ │ UsageCount  │ ├───────────────────┤      │
-└─────┬─────┘             │LastGenerated│ │ CreatedAt   │ │PK SecQuestion_ID  │      │
-      │                   │ CreatedAt   │ │ UpdatedAt   │ │   Prompt          │      │
-      │                   │ UpdatedAt   │ └─────────────┘ │   IsActive        │      │
-      │                   └─────────────┘                 │   CreatedAt       │      │
-      │                                                   │   UpdatedAt       │      │
-      │                                                   └───────────────────┘      │
-      │                                                                              │
-      ├──────────────────────────────────────────────────────────────────────────────┘
+    ┌────────────┼────────────┬─────────────────┐
+    │            │            │                 │
+    │ 1          │ 1          │ 1               │
+    ▼ N          ▼ N          ▼ N               │
+┌───────────┐ ┌─────────┐ ┌───────────────────┐ │
+│   Task    │ │Settings │ │UserSecurityAnswer │ │
+├───────────┤ ├─────────┤ ├───────────────────┤ │
+│PK Task_ID │ │PK Set_ID│ │PK Answer_ID       │ │
+│PK User_ID │ │PK User_ID│ │FK User_ID         │ │
+│   Title   │ │FK Per_ID│ │FK Question_ID     │ │
+│Description│ │Appearance│ │   AnswerHash      │ │
+│  Category │ │Notif.   │ └─────────┬─────────┘ │
+│  Priority │ │DataMgmt │           │           │
+│   DueAt   │ │Statistics│           │ N         │
+│  DueTime  │ └─────────┘           │           │
+│   Status  │                       ▼ 1         │
+│TaskProgress│           ┌───────────────────┐  │
+│ CreatedAt │            │ SecurityQuestion  │  │
+│ UpdatedAt │            ├───────────────────┤  │
+│ DeletedAt │            │PK SecQuestion_ID  │  │
+└─────┬─────┘            │   Prompt          │  │
+      │                  │   IsActive        │  │
+      │                  │   CreatedAt       │  │
+      │                  │   UpdatedAt       │  │
+      │                  └───────────────────┘  │
+      │                                         │
+      ├─────────────────────────────────────────┘
       │
       │ 1                        1                         N
       ├──────────────────────────┼─────────────────────────┐
@@ -180,54 +179,7 @@ Represents dependencies between tasks (prerequisite relationships).
 
 ---
 
-### 6. **RecurringTask**
-Defines recurring task patterns.
-
-| Attribute | Type | Constraints | Description |
-|-----------|------|-------------|-------------|
-| RecurringTask_ID | INTEGER | PK (composite) | Recurring task identifier |
-| User_ID | INTEGER | PK (composite), FK → User | Owner of recurring task |
-| Task_ID | INTEGER | FK → Task, NULLABLE | Base task (optional) |
-| Title | TEXT | NOT NULL | Recurring task title |
-| Description | TEXT | NULLABLE | Recurring task description |
-| Priority | ENUM | NOT NULL | Low, Medium, High |
-| Frequency | ENUM | NOT NULL | DAILY, WEEKLY, MONTHLY, YEARLY |
-| StartDate | TEXT | NOT NULL | Start date (yyyy-MM-dd) |
-| EndDate | TEXT | NULLABLE | End date (optional) |
-| TimeOfDay | TEXT | NULLABLE | Time of day (HH:mm) |
-| DayOfWeek | INTEGER | NULLABLE | For WEEKLY (1-7, Monday-Sunday) |
-| DayOfMonth | INTEGER | NULLABLE | For MONTHLY (1-31) |
-| IsActive | BOOLEAN | NOT NULL | Whether recurrence is active |
-| LastGenerated | TEXT | NULLABLE | Last task generation date |
-| CreatedAt | INTEGER | NOT NULL | Creation timestamp |
-| UpdatedAt | INTEGER | NOT NULL | Last update timestamp |
-
----
-
-### 7. **TaskTemplate**
-Reusable task templates.
-
-| Attribute | Type | Constraints | Description |
-|-----------|------|-------------|-------------|
-| Template_ID | INTEGER | PK (composite) | Template identifier |
-| User_ID | INTEGER | PK (composite), FK → User | Template owner |
-| Task_ID | INTEGER | FK → Task, NULLABLE | Source task (optional) |
-| Name | TEXT | NOT NULL | Template name |
-| Description | TEXT | NULLABLE | Template description |
-| Category | TEXT | NULLABLE | Template category |
-| Title | TEXT | NOT NULL | Default task title |
-| TaskDescription | TEXT | NULLABLE | Default task description |
-| Priority | ENUM | NOT NULL | Default priority |
-| EstimatedDuration | INTEGER | NULLABLE | Duration in minutes |
-| DefaultDueInDays | INTEGER | NULLABLE | Days until due from creation |
-| IsShared | BOOLEAN | NOT NULL (default false) | Sharing status |
-| UsageCount | INTEGER | NOT NULL (default 0) | Times used |
-| CreatedAt | INTEGER | NOT NULL | Creation timestamp |
-| UpdatedAt | INTEGER | NOT NULL | Last update timestamp |
-
----
-
-### 8. **Personality**
+### 6. **Personality**
 Predefined personality types that influence app messaging.
 
 | Attribute | Type | Constraints | Description |
@@ -249,7 +201,7 @@ Predefined personality types that influence app messaging.
 
 ---
 
-### 9. **MessageTemplate**
+### 7. **MessageTemplate**
 Templates for personality-based messages.
 
 | Attribute | Type | Constraints | Description |
@@ -261,7 +213,7 @@ Templates for personality-based messages.
 
 ---
 
-### 10. **Settings**
+### 8. **Settings**
 User-specific application settings.
 
 | Attribute | Type | Constraints | Description |
@@ -276,7 +228,7 @@ User-specific application settings.
 
 ---
 
-### 11. **SecurityQuestion**
+### 9. **SecurityQuestion**
 Predefined security questions for account recovery.
 
 | Attribute | Type | Constraints | Description |
@@ -289,7 +241,7 @@ Predefined security questions for account recovery.
 
 ---
 
-### 12. **UserSecurityAnswer**
+### 10. **UserSecurityAnswer**
 User answers to security questions.
 
 | Attribute | Type | Constraints | Description |
@@ -307,8 +259,6 @@ User answers to security questions.
 |--------------|-------------|-------------|
 | User → Task | 1:N | A user can have many tasks |
 | User → Settings | 1:N | A user can have multiple settings configurations |
-| User → RecurringTask | 1:N | A user can define multiple recurring tasks |
-| User → TaskTemplate | 1:N | A user can create multiple task templates |
 | User → UserSecurityAnswer | 1:N | A user can have multiple security answers |
 | Task → SubTask | 1:N | A task can have multiple sub-tasks |
 | Task → TaskReminder | 1:N | A task can have multiple reminders |
@@ -348,9 +298,8 @@ User answers to security questions.
 ## 🔐 Data Integrity Features
 
 ### Foreign Key Constraints
-- **CASCADE DELETE**: User deletion cascades to Tasks, Settings, RecurringTask, TaskTemplate
+- **CASCADE DELETE**: User deletion cascades to Tasks, Settings
 - **CASCADE DELETE**: Task deletion cascades to SubTask, TaskReminder, TaskDependency
-- **SET NULL**: Template/RecurringTask reference to Task set to null on task deletion
 - **CASCADE DELETE**: Personality deletion cascades to MessageTemplate
 
 ### Unique Constraints
