@@ -10,7 +10,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 import com.cheermateapp.data.dao.MessageTemplateDao
 import com.cheermateapp.data.dao.PersonalityDao
 import com.cheermateapp.data.dao.SecurityDao
-import com.cheermateapp.data.dao.SettingsDao
+import com.cheermateapp.data.dao.UserSettingsDao
 import com.cheermateapp.data.dao.SubTaskDao
 import com.cheermateapp.data.dao.TaskDao
 import com.cheermateapp.data.dao.TaskDependencyDao
@@ -20,7 +20,7 @@ import com.cheermateapp.data.model.MessageTemplate
 import com.cheermateapp.data.model.Personality
 import com.cheermateapp.data.model.SecurityQuestion
 import com.cheermateapp.data.model.UserSecurityAnswer
-import com.cheermateapp.data.model.Settings
+import com.cheermateapp.data.model.UserSettings
 import com.cheermateapp.data.model.SubTask
 import com.cheermateapp.data.model.Task
 import com.cheermateapp.data.model.TaskDependency
@@ -37,11 +37,11 @@ import com.google.gson.Gson
         SubTask::class,
         SecurityQuestion::class,
         UserSecurityAnswer::class,
-        Settings::class,
+        UserSettings::class,
         MessageTemplate::class,
         TaskDependency::class
     ],
-    version = 21,
+    version = 22,
     exportSchema = false
 )
 @TypeConverters(AppTypeConverters::class)
@@ -50,7 +50,7 @@ abstract class AppDb : RoomDatabase() {
     abstract fun taskDao(): TaskDao
     abstract fun subTaskDao(): SubTaskDao
     abstract fun taskReminderDao(): TaskReminderDao
-    abstract fun settingsDao(): SettingsDao
+    abstract fun userSettingsDao(): UserSettingsDao
     abstract fun securityDao(): SecurityDao
     abstract fun personalityDao(): PersonalityDao
     abstract fun messageTemplateDao(): MessageTemplateDao
@@ -114,6 +114,35 @@ abstract class AppDb : RoomDatabase() {
             }
         }
 
+        private val MIGRATION_21_22 = object : Migration(21, 22) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                // Create new UserSettings table with updated schema
+                database.execSQL("""
+                    CREATE TABLE IF NOT EXISTS UserSettings (
+                        UserSettings_ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                        User_ID INTEGER NOT NULL,
+                        Appearance TEXT,
+                        Notification TEXT,
+                        DataManagement TEXT,
+                        Statistics TEXT,
+                        FOREIGN KEY (User_ID) REFERENCES User(User_ID) ON DELETE CASCADE
+                    )
+                """)
+                
+                // Create index on User_ID
+                database.execSQL("CREATE INDEX IF NOT EXISTS index_UserSettings_User_ID ON UserSettings(User_ID)")
+                
+                // Migrate data from old Settings table (if exists) to new UserSettings table
+                database.execSQL("""
+                    INSERT INTO UserSettings (User_ID, Appearance, Notification, DataManagement, Statistics)
+                    SELECT User_ID, Appearance, Notification, DataManagement, Statistics FROM Settings
+                """)
+                
+                // Drop old Settings table
+                database.execSQL("DROP TABLE IF EXISTS Settings")
+            }
+        }
+
 
         private fun buildDatabase(appContext: Context): AppDb {
             val gson = Gson()
@@ -123,7 +152,7 @@ abstract class AppDb : RoomDatabase() {
                 "cheermate_database"
             )
                 .addTypeConverter(AppTypeConverters(gson))
-                .addMigrations(MIGRATION_19_20, MIGRATION_20_21)
+                .addMigrations(MIGRATION_19_20, MIGRATION_20_21, MIGRATION_21_22)
                 .build()
         }
     }

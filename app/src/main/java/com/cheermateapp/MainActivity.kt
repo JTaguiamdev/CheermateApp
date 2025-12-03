@@ -734,18 +734,18 @@ class MainActivity : AppCompatActivity() {
                     .putBoolean("ignore_next_toggle", true)
                     .apply()
                 com.cheermateapp.util.ThemeManager.setThemeMode(this, newMode)
-                // Persist to Settings.Appearance
+                // Persist to UserSettings.Appearance
                 lifecycleScope.launch {
                     try {
                         val db = com.cheermateapp.data.db.AppDb.get(this@MainActivity)
-                        val current = withContext(kotlinx.coroutines.Dispatchers.IO) { db.settingsDao().getSettingsByUser(userId) }
+                        val current = withContext(kotlinx.coroutines.Dispatchers.IO) { db.userSettingsDao().getSettingsByUser(userId) }
                         val appearance = com.cheermateapp.data.model.Appearance(theme = if (isChecked) "dark" else "light")
                         val newSettings = if (current != null) {
                             current.copy(Appearance = appearance)
                         } else {
-                            com.cheermateapp.data.model.Settings(User_ID = userId, Appearance = appearance)
+                            com.cheermateapp.data.model.UserSettings(User_ID = userId, Appearance = appearance)
                         }
-                        withContext(kotlinx.coroutines.Dispatchers.IO) { db.settingsDao().upsert(newSettings) }
+                        withContext(kotlinx.coroutines.Dispatchers.IO) { db.userSettingsDao().upsert(newSettings) }
                     } catch (_: Exception) {}
                 }
                 // Single controlled recreate to apply theme

@@ -3,33 +3,26 @@ package com.cheermateapp.data.model
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
+import androidx.room.PrimaryKey
 
 @Entity(
-    tableName = "Settings",
-    primaryKeys = ["User_ID", "Settings_ID"],
+    tableName = "UserSettings",
     foreignKeys = [
         ForeignKey(
             entity = User::class,
             parentColumns = ["User_ID"],
             childColumns = ["User_ID"],
             onDelete = ForeignKey.CASCADE
-        ),
-        ForeignKey(
-            entity = Personality::class,
-            parentColumns = ["Personality_ID"],
-            childColumns = ["Personality_ID"],
-            onDelete = ForeignKey.SET_NULL
         )
     ],
     indices = [
-        Index("User_ID"),
-        Index("Personality_ID")
+        Index("User_ID")
     ]
 )
-data class Settings(
-    val Settings_ID: Int = 0,
+data class UserSettings(
+    @PrimaryKey(autoGenerate = true)
+    val UserSettings_ID: Int = 0,
     val User_ID: Int,
-    val Personality_ID: Int? = null,
     val Appearance: Appearance? = null,
     val Notification: NotificationPref? = null,
     val DataManagement: DataManagement? = null,
