@@ -26,7 +26,7 @@
             android:layout_marginBottom="12dp"
             android:fontFamily="@font/sf_pro_rounded_bold"
             android:text="Task Title"
-            android:textColor="@android:color/white"
+            android:textColor="@color/bottom_sheet_text_primary"
             android:textSize="20sp" />
 
         <!-- Task Description -->
@@ -37,7 +37,7 @@
             android:layout_marginBottom="16dp"
             android:fontFamily="@font/sf_pro_rounded_regular"
             android:text="Task Description"
-            android:textColor="@color/text_secondary_white_70"
+            android:textColor="@color/bottom_sheet_text_secondary"
             android:textSize="14sp"
             android:visibility="gone" />
 
@@ -54,7 +54,7 @@
                 android:alpha="0.7"
                 android:fontFamily="@font/sf_pro_rounded_regular"
                 android:text="Category: "
-                android:textColor="@android:color/white"
+                android:textColor="@color/bottom_sheet_text_secondary"
                 android:textSize="14sp" />
 
             <TextView
@@ -63,7 +63,7 @@
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/sf_pro_rounded_bold"
                 android:text="📋 Work"
-                android:textColor="@android:color/white"
+                android:textColor="@color/bottom_sheet_text_primary"
                 android:textSize="14sp" />
         </LinearLayout>
 
@@ -80,7 +80,7 @@
                 android:alpha="0.7"
                 android:fontFamily="@font/sf_pro_rounded_regular"
                 android:text="Priority: "
-                android:textColor="@android:color/white"
+                android:textColor="@color/bottom_sheet_text_secondary"
                 android:textSize="14sp" />
 
             <TextView
@@ -89,7 +89,7 @@
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/sf_pro_rounded_bold"
                 android:text="High"
-                android:textColor="@android:color/white"
+                android:textColor="@color/bottom_sheet_text_primary"
                 android:textSize="14sp" />
         </LinearLayout>
 
@@ -106,7 +106,7 @@
                 android:alpha="0.7"
                 android:fontFamily="@font/sf_pro_rounded_regular"
                 android:text="Status: "
-                android:textColor="@android:color/white"
+                android:textColor="@color/bottom_sheet_text_secondary"
                 android:textSize="14sp" />
 
             <TextView
@@ -115,7 +115,7 @@
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/sf_pro_rounded_bold"
                 android:text="⏳ Pending"
-                android:textColor="@android:color/white"
+                android:textColor="@color/bottom_sheet_text_primary"
                 android:textSize="14sp" />
         </LinearLayout>
 
@@ -135,7 +135,7 @@
                 android:alpha="0.7"
                 android:fontFamily="@font/sf_pro_rounded_regular"
                 android:text="Progress: "
-                android:textColor="@android:color/white"
+                android:textColor="@color/bottom_sheet_text_secondary"
                 android:textSize="14sp" />
 
             <ProgressBar
@@ -148,7 +148,7 @@
                 android:layout_weight="1"
                 android:progress="50"
                 android:progressBackgroundTint="#33FFFFFF"
-                android:progressTint="@android:color/white" />
+                android:progressTint="@color/bottom_sheet_text_primary" />
 
             <TextView
                 android:id="@+id/tvTaskProgress"
@@ -156,7 +156,7 @@
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/sf_pro_rounded_bold"
                 android:text="50%"
-                android:textColor="@android:color/white"
+                android:textColor="@color/bottom_sheet_text_primary"
                 android:textSize="14sp" />
         </LinearLayout>
 
@@ -173,7 +173,7 @@
                 android:alpha="0.7"
                 android:fontFamily="@font/sf_pro_rounded_regular"
                 android:text="Due: "
-                android:textColor="@android:color/white"
+                android:textColor="@color/bottom_sheet_text_secondary"
                 android:textSize="14sp" />
 
             <TextView
@@ -182,7 +182,7 @@
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/sf_pro_rounded_bold"
                 android:text="Dec 25, 2024 at 3:30 PM"
-                android:textColor="@android:color/white"
+                android:textColor="@color/bottom_sheet_text_primary"
                 android:textSize="14sp" />
         </LinearLayout>
 
@@ -205,7 +205,7 @@
                 android:fontFamily="@font/sf_pro_rounded_bold"
                 android:gravity="center"
                 android:text="✅ Complete"
-                android:textColor="@android:color/white"
+                android:textColor="@color/bottom_sheet_text_primary"
                 android:textSize="13sp" />
 
             <TextView
@@ -220,7 +220,7 @@
                 android:fontFamily="@font/sf_pro_rounded_bold"
                 android:gravity="center"
                 android:text="✏️ Edit"
-                android:textColor="@android:color/white"
+                android:textColor="@color/bottom_sheet_text_primary"
                 android:textSize="13sp" />
 
             <TextView
@@ -235,7 +235,7 @@
                 android:fontFamily="@font/sf_pro_rounded_bold"
                 android:gravity="center"
                 android:text="🗑️ Delete"
-                android:textColor="@android:color/white"
+                android:textColor="@color/bottom_sheet_text_primary"
                 android:textSize="13sp" />
         </LinearLayout>
     </LinearLayout>

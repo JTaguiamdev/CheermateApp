@@ -10,22 +10,30 @@
     <!-- SubTask Name Input -->
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/tilSubTaskName"
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
+        style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:hint="Subtask name"
         app:boxCornerRadiusTopStart="12dp"
         app:boxCornerRadiusTopEnd="12dp"
         app:boxCornerRadiusBottomStart="12dp"
-        app:boxCornerRadiusBottomEnd="12dp">
+        app:boxCornerRadiusBottomEnd="12dp"
+        app:hintTextColor="@color/bottom_sheet_text_secondary"
+        app:boxStrokeColor="@color/calendar_today"
+        app:boxBackgroundColor="@color/bottom_sheet_button_background"
+        app:startIconDrawable="@drawable/ic_task_24dp"
+        app:startIconTint="@color/calendar_today">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/etSubTaskName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Subtask name"
             android:inputType="textCapSentences"
             android:minHeight="48dp"
-            android:maxLines="2" />
+            android:maxLines="2"
+            android:textColor="@color/bottom_sheet_text_primary"
+            android:fontFamily="@font/sf_pro_rounded_regular" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <!-- Help text -->
@@ -35,6 +43,7 @@
         android:layout_marginTop="8dp"
         android:text="Add a subtask to break down this task into smaller steps"
         android:textSize="12sp"
-        android:textColor="?android:attr/textColorSecondary" />
+        android:textColor="@color/bottom_sheet_text_secondary"
+        android:fontFamily="@font/sf_pro_rounded_regular" />
 
 </LinearLayout>

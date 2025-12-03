@@ -10,84 +10,108 @@
     <!-- Username -->
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/tilEditUsername"
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
+        style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="12dp"
+        android:layout_marginBottom="16dp"
+        android:hint="Username"
         app:boxCornerRadiusTopStart="12dp"
         app:boxCornerRadiusTopEnd="12dp"
         app:boxCornerRadiusBottomStart="12dp"
-        app:boxCornerRadiusBottomEnd="12dp">
+        app:boxCornerRadiusBottomEnd="12dp"
+        app:hintTextColor="@color/bottom_sheet_text_secondary"
+        app:boxStrokeColor="@color/calendar_today"
+        app:boxBackgroundColor="@color/bottom_sheet_button_background"
+        app:startIconDrawable="@drawable/ic_person_24dp"
+        app:startIconTint="@color/calendar_today">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/etEditUsername"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Username"
             android:inputType="text"
-            android:minHeight="48dp" />
+            android:minHeight="48dp"
+            android:textColor="@color/bottom_sheet_text_primary"
+            android:fontFamily="@font/sf_pro_rounded_regular" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <!-- Email -->
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/tilEditEmail"
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
+        style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="12dp"
+        android:layout_marginBottom="16dp"
+        android:hint="Email"
         app:boxCornerRadiusTopStart="12dp"
         app:boxCornerRadiusTopEnd="12dp"
         app:boxCornerRadiusBottomStart="12dp"
-        app:boxCornerRadiusBottomEnd="12dp">
+        app:boxCornerRadiusBottomEnd="12dp"
+        app:hintTextColor="@color/bottom_sheet_text_secondary"
+        app:boxStrokeColor="@color/calendar_today"
+        app:boxBackgroundColor="@color/bottom_sheet_button_background"
+        app:startIconDrawable="@drawable/ic_email_24dp"
+        app:startIconTint="@color/calendar_today">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/etEditEmail"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Email"
             android:inputType="textEmailAddress"
-            android:minHeight="48dp" />
+            android:minHeight="48dp"
+            android:textColor="@color/bottom_sheet_text_primary"
+            android:fontFamily="@font/sf_pro_rounded_regular" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <!-- First Name -->
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/tilEditFirstName"
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
+        style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="12dp"
+        android:layout_marginBottom="16dp"
+        android:hint="First Name"
         app:boxCornerRadiusTopStart="12dp"
         app:boxCornerRadiusTopEnd="12dp"
         app:boxCornerRadiusBottomStart="12dp"
-        app:boxCornerRadiusBottomEnd="12dp">
+        app:boxCornerRadiusBottomEnd="12dp"
+        app:hintTextColor="@color/bottom_sheet_text_secondary"
+        app:boxStrokeColor="@color/calendar_today"
+        app:boxBackgroundColor="@color/bottom_sheet_button_background">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/etEditFirstName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="First Name"
             android:inputType="textPersonName"
-            android:minHeight="48dp" />
+            android:minHeight="48dp"
+            android:textColor="@color/bottom_sheet_text_primary"
+            android:fontFamily="@font/sf_pro_rounded_regular" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <!-- Last Name -->
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/tilEditLastName"
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
+        style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:hint="Last Name"
         app:boxCornerRadiusTopStart="12dp"
         app:boxCornerRadiusTopEnd="12dp"
         app:boxCornerRadiusBottomStart="12dp"
-        app:boxCornerRadiusBottomEnd="12dp">
+        app:boxCornerRadiusBottomEnd="12dp"
+        app:hintTextColor="@color/bottom_sheet_text_secondary"
+        app:boxStrokeColor="@color/calendar_today"
+        app:boxBackgroundColor="@color/bottom_sheet_button_background">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/etEditLastName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Last Name"
             android:inputType="textPersonName"
-            android:minHeight="48dp" />
+            android:minHeight="48dp"
+            android:textColor="@color/bottom_sheet_text_primary"
+            android:fontFamily="@font/sf_pro_rounded_regular" />
     </com.google.android.material.textfield.TextInputLayout>
 
 </LinearLayout>

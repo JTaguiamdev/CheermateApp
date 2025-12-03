@@ -1,16 +1,84 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- CalendarView Style for Dark Mode -->
+    <!-- Dark mode calendar theme overlay -->
+    <style name="AppTheme.Calendar" parent="ThemeOverlay.Material3.Dark">
+        <!-- Header & controls color overrides -->
+        <item name="android:textColorPrimary">@color/bottom_sheet_text_primary</item>
+        <item name="android:colorControlNormal">@color/bottom_sheet_text_primary</item>
+        <item name="colorControlNormal">@color/bottom_sheet_text_primary</item>
+        <item name="android:colorControlActivated">#9966CC</item>
+        <item name="colorControlActivated">#9966CC</item>
+
+        <!-- Selected date circle color -->
+        <item name="colorPrimary">@color/calendar_selected</item>
+        <!-- Text color on selected date circle -->
+        <item name="colorOnPrimary">@color/bottom_sheet_text_primary</item>
+        <!-- Today's date text color -->
+        <item name="colorOnSurfaceVariant">@color/calendar_today</item>
+        <!-- Set the main text appearance for dates -->
+        <item name="android:dateTextAppearance">@style/CalendarView.Date</item>
+        <item name="android:weekDayTextAppearance">@style/CalendarView.WeekDay</item>
+    </style>
+
+    <!-- Base style for the calendar date text in dark mode -->
+    <style name="CalendarView.Date" parent="android:TextAppearance.Material.Small">
+        <item name="android:textColor">@color/bottom_sheet_text_primary</item>
+        <item name="android:fontFamily">@font/sf_pro_rounded_regular</item>
+    </style>
+
+    <!-- Base style for the calendar weekday text (S, M, T, etc.) in dark mode -->
+    <style name="CalendarView.WeekDay" parent="android:TextAppearance.Material.Small">
+        <item name="android:textColor">@color/bottom_sheet_text_primary</item>
+    </style>
+
+    <!-- Custom Date Picker Style for DatePickerDialog in dark mode -->
+    <style name="CustomDatePickerTheme" parent="Theme.MaterialComponents.DayNight.Dialog">
+        <item name="colorPrimary">@color/calendar_today</item>
+        <item name="android:background">@color/bottom_sheet_background</item>
+        <item name="android:textColorPrimary">@color/bottom_sheet_text_primary</item>
+        <item name="android:textColorSecondary">@color/bottom_sheet_text_secondary</item>
+    </style>
+
+    <!-- Custom Time Picker Style for TimePickerDialog in dark mode -->
+    <style name="CustomTimePickerTheme" parent="Theme.MaterialComponents.DayNight.Dialog">
+        <item name="colorPrimary">@color/calendar_today</item>
+        <item name="android:background">@color/bottom_sheet_background</item>
+        <item name="android:textColorPrimary">@color/bottom_sheet_text_primary</item>
+        <item name="android:textColorSecondary">@color/bottom_sheet_text_secondary</item>
+    </style>
+
+    <!-- Legacy CalendarView Style for Dark Mode -->
     <style name="CalendarViewStyle" parent="android:Widget.Material.CalendarView">
         <item name="android:dateTextAppearance">@style/CalendarViewDateTextAppearance</item>
         <item name="android:weekDayTextAppearance">@style/CalendarViewWeekDayTextAppearance</item>
     </style>
 
     <style name="CalendarViewDateTextAppearance" parent="android:TextAppearance.Material.Small">
-        <item name="android:textColor">@android:color/white</item>
+        <item name="android:textColor">@color/bottom_sheet_text_primary</item>
     </style>
 
     <style name="CalendarViewWeekDayTextAppearance" parent="android:TextAppearance.Material.Small">
-        <item name="android:textColor">@android:color/white</item>
+        <item name="android:textColor">@color/bottom_sheet_text_primary</item>
+    </style>
+
+    <!-- ============================= -->
+    <!--  Dark Mode Task Dialog Overrides -->
+    <!-- ============================= -->
+
+    <!-- Dark mode specific EditText theme override -->
+    <style name="TaskDialogEditTextTheme">
+        <item name="editTextColor">@color/dialog_text_primary</item>
+        <item name="android:editTextColor">@color/dialog_text_primary</item>
+        <item name="android:textColor">@color/dialog_text_primary</item>
+        <item name="android:textColorHint">@color/dialog_text_hint</item>
+        <item name="colorOnSurface">@color/dialog_text_primary</item>
+    </style>
+
+    <!-- Dark mode specific EditText appearance -->
+    <style name="TaskDialogEditTextAppearance" parent="TextAppearance.MaterialComponents.Body1">
+        <item name="android:textColor">@color/dialog_text_primary</item>
+        <item name="android:textColorHint">@color/dialog_text_hint</item>
+        <item name="android:fontFamily">@font/sf_pro_rounded_regular</item>
+        <item name="android:textSize">16sp</item>
     </style>
 </resources>

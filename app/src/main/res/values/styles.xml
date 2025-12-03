@@ -82,4 +82,74 @@
         <item name="colorControlActivated">@android:color/white</item>
         <item name="android:textColorPrimary">@android:color/white</item>
     </style>
+
+    <!-- ============================= -->
+    <!--  Task Dialog Accessible Styles -->
+    <!-- ============================= -->
+    
+    <!-- Enhanced TextInputLayout with proper hint visibility -->
+    <style name="TaskDialogTextInputLayout" parent="Widget.MaterialComponents.TextInputLayout.FilledBox">
+        <item name="boxCornerRadiusTopStart">12dp</item>
+        <item name="boxCornerRadiusTopEnd">12dp</item>
+        <item name="boxCornerRadiusBottomStart">12dp</item>
+        <item name="boxCornerRadiusBottomEnd">12dp</item>
+        <item name="boxBackgroundColor">@color/dialog_input_background</item>
+        <item name="boxStrokeColor">@color/dialog_input_border</item>
+        <item name="hintTextColor">@color/dialog_text_hint</item>
+        <item name="android:textColorHint">@color/dialog_text_hint</item>
+        <item name="errorTextColor">@color/dialog_text_error</item>
+        <item name="startIconTint">@color/calendar_today</item>
+        <item name="endIconTint">@color/calendar_today</item>
+        <!-- Force EditText text color through the layout -->
+        <item name="android:theme">@style/TaskDialogEditTextTheme</item>
+    </style>
+
+    <!-- Theme override for EditText within TextInputLayout -->
+    <style name="TaskDialogEditTextTheme">
+        <item name="editTextColor">@color/dialog_text_primary</item>
+        <item name="android:editTextColor">@color/dialog_text_primary</item>
+        <item name="android:textColor">@color/dialog_text_primary</item>
+        <item name="android:textColorHint">@color/dialog_text_hint</item>
+    </style>
+
+    <!-- Enhanced EditText with proper text contrast -->
+    <style name="TaskDialogEditText" parent="Widget.MaterialComponents.TextInputEditText.FilledBox">
+        <item name="android:textColor">@color/dialog_text_primary</item>
+        <item name="android:textColorHint">@color/dialog_text_hint</item>
+        <item name="android:fontFamily">@font/sf_pro_rounded_regular</item>
+        <item name="android:textSize">16sp</item>
+        <!-- Force text appearance -->
+        <item name="android:textAppearance">@style/TaskDialogEditTextAppearance</item>
+    </style>
+
+    <!-- Text appearance to ensure proper coloring -->
+    <style name="TaskDialogEditTextAppearance" parent="TextAppearance.MaterialComponents.Body1">
+        <item name="android:textColor">@color/dialog_text_primary</item>
+        <item name="android:textColorHint">@color/dialog_text_hint</item>
+        <item name="android:fontFamily">@font/sf_pro_rounded_regular</item>
+        <item name="android:textSize">16sp</item>
+    </style>
+
+    <!-- Label text style with proper contrast -->
+    <style name="TaskDialogLabel">
+        <item name="android:textColor">@color/dialog_label_text</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:fontFamily">@font/sf_pro_rounded_bold</item>
+        <item name="android:layout_marginBottom">8dp</item>
+    </style>
+
+    <!-- Helper text style -->
+    <style name="TaskDialogHelperText">
+        <item name="android:textColor">@color/dialog_helper_text</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:fontFamily">@font/sf_pro_rounded_regular</item>
+        <item name="android:lineSpacingExtra">2dp</item>
+    </style>
+
+    <!-- Required asterisk style -->
+    <style name="TaskDialogRequiredAsterisk">
+        <item name="android:textColor">@color/dialog_required_asterisk</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:fontFamily">@font/sf_pro_rounded_bold</item>
+    </style>
 </resources>
