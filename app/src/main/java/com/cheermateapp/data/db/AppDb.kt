@@ -9,18 +9,15 @@ import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.cheermateapp.data.dao.MessageTemplateDao
 import com.cheermateapp.data.dao.PersonalityDao
-import com.cheermateapp.data.dao.RecurringTaskDao
 import com.cheermateapp.data.dao.SecurityDao
 import com.cheermateapp.data.dao.SettingsDao
 import com.cheermateapp.data.dao.SubTaskDao
 import com.cheermateapp.data.dao.TaskDao
 import com.cheermateapp.data.dao.TaskDependencyDao
 import com.cheermateapp.data.dao.TaskReminderDao
-import com.cheermateapp.data.dao.TaskTemplateDao
 import com.cheermateapp.data.dao.UserDao
 import com.cheermateapp.data.model.MessageTemplate
 import com.cheermateapp.data.model.Personality
-import com.cheermateapp.data.model.RecurringTask
 import com.cheermateapp.data.model.SecurityQuestion
 import com.cheermateapp.data.model.UserSecurityAnswer
 import com.cheermateapp.data.model.Settings
@@ -28,7 +25,6 @@ import com.cheermateapp.data.model.SubTask
 import com.cheermateapp.data.model.Task
 import com.cheermateapp.data.model.TaskDependency
 import com.cheermateapp.data.model.TaskReminder
-import com.cheermateapp.data.model.TaskTemplate
 import com.cheermateapp.data.model.User
 import com.google.gson.Gson
 
@@ -43,11 +39,9 @@ import com.google.gson.Gson
         UserSecurityAnswer::class,
         Settings::class,
         MessageTemplate::class,
-        RecurringTask::class,
-        TaskTemplate::class,
         TaskDependency::class
     ],
-    version = 20,
+    version = 21,
     exportSchema = false
 )
 @TypeConverters(AppTypeConverters::class)
@@ -60,8 +54,6 @@ abstract class AppDb : RoomDatabase() {
     abstract fun securityDao(): SecurityDao
     abstract fun personalityDao(): PersonalityDao
     abstract fun messageTemplateDao(): MessageTemplateDao
-    abstract fun recurringTaskDao(): RecurringTaskDao
-    abstract fun taskTemplateDao(): TaskTemplateDao
     abstract fun taskDependencyDao(): TaskDependencyDao
 
     companion object {
@@ -112,6 +104,16 @@ abstract class AppDb : RoomDatabase() {
             }
         }
 
+        private val MIGRATION_20_21 = object : Migration(20, 21) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                // Drop RecurringTask table and its indexes
+                database.execSQL("DROP TABLE IF EXISTS RecurringTask")
+                
+                // Drop TaskTemplate table and its indexes
+                database.execSQL("DROP TABLE IF EXISTS TaskTemplate")
+            }
+        }
+
 
         private fun buildDatabase(appContext: Context): AppDb {
             val gson = Gson()
@@ -121,7 +123,7 @@ abstract class AppDb : RoomDatabase() {
                 "cheermate_database"
             )
                 .addTypeConverter(AppTypeConverters(gson))
-                .addMigrations(MIGRATION_19_20)
+                .addMigrations(MIGRATION_19_20, MIGRATION_20_21)
                 .build()
         }
     }
