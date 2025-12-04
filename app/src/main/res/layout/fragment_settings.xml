@@ -279,7 +279,7 @@
             <ImageView
                 android:layout_width="22dp"
                 android:layout_height="22dp"
-                android:src="@drawable/ic_moon"
+                android:src="@drawable/ic_darkmode"
                 app:tint="@color/white" />
 
             <LinearLayout
@@ -337,7 +337,7 @@
             <ImageView
                 android:layout_width="22dp"
                 android:layout_height="22dp"
-                android:src="@android:drawable/ic_popup_reminder"
+                android:src="@drawable/ic_bell"
                 app:tint="@android:color/white" />
 
             <LinearLayout
