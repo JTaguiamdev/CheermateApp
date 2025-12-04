@@ -9,7 +9,6 @@ import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.cheermateapp.data.dao.MessageTemplateDao
 import com.cheermateapp.data.dao.PersonalityDao
-import com.cheermateapp.data.dao.RecurringTaskDao
 import com.cheermateapp.data.dao.SecurityDao
 import com.cheermateapp.data.dao.SettingsDao
 import com.cheermateapp.data.dao.SubTaskDao
@@ -20,7 +19,6 @@ import com.cheermateapp.data.dao.TaskTemplateDao
 import com.cheermateapp.data.dao.UserDao
 import com.cheermateapp.data.model.MessageTemplate
 import com.cheermateapp.data.model.Personality
-import com.cheermateapp.data.model.RecurringTask
 import com.cheermateapp.data.model.SecurityQuestion
 import com.cheermateapp.data.model.UserSecurityAnswer
 import com.cheermateapp.data.model.Settings
@@ -43,11 +41,10 @@ import com.google.gson.Gson
         UserSecurityAnswer::class,
         Settings::class,
         MessageTemplate::class,
-        RecurringTask::class,
         TaskTemplate::class,
         TaskDependency::class
     ],
-    version = 20,
+    version = 21,
     exportSchema = false
 )
 @TypeConverters(AppTypeConverters::class)
@@ -60,7 +57,6 @@ abstract class AppDb : RoomDatabase() {
     abstract fun securityDao(): SecurityDao
     abstract fun personalityDao(): PersonalityDao
     abstract fun messageTemplateDao(): MessageTemplateDao
-    abstract fun recurringTaskDao(): RecurringTaskDao
     abstract fun taskTemplateDao(): TaskTemplateDao
     abstract fun taskDependencyDao(): TaskDependencyDao
 
@@ -112,6 +108,34 @@ abstract class AppDb : RoomDatabase() {
             }
         }
 
+        private val MIGRATION_20_21 = object : Migration(20, 21) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                // Drop RecurringTask table
+                database.execSQL("DROP TABLE IF EXISTS RecurringTask")
+                
+                // Remove MotivationMessage column from Personality table
+                // SQLite doesn't support DROP COLUMN, so we recreate the table
+                database.execSQL("""
+                    CREATE TABLE Personality_new (
+                        Personality_ID INTEGER PRIMARY KEY NOT NULL,
+                        Name TEXT NOT NULL,
+                        Description TEXT NOT NULL,
+                        IsActive INTEGER NOT NULL DEFAULT 1,
+                        CreatedAt INTEGER NOT NULL,
+                        UpdatedAt INTEGER NOT NULL
+                    )
+                """)
+                
+                database.execSQL("""
+                    INSERT INTO Personality_new (Personality_ID, Name, Description, IsActive, CreatedAt, UpdatedAt)
+                    SELECT Personality_ID, Name, Description, IsActive, CreatedAt, UpdatedAt FROM Personality
+                """)
+                
+                database.execSQL("DROP TABLE Personality")
+                database.execSQL("ALTER TABLE Personality_new RENAME TO Personality")
+            }
+        }
+
 
         private fun buildDatabase(appContext: Context): AppDb {
             val gson = Gson()
@@ -121,7 +145,7 @@ abstract class AppDb : RoomDatabase() {
                 "cheermate_database"
             )
                 .addTypeConverter(AppTypeConverters(gson))
-                .addMigrations(MIGRATION_19_20)
+                .addMigrations(MIGRATION_19_20, MIGRATION_20_21)
                 .build()
         }
     }

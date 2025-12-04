@@ -318,21 +318,6 @@ class RoomSchemaValidatorTest {
     }
 
     @Test
-    fun `test RecurringTask foreign key validation`() {
-        // Given
-        val entities = listOf(User::class, RecurringTask::class)
-
-        // When
-        val issues = validator.validateEntity(RecurringTask::class, entities)
-
-        // Then
-        val criticalIssues = issues.filter { 
-            it.severity == ValidationSeverity.CRITICAL 
-        }
-        assertTrue("RecurringTask should have valid foreign key", criticalIssues.isEmpty())
-    }
-
-    @Test
     fun `test comprehensive validation with all checks`() {
         // Given
         val entities = DatabaseSchemaValidationHelper.getAllEntities()

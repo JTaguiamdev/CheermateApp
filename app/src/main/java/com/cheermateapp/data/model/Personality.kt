@@ -7,7 +7,7 @@ import androidx.room.PrimaryKey
 /**
  * Represents a personality type with associated messages and characteristics.
  * This entity stores the personality types (1-5) that users can choose from.
- * Each personality has unique motivation messages for different contexts.
+ * Motivation messages are now fetched from MessageTemplate entity.
  */
 @Entity(tableName = "Personality")
 data class Personality(
@@ -20,9 +20,6 @@ data class Personality(
 
     @ColumnInfo(name = "Description")
     val Description: String,
-
-    @ColumnInfo(name = "MotivationMessage")
-    val MotivationMessage: String? = null,
 
     @ColumnInfo(name = "IsActive")
     val IsActive: Boolean = true,

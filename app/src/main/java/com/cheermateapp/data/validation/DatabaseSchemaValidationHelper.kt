@@ -19,7 +19,6 @@ object DatabaseSchemaValidationHelper {
             TaskReminder::class,
             TaskDependency::class,
             TaskTemplate::class,
-            RecurringTask::class,
             Settings::class,
             Personality::class,
             SecurityQuestion::class,
