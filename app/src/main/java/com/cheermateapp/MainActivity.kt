@@ -2271,44 +2271,40 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showMotivationalMessage() {
-        try {
-            uiScope.launch {
-                try {
-                    val db = AppDb.get(this@MainActivity)
+        uiScope.launch {
+            try {
+                val db = AppDb.get(this@MainActivity)
 
-                    // Get user's personality ID
-                    val user = withContext(Dispatchers.IO) {
-                        db.userDao().getById(userId)
+                // Get user's personality ID
+                val user = withContext(Dispatchers.IO) {
+                    db.userDao().getById(userId)
+                }
+                
+                val personalityId = user?.Personality_ID
+                
+                if (personalityId != null) {
+                    // Fetch motivation messages from MessageTemplate based on user's personality
+                    val motivationMessages = withContext(Dispatchers.IO) {
+                        db.messageTemplateDao().getByPersonalityAndCategory(personalityId, "motivation")
                     }
                     
-                    val personalityId = user?.Personality_ID
-                    
-                    if (personalityId != null) {
-                        // Fetch motivation messages from MessageTemplate based on user's personality
-                        val motivationMessages = withContext(Dispatchers.IO) {
-                            db.messageTemplateDao().getByPersonalityAndCategory(personalityId, "motivation")
-                        }
-                        
-                        if (motivationMessages.isNotEmpty()) {
-                            // Pick a random message from the list
-                            val randomMessage = motivationMessages.random().TextTemplate
-                            ToastManager.showToast(this@MainActivity, randomMessage, Toast.LENGTH_LONG)
-                        } else {
-                            // Fallback message if no templates found
-                            ToastManager.showToast(this@MainActivity, "💪 You've got this! Keep going!", Toast.LENGTH_LONG)
-                        }
+                    if (motivationMessages.isNotEmpty()) {
+                        // Pick a random message from the list
+                        val randomMessage = motivationMessages.random().TextTemplate
+                        ToastManager.showToast(this@MainActivity, randomMessage, Toast.LENGTH_LONG)
                     } else {
-                        // No personality selected
-                        ToastManager.showToast(this@MainActivity, "💪 You've got this! Let's make today amazing!", Toast.LENGTH_SHORT)
+                        // Fallback message if no templates found
+                        ToastManager.showToast(this@MainActivity, "💪 You've got this! Keep going!", Toast.LENGTH_LONG)
                     }
-
-                } catch (e: Exception) {
-                    android.util.Log.e("MainActivity", "Error showing motivational message", e)
+                } else {
+                    // No personality selected
                     ToastManager.showToast(this@MainActivity, "💪 You've got this! Let's make today amazing!", Toast.LENGTH_SHORT)
                 }
+
+            } catch (e: Exception) {
+                android.util.Log.e("MainActivity", "Error showing motivational message", e)
+                ToastManager.showToast(this@MainActivity, "💪 Stay motivated and keep pushing forward!", Toast.LENGTH_SHORT)
             }
-        } catch (e: Exception) {
-            ToastManager.showToast(this, "💪 Stay motivated and keep pushing forward!", Toast.LENGTH_SHORT)
         }
     }
 
