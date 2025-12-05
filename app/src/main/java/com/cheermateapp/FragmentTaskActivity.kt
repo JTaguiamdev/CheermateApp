@@ -7,6 +7,7 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
+import android.view.animation.AnimationUtils
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
@@ -16,6 +17,7 @@ import com.cheermateapp.data.db.AppDb
 import com.cheermateapp.data.model.Task
 import com.cheermateapp.data.model.Priority
 import com.cheermateapp.data.model.*
+import com.cheermateapp.util.AnimationHelper
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -173,8 +175,11 @@ class FragmentTaskActivity : AppCompatActivity() {
             progressPercent = findViewById(R.id.progressPercent)
             progressCompleted = findViewById(R.id.progressCompleted)
 
-            // Setup RecyclerView
+            // Setup RecyclerView with animations
             recyclerViewTasks.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(this)
+            AnimationHelper.setupRecyclerViewItemAnimator(recyclerViewTasks)
+            AnimationHelper.applyLayoutAnimation(recyclerViewTasks, R.anim.layout_animation_fall_down)
+            
             taskListAdapter = TaskListAdapter(
                 emptyList(),
                 onTaskClick = { task ->
@@ -198,13 +203,17 @@ class FragmentTaskActivity : AppCompatActivity() {
     // ✅ FIXED: Setup interactions with proper navigation
     private fun setupInteractions() {
         try {
-            // FAB click listener
+            // FAB click listener with entrance animation
             fabAddTask.setOnClickListener {
                 android.util.Log.d("FAB_DEBUG", "===== FAB CLICKED =====")
                 android.util.Log.d("FAB_DEBUG", "FAB ID: ${fabAddTask.id}")
                 android.util.Log.d("FAB_DEBUG", "Calling showAddTaskDialog()")
                 showAddTaskDialog()
             }
+            
+            // Apply FAB entrance animation
+            val fabAnimation = AnimationUtils.loadAnimation(this, R.anim.fab_scale_up)
+            fabAddTask.startAnimation(fabAnimation)
 
             btnSort.setOnClickListener {
                 showSortOptionsDialog()
@@ -599,11 +608,14 @@ class FragmentTaskActivity : AppCompatActivity() {
         try {
             listOf(tabAll, tabToday, tabPending, tabDone).forEach { tab ->
                 tab.setBackgroundResource(android.R.color.transparent)
-                tab.alpha = 0.7f
+                AnimationHelper.animateTabAlpha(tab, 0.7f)
             }
 
             selectedTab.setBackgroundResource(R.drawable.bg_chip_glass)
-            selectedTab.alpha = 1.0f
+            AnimationHelper.animateTabAlpha(selectedTab, 1.0f)
+            
+            // Run layout animation on RecyclerView for filter change
+            AnimationHelper.runLayoutAnimation(recyclerViewTasks)
         } catch (e: Exception) {
             android.util.Log.e("FragmentTaskActivity", "Error updating tab selection", e)
         }
@@ -1370,6 +1382,9 @@ class FragmentTaskActivity : AppCompatActivity() {
 
             // Set dialog window properties for proper rendering
             dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+            
+            // Apply dialog animation using setWindowAnimations for reliable application
+            dialog.window?.setWindowAnimations(R.style.DialogAnimation)
 
             // Set click listener for the "Cancel" button inside the dialog
             btnCancelTask.setOnClickListener {
