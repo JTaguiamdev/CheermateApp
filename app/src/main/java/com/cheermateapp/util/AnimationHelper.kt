@@ -228,7 +228,7 @@ object AnimationHelper {
             )
             recyclerView.layoutAnimation = layoutAnimation
         } catch (e: Exception) {
-            android.util.Log.e("AnimationHelper", "Failed to load layout animation", e)
+            android.util.Log.e("AnimationHelper", "Failed to load layout animation (resId: $animationResId)", e)
         }
     }
 
@@ -262,19 +262,5 @@ object AnimationHelper {
             this.duration = duration
             start()
         }
-    }
-
-    /**
-     * Create fade in animation from resources
-     */
-    fun loadFadeInAnimation(view: View): Animation {
-        return AnimationUtils.loadAnimation(view.context, android.R.anim.fade_in)
-    }
-
-    /**
-     * Create fade out animation from resources
-     */
-    fun loadFadeOutAnimation(view: View): Animation {
-        return AnimationUtils.loadAnimation(view.context, android.R.anim.fade_out)
     }
 }

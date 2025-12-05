@@ -1383,8 +1383,8 @@ class FragmentTaskActivity : AppCompatActivity() {
             // Set dialog window properties for proper rendering
             dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
             
-            // Apply dialog animation
-            dialog.window?.attributes?.windowAnimations = R.style.DialogAnimation
+            // Apply dialog animation using setWindowAnimations for reliable application
+            dialog.window?.setWindowAnimations(R.style.DialogAnimation)
 
             // Set click listener for the "Cancel" button inside the dialog
             btnCancelTask.setOnClickListener {
