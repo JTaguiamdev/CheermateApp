@@ -49,14 +49,13 @@ class TaskPagerAdapter(
         when (task.Status) {
             Status.Pending -> holder.tvTaskStatus.text = "⏳ Pending"
             Status.InProgress -> holder.tvTaskStatus.text = "🔄 In Progress"
-            Status.Completed -> holder.tvTaskStatus.text = "✅ Completed"
+            Status.Done -> holder.tvTaskStatus.text = "✅ Done"
             Status.Cancelled -> holder.tvTaskStatus.text = "❌ Cancelled"
             Status.OverDue -> holder.tvTaskStatus.text = "🔴 Overdue"
         }
         
         // Set due date with proper formatting
-        if (task.Status == Status.Completed) {
-            holder.tvTaskDueDate.visibility = View.GONE
+                    if (task.Status == Status.Done) {            holder.tvTaskDueDate.visibility = View.GONE
         } else if (task.DueAt != null) {
             holder.tvTaskDueDate.visibility = View.VISIBLE
             val formattedDate = task.getFormattedDueDateTime()

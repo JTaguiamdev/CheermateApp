@@ -136,7 +136,7 @@
             android:layout_width="0dp"
             android:layout_height="32dp"
             android:layout_weight="1"
-            android:text="✅ Complete"
+            android:text="✅ Done"
             android:textColor="@android:color/white"
             android:textSize="11sp"
             android:fontFamily="@font/sf_pro_rounded_bold"

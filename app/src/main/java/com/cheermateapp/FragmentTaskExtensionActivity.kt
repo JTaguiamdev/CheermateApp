@@ -265,7 +265,7 @@ class FragmentTaskExtensionActivity : AppCompatActivity() {
         tvTaskStatus.text = when (status) {
             Status.Pending -> "⏳ Pending"
             Status.InProgress -> "🔄 In Progress"
-            Status.Completed -> "✅ Completed"
+            Status.Done -> "✅ Done"
             Status.Cancelled -> "❌ Cancelled"
             Status.OverDue -> "🔴 Overdue"
         }
@@ -886,8 +886,8 @@ class FragmentTaskExtensionActivity : AppCompatActivity() {
     private fun markTaskAsCompleted() {
         currentTask?.let { task ->
             AlertDialog.Builder(this)
-                .setTitle("Mark as Completed")
-                .setMessage("Are you sure you want to mark '${task.Title}' as completed?")
+                .setTitle("Mark as Done")
+                .setMessage("Are you sure you want to mark '${task.Title}' as Done?")
                 .setPositiveButton("Yes") { _, _ ->
                     lifecycleScope.launch {
                         try {
@@ -905,17 +905,17 @@ class FragmentTaskExtensionActivity : AppCompatActivity() {
                             
                             // Update the current task status
                             currentTask = task.copy(
-                                Status = Status.Completed,
+                                Status = Status.Done,
                                 TaskProgress = 100,
                                 UpdatedAt = updatedAt
                             )
                             
                             // Update the status display
-                            updateTaskStatus(Status.Completed)
+                            updateTaskStatus(Status.Done)
                             
                             Toast.makeText(
                                 this@FragmentTaskExtensionActivity,
-                                "✅ Task marked as completed!",
+                                "✅ Task marked as Done!",
                                 Toast.LENGTH_SHORT
                             ).show()
                             

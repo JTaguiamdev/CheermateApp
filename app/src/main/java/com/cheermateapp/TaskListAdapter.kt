@@ -80,7 +80,7 @@ class TaskListAdapter(
         holder.tvStatus.text = "${task.getStatusEmoji()} ${task.Status.name}"
 
         // Set due date (shortened format for list)
-        if (task.Status == com.cheermateapp.data.model.Status.Completed) {
+        if (task.Status == com.cheermateapp.data.model.Status.Done) {
             holder.tvDueDate.visibility = View.GONE
         } else if (task.DueAt != null) {
             try {

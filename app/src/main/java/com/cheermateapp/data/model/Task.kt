@@ -16,7 +16,7 @@ enum class Status {
     Pending,
     @SerializedName("In Progress")
     InProgress,
-    Completed,
+    Done,
     Cancelled,
     OverDue
 }
@@ -171,7 +171,7 @@ data class Task(
 
     fun isOverdue(): Boolean {
         val dueDate = getDueDate()
-        return dueDate != null && dueDate.before(Date()) && Status != com.cheermateapp.data.model.Status.Completed
+        return dueDate != null && dueDate.before(Date()) && Status != com.cheermateapp.data.model.Status.Done
     }
 
     fun isToday(): Boolean {
@@ -203,7 +203,7 @@ data class Task(
 
     fun getStatusEmoji(): String {
         return when (Status) {
-            com.cheermateapp.data.model.Status.Completed -> "✅"
+            com.cheermateapp.data.model.Status.Done -> "✅"
             com.cheermateapp.data.model.Status.Pending -> "⏳"
             com.cheermateapp.data.model.Status.InProgress -> "🔄"
             com.cheermateapp.data.model.Status.Cancelled -> "❌"
@@ -224,7 +224,7 @@ data class Task(
         return when (Status) {
             com.cheermateapp.data.model.Status.Pending -> 0xFFFFA500.toInt()  // Orange
             com.cheermateapp.data.model.Status.InProgress -> 0xFF0066CC.toInt() // Blue
-            com.cheermateapp.data.model.Status.Completed -> 0xFF38A169.toInt()  // Green
+            com.cheermateapp.data.model.Status.Done -> 0xFF38A169.toInt()  // Green
             com.cheermateapp.data.model.Status.Cancelled -> 0xFF808080.toInt()  // Gray
             com.cheermateapp.data.model.Status.OverDue -> 0xFFE53E3E.toInt()    // Red
         }
@@ -242,7 +242,7 @@ data class Task(
         return when (Status) {
             com.cheermateapp.data.model.Status.Pending -> "⏳ Pending"
             com.cheermateapp.data.model.Status.InProgress -> "🔄 In Progress"
-            com.cheermateapp.data.model.Status.Completed -> "✅ Completed"
+            com.cheermateapp.data.model.Status.Done -> "✅ Done"
             com.cheermateapp.data.model.Status.Cancelled -> "❌ Cancelled"
             com.cheermateapp.data.model.Status.OverDue -> "🔴 Overdue"
         }

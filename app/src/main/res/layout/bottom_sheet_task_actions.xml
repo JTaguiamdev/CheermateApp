@@ -23,7 +23,7 @@
 
     <!-- Mark as Completed Option -->
     <LinearLayout
-        android:id="@+id/action_mark_completed"
+            android:id="@+id/action_mark_completed"
         android:layout_width="match_parent"
         android:layout_height="56dp"
         android:orientation="horizontal"
@@ -47,7 +47,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:layout_marginStart="16dp"
-            android:text="Mark as Completed"
+            android:text="@string/mark_as_done"
             android:textColor="@color/bottom_sheet_text_primary"
             android:textSize="16sp"
             android:fontFamily="@font/sf_pro_rounded_regular" />

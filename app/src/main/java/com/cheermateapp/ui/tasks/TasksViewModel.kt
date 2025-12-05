@@ -27,7 +27,7 @@ class TasksViewModel(private val db: AppDb, private val userId: Int) : ViewModel
                 tasks.filter { it.DueAt == todayStr || it.DueAt == altTodayStr }
             }
             "PENDING" -> tasks.filter { it.Status == Status.Pending || it.Status == Status.InProgress }
-            "DONE" -> tasks.filter { it.Status == Status.Completed }
+            "DONE" -> tasks.filter { it.Status == Status.Done }
             else -> tasks
         }
     }
@@ -57,7 +57,7 @@ class TasksViewModel(private val db: AppDb, private val userId: Int) : ViewModel
     }
 
     val completedTasksCount: Flow<Int> = allTasks.map { list ->
-        val count = list.count { it.Status == Status.Completed }
+        val count = list.count { it.Status == Status.Done }
         android.util.Log.d("TasksViewModel", "Recalculating completedTasksCount. Count: $count")
         count
     }

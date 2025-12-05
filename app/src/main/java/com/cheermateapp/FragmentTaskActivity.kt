@@ -350,7 +350,7 @@ class FragmentTaskActivity : AppCompatActivity() {
             com.cheermateapp.data.model.Status.Pending -> "⏳ Pending"
             com.cheermateapp.data.model.Status.InProgress -> "🔄 In Progress"
             com.cheermateapp.data.model.Status.OverDue -> "🔴 Overdue"
-            com.cheermateapp.data.model.Status.Completed -> "✅ Completed"
+            com.cheermateapp.data.model.Status.Done -> "✅ Done"
             com.cheermateapp.data.model.Status.Cancelled -> "❌ Cancelled"
         }
     }
@@ -395,7 +395,7 @@ class FragmentTaskActivity : AppCompatActivity() {
             com.cheermateapp.data.model.Status.Pending -> "⏳"
             com.cheermateapp.data.model.Status.InProgress -> "🔄"
             com.cheermateapp.data.model.Status.OverDue -> "🔴"
-            com.cheermateapp.data.model.Status.Completed -> "✅"
+            com.cheermateapp.data.model.Status.Done -> "✅"
             com.cheermateapp.data.model.Status.Cancelled -> "❌"
         }
     }
@@ -572,7 +572,7 @@ class FragmentTaskActivity : AppCompatActivity() {
                         Title = "Buy Groceries",
                         Description = "Weekly shopping list",
                         Priority = Priority.Low,
-                        Status = Status.Completed,
+                        Status = Status.Done,
                         TaskProgress = 100,
                         DueAt = "2025-09-28",
                         DueTime = "16:00",
@@ -850,14 +850,14 @@ class FragmentTaskActivity : AppCompatActivity() {
                             Status.Pending -> 1
                             Status.InProgress -> 2
                             Status.OverDue -> 3
-                            Status.Completed -> 4
+                            Status.Done -> 4
                             Status.Cancelled -> 5
                         }
                         val status2 = when (task2.Status) {
                             Status.Pending -> 1
                             Status.InProgress -> 2
                             Status.OverDue -> 3
-                            Status.Completed -> 4
+                            Status.Done -> 4
                             Status.Cancelled -> 5
                         }
                         status1.compareTo(status2)
@@ -965,7 +965,7 @@ class FragmentTaskActivity : AppCompatActivity() {
             }
             
             // Update button state based on task status
-            if (task.Status == Status.Completed) {
+            if (task.Status == Status.Done) {
                 btnComplete.text = "✅ Completed"
                 btnComplete.alpha = 0.5f
                 btnComplete.isEnabled = false
@@ -1070,7 +1070,7 @@ class FragmentTaskActivity : AppCompatActivity() {
             val currentStatusIndex = when (task.Status) {
                 Status.Pending -> 0
                 Status.InProgress -> 1
-                Status.Completed -> 2
+                Status.Done -> 2
                 Status.Cancelled -> 3
                 Status.OverDue -> 0 // Default to Pending for OverDue
             }
@@ -1225,7 +1225,7 @@ class FragmentTaskActivity : AppCompatActivity() {
                 val statusEnum = when (status.uppercase()) {
                     "PENDING" -> Status.Pending
                     "INPROGRESS" -> Status.InProgress
-                    "COMPLETED" -> Status.Completed
+                    "DONE" -> Status.Done
                     "CANCELLED" -> Status.Cancelled
                     else -> Status.Pending
                 }

@@ -53,7 +53,7 @@ object AnalyticsUtil {
      */
     fun calculateAverageCompletionTime(tasks: List<Task>): Long? {
         val completedTasks = tasks.filter { 
-            it.Status == com.cheermateapp.data.model.Status.Completed 
+            it.Status == com.cheermateapp.data.model.Status.Done 
         }
         
         if (completedTasks.isEmpty()) return null
@@ -84,7 +84,7 @@ object AnalyticsUtil {
         }
         
         val completedTasks = tasksInPeriod.filter { 
-            it.Status == com.cheermateapp.data.model.Status.Completed 
+            it.Status == com.cheermateapp.data.model.Status.Done 
         }
         
         val completionRate = calculateCompletionRate(tasksInPeriod.size, completedTasks.size)
@@ -150,7 +150,7 @@ object AnalyticsUtil {
             }
             
             val completed = tasksForDay.count { 
-                it.Status == com.cheermateapp.data.model.Status.Completed 
+                it.Status == com.cheermateapp.data.model.Status.Done 
             }
             val pending = tasksForDay.count { 
                 it.Status == com.cheermateapp.data.model.Status.Pending ||
@@ -198,7 +198,7 @@ object AnalyticsUtil {
      */
     fun calculateCurrentStreak(tasks: List<Task>): Int {
         val completedTasks = tasks.filter { 
-            it.Status == com.cheermateapp.data.model.Status.Completed 
+            it.Status == com.cheermateapp.data.model.Status.Done 
         }.sortedByDescending { it.UpdatedAt }
         
         if (completedTasks.isEmpty()) return 0

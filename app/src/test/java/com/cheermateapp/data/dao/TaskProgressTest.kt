@@ -23,14 +23,14 @@ class TaskProgressTest {
             Task_ID = 1,
             User_ID = 1,
             Title = "Test Task",
-            Status = Status.Completed,
+            Status = Status.Done,
             TaskProgress = 100,
             Priority = Priority.Medium,
             Category = Category.Work
         )
         
         assertEquals(100, task.TaskProgress)
-        assertEquals(Status.Completed, task.Status)
+        assertEquals(Status.Done, task.Status)
     }
     
     @Test

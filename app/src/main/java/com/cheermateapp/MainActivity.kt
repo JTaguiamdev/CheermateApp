@@ -253,7 +253,7 @@ class MainActivity : AppCompatActivity() {
 
     // ✅ FIXED - Use only existing status values
     private fun isTaskOverdue(task: Task, currentTime: Long): Boolean {
-        if (task.Status == Status.Completed) {
+        if (task.Status == Status.Done) {
             return false // Already completed
         }
 
@@ -318,7 +318,7 @@ class MainActivity : AppCompatActivity() {
             Status.InProgress -> "⏳"
             Status.OverDue -> "🔄"
             Status.Cancelled -> "❌"
-            Status.Completed -> "✅"
+            Status.Done -> "✅"
         }
     }
 
@@ -890,7 +890,7 @@ class MainActivity : AppCompatActivity() {
             try {
                 val db = AppDb.get(this@MainActivity)
                 val updatedTask = task.copy(
-                    Status = Status.Completed,
+                    Status = Status.Done,
                     TaskProgress = 100
                 )
                 withContext(Dispatchers.IO) {
@@ -971,7 +971,7 @@ class MainActivity : AppCompatActivity() {
             val currentStatusIndex = when (task.Status) {
                 Status.Pending -> 0
                 Status.InProgress -> 1
-                Status.Completed -> 2
+                Status.Done -> 2
                 Status.Cancelled -> 3
                 Status.OverDue -> 0 // Default to Pending for OverDue
             }
@@ -1082,7 +1082,7 @@ class MainActivity : AppCompatActivity() {
                 val statusEnum = when (status.uppercase()) {
                     "PENDING" -> Status.Pending
                     "INPROGRESS" -> Status.InProgress
-                    "COMPLETED" -> Status.Completed
+                    "DONE" -> Status.Done
                     "CANCELLED" -> Status.Cancelled
                     else -> Status.Pending
                 }
@@ -1192,14 +1192,14 @@ class MainActivity : AppCompatActivity() {
                             com.cheermateapp.data.model.Status.Pending -> 1
                             com.cheermateapp.data.model.Status.InProgress -> 2
                             com.cheermateapp.data.model.Status.OverDue -> 3
-                            com.cheermateapp.data.model.Status.Completed -> 4
+                            com.cheermateapp.data.model.Status.Done -> 4
                             com.cheermateapp.data.model.Status.Cancelled -> 5
                         }
                         val status2 = when (task2.Status) {
                             com.cheermateapp.data.model.Status.Pending -> 1
                             com.cheermateapp.data.model.Status.InProgress -> 2
                             com.cheermateapp.data.model.Status.OverDue -> 3
-                            com.cheermateapp.data.model.Status.Completed -> 4
+                            com.cheermateapp.data.model.Status.Done -> 4
                             com.cheermateapp.data.model.Status.Cancelled -> 5
                         }
                         status1.compareTo(status2)
@@ -2779,7 +2779,7 @@ class MainActivity : AppCompatActivity() {
             tvTaskStatus.text = when (task.Status) {
                 com.cheermateapp.data.model.Status.Pending -> "⏳ Pending"
                 com.cheermateapp.data.model.Status.InProgress -> "🔄 In Progress"
-                com.cheermateapp.data.model.Status.Completed -> "✅ Completed"
+                com.cheermateapp.data.model.Status.Done -> "✅ Done"
                 com.cheermateapp.data.model.Status.OverDue -> "🔴 Overdue"
                 com.cheermateapp.data.model.Status.Cancelled -> "❌ Cancelled"
             }
@@ -2809,7 +2809,7 @@ class MainActivity : AppCompatActivity() {
             }
 
             // 8. Due Date
-            if (task.Status == com.cheermateapp.data.model.Status.Completed) {
+            if (task.Status == com.cheermateapp.data.model.Status.Done) {
                 tvTaskDueDate.visibility = View.GONE
             } else {
                 tvTaskDueDate.visibility = View.VISIBLE
@@ -2819,7 +2819,7 @@ class MainActivity : AppCompatActivity() {
 
             // 9. Button States based on Task Status
             when (task.Status) {
-                com.cheermateapp.data.model.Status.Completed -> {
+                com.cheermateapp.data.model.Status.Done -> {
                     btnComplete.text = "✅ Completed"
                     btnComplete.isClickable = false
                     btnComplete.alpha = 0.6f
@@ -2850,7 +2850,7 @@ class MainActivity : AppCompatActivity() {
 
             // Complete Button
             btnComplete.setOnClickListener {
-                if (task.Status != com.cheermateapp.data.model.Status.Completed && 
+                if (task.Status != com.cheermateapp.data.model.Status.Done && 
                     task.Status != com.cheermateapp.data.model.Status.Cancelled) {
                     onTaskDone(task)
                 }
@@ -2929,7 +2929,7 @@ class MainActivity : AppCompatActivity() {
                 text = when (task.Status) {
                     Status.Pending -> "⏳ Pending"
                     Status.InProgress -> "🔄 In Progress"
-                    Status.Completed -> "✅ Completed"
+                    Status.Done -> "✅ Done"
                     Status.OverDue -> "🔴 Overdue"
                     Status.Cancelled -> "❌ Cancelled"
                 }
