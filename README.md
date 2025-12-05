@@ -54,14 +54,14 @@ A comprehensive Android task management application built with Kotlin, featuring
 
 ## 📋 Development
 
-### 🚀 New Here? Start with **[QUICKSTART.md](QUICKSTART.md)** - Your guide to the project!
+### 🚀 New Here? Start with **[QUICKSTART.md](docs/QUICKSTART.md)** - Your guide to the project!
 
 ### Documentation
-- **[QUICKSTART.md](QUICKSTART.md)** - Quick reference guide for contributors
-- **[CACHING_SYSTEM_GUIDE.md](CACHING_SYSTEM_GUIDE.md)** - Database-backed caching system documentation
-- **[TODO.md](TODO.md)** - Immediate tasks and known issues to address
-- **[ROADMAP.md](ROADMAP.md)** - Long-term development roadmap and feature planning
-- **[CHANGELOG.md](CHANGELOG.md)** - Version history and changes
+- **[QUICKSTART.md](docs/QUICKSTART.md)** - Quick reference guide for contributors
+- **[CACHING_SYSTEM_GUIDE.md](docs/CACHING_SYSTEM_GUIDE.md)** - Database-backed caching system documentation
+- **[TODO.md](docs/TODO.md)** - Immediate tasks and known issues to address
+- **[ROADMAP.md](docs/ROADMAP.md)** - Long-term development roadmap and feature planning
+- **[CHANGELOG.md](docs/CHANGELOG.md)** - Version history and changes
 
 ### Current Status
 - **Version:** 1.5 (Phase 2 - Core Features Implemented)
