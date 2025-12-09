@@ -153,7 +153,7 @@ class ForgotPasswordActivity : AppCompatActivity() {
 
                     // Get all security questions
                     val questions = db.securityDao().getAllQuestions()
-                    val questionId = questions.find { it.Prompt == securityQuestion }?.SecurityQuestion_ID
+                    val questionId = questions.find { it.Prompt == securityQuestion }?.Question_ID
 
                     if (questionId == null) {
                         return@withContext false

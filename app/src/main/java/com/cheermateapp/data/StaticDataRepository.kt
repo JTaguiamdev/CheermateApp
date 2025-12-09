@@ -76,7 +76,6 @@ class StaticDataRepository(private val context: Context) {
                 // Cache miss or stale, fetch from database
                 Log.d(TAG, "Cache miss, fetching security questions from database")
                 val data = db.securityDao().getAllQuestions()
-                    .filter { it.IsActive }
                 
                 if (data.isNotEmpty()) {
                     // Save to cache for next time

@@ -79,36 +79,28 @@ object DatabaseSeeder {
                     Log.d(TAG, "Seeding security questions...")
                     val questions = listOf(
                         SecurityQuestion(
-                            Prompt = "What was your first pet's name?",
-                            IsActive = true
+                            Prompt = "What was your first pet's name?"
                         ),
                         SecurityQuestion(
-                            Prompt = "What city were you born in?",
-                            IsActive = true
+                            Prompt = "What city were you born in?"
                         ),
                         SecurityQuestion(
-                            Prompt = "What is your mother's maiden name?",
-                            IsActive = true
+                            Prompt = "What is your mother's maiden name?"
                         ),
                         SecurityQuestion(
-                            Prompt = "What was your first car?",
-                            IsActive = true
+                            Prompt = "What was your first car?"
                         ),
                         SecurityQuestion(
-                            Prompt = "What elementary school did you attend?",
-                            IsActive = true
+                            Prompt = "What elementary school did you attend?"
                         ),
                         SecurityQuestion(
-                            Prompt = "What is your favorite color?",
-                            IsActive = true
+                            Prompt = "What is your favorite color?"
                         ),
                         SecurityQuestion(
-                            Prompt = "What was the name of your first boss?",
-                            IsActive = true
+                            Prompt = "What was the name of your first boss?"
                         ),
                         SecurityQuestion(
-                            Prompt = "In what city did you meet your spouse/significant other?",
-                            IsActive = true
+                            Prompt = "In what city did you meet your spouse/significant other?"
                         )
                     )
                     
