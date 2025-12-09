@@ -24,7 +24,5 @@ data class UserSettings(
     val UserSettings_ID: Int = 0,
     val User_ID: Int,
     val Appearance: Appearance? = null,
-    val Notification: NotificationPref? = null,
-    val DataManagement: DataManagement? = null,
-    val Statistics: StatisticsPref? = null
+    val Notification: NotificationPref? = null
 )

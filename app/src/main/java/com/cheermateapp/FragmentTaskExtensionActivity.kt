@@ -106,8 +106,7 @@ class FragmentTaskExtensionActivity : AppCompatActivity() {
             subtasks,
             onSubTaskToggle = { subtask ->
                 val updatedSubtask = subtask.copy(
-                    IsCompleted = !subtask.IsCompleted,
-                    UpdatedAt = System.currentTimeMillis()
+                    IsCompleted = !subtask.IsCompleted
                 )
                 updateSubtask(updatedSubtask)
             },
@@ -693,20 +692,18 @@ class FragmentTaskExtensionActivity : AppCompatActivity() {
             try {
                 val db = AppDb.get(this@FragmentTaskExtensionActivity)
                 
-                // Get the next available Subtask_ID for this task and user
+                // Get the next available SubTask_ID for this task and user
                 val nextSubtaskId = withContext(Dispatchers.IO) {
                     db.subTaskDao().getNextSubtaskId(taskId, userId)
                 }
                 
                 val newSubtask = SubTask(
-                    Subtask_ID = nextSubtaskId,
+                    SubTask_ID = nextSubtaskId,
                     Task_ID = taskId,
                     User_ID = userId,
                     Name = subtaskName,
                     IsCompleted = false,
-                    SortOrder = subtasks.size,
-                    CreatedAt = System.currentTimeMillis(),
-                    UpdatedAt = System.currentTimeMillis()
+                    CreatedAt = System.currentTimeMillis()
                 )
                 
                 withContext(Dispatchers.IO) {
@@ -745,7 +742,7 @@ class FragmentTaskExtensionActivity : AppCompatActivity() {
                 }
                 
                 // Update local list
-                val index = subtasks.indexOfFirst { it.Subtask_ID == subtask.Subtask_ID }
+                val index = subtasks.indexOfFirst { it.SubTask_ID == subtask.SubTask_ID }
                 if (index >= 0) {
                     subtasks[index] = subtask
                 }

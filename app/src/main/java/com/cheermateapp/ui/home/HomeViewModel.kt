@@ -25,7 +25,6 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
                 PasswordHash = "<pbkdf2>",
                 FirstName = "Alice",
                 LastName = "Lee",
-                Birthdate = "2001-01-01",
                 Personality_ID = null
             )
         )

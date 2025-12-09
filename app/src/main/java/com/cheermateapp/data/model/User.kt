@@ -20,7 +20,6 @@ data class User(
     val PasswordHash: String,
     val FirstName: String = "",
     val LastName: String = "",
-    val Birthdate: String? = null,
     val Personality_ID: Int? = null,
     val CreatedAt: Long = System.currentTimeMillis(),
     val UpdatedAt: Long = System.currentTimeMillis(),

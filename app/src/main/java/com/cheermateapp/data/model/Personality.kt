@@ -19,14 +19,5 @@ data class Personality(
     val Name: String,
 
     @ColumnInfo(name = "Description")
-    val Description: String,
-
-    @ColumnInfo(name = "IsActive")
-    val IsActive: Boolean = true,
-
-    @ColumnInfo(name = "CreatedAt")
-    val CreatedAt: Long = System.currentTimeMillis(),
-
-    @ColumnInfo(name = "UpdatedAt")
-    val UpdatedAt: Long = System.currentTimeMillis()
+    val Description: String
 )

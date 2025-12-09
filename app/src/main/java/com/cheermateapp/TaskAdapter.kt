@@ -115,11 +115,11 @@ class TaskAdapter(
 
             when {
                 isSameDay(today, taskDate) -> {
-                    val timeText = if (task.DueTime != null) " at ${task.DueTime}" else ""
+                    val timeText = ""
                     "📅 Due Today$timeText"
                 }
                 isSameDay(tomorrow, taskDate) -> {
-                    val timeText = if (task.DueTime != null) " at ${task.DueTime}" else ""
+                    val timeText = ""
                     "📅 Due Tomorrow$timeText"
                 }
                 taskDate.before(today) -> {
@@ -127,8 +127,7 @@ class TaskAdapter(
                 }
                 else -> {
                     val displayFormat = SimpleDateFormat("MMM dd", Locale.getDefault())
-                    val timeText = if (task.DueTime != null) " at ${task.DueTime}" else ""
-                    "📅 ${displayFormat.format(date)}$timeText"
+                    "📅 ${displayFormat.format(date)}"
                 }
             }
         } catch (e: Exception) {

@@ -1656,7 +1656,7 @@ class MainActivity : AppCompatActivity() {
                 
                 // Fetch personalities from database
                 val availablePersonalities = withContext(Dispatchers.IO) {
-                    db.personalityDao().getAllActive()
+                    db.personalityDao().getAll()
                 }
                 
                 if (availablePersonalities.isEmpty()) {

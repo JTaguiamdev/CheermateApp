@@ -268,7 +268,6 @@ class SignUpActivity : AppCompatActivity() {
                         PasswordHash = hashedPassword,
                         FirstName = firstName,
                         LastName = lastName,
-                        Birthdate = null,
                         Personality_ID = null
                     )
 
@@ -276,15 +275,15 @@ class SignUpActivity : AppCompatActivity() {
 
                     // Save security answer
                     val questions = db.securityDao().getAllQuestions()
-                    val questionId = questions.find { it.Prompt == securityQuestion }?.SecurityQuestion_ID
+                    val questionId = questions.find { it.Prompt == securityQuestion }?.Question_ID
 
-                    if (questionId != null) {
+                    questionId?.let {
                         // Hash the security answer using PBKDF2-HMAC-SHA256 (same as password)
                         val hashedAnswer = PasswordHashUtil.hashPassword(securityAnswer)
                         val userAnswer = UserSecurityAnswer(
                             Answer_ID = 0,
                             User_ID = newUserId.toInt(),
-                            Question_ID = questionId,
+                            Question_ID = it,
                             AnswerHash = hashedAnswer
                         )
                         db.securityDao().saveAnswer(userAnswer)

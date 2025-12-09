@@ -22,10 +22,6 @@ interface PersonalityDao {
     @Upsert
     suspend fun upsert(personality: Personality)
 
-    // ✅ QUERY METHODS
-    @Query("SELECT * FROM Personality WHERE IsActive = 1 ORDER BY Personality_ID")
-    suspend fun getAllActive(): List<Personality>
-
     @Query("SELECT * FROM Personality ORDER BY Personality_ID")
     suspend fun getAll(): List<Personality>
 
@@ -37,9 +33,6 @@ interface PersonalityDao {
 
     @Query("SELECT COUNT(*) FROM Personality")
     suspend fun getCount(): Int
-
-    @Query("SELECT MAX(UpdatedAt) FROM Personality")
-    suspend fun getLastModifiedTimestamp(): Long?
 
     // ✅ USER-BASED QUERY - Get personality for a user via User.Personality_ID
     @Query("""

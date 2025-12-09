@@ -6,7 +6,7 @@ import androidx.room.Index
 
 @Entity(
     tableName = "SubTask",
-    primaryKeys = ["Task_ID", "User_ID", "Subtask_ID"],
+    primaryKeys = ["Task_ID", "User_ID", "SubTask_ID"],
     foreignKeys = [
         ForeignKey(
             entity = Task::class,
@@ -21,13 +21,10 @@ import androidx.room.Index
     ]
 )
 data class SubTask(
-    val Subtask_ID: Int = 0,
+    val SubTask_ID: Int = 0,
     val Task_ID: Int,
     val User_ID: Int,
     val Name: String,
     val IsCompleted: Boolean = false,
-    val SortOrder: Int = 0,
-    val CreatedAt: Long = System.currentTimeMillis(),
-    val UpdatedAt: Long = System.currentTimeMillis(),
-    val DeletedAt: Long? = null
+    val CreatedAt: Long = System.currentTimeMillis()
 )

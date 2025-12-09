@@ -90,7 +90,7 @@ class SubTaskAdapter(
      * Update a subtask
      */
     fun updateSubTask(subTask: SubTask) {
-        val position = subTasks.indexOfFirst { it.Subtask_ID == subTask.Subtask_ID }
+        val position = subTasks.indexOfFirst { it.SubTask_ID == subTask.SubTask_ID }
         if (position != -1) {
             subTasks[position] = subTask
             notifyItemChanged(position)

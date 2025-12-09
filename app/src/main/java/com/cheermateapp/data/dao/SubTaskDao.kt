@@ -19,7 +19,7 @@ interface SubTaskDao {
     @Query("SELECT * FROM SubTask")
     suspend fun getAllSubTasks(): List<SubTask>
 
-    @Query("SELECT * FROM SubTask WHERE Task_ID = :taskId AND User_ID = :userId ORDER BY SortOrder ASC")
+    @Query("SELECT * FROM SubTask WHERE Task_ID = :taskId AND User_ID = :userId")
     suspend fun list(taskId: Int, userId: Int): List<SubTask>
 
     @Query("SELECT * FROM SubTask WHERE Task_ID = :taskId")
@@ -29,7 +29,7 @@ interface SubTaskDao {
     suspend fun getNextSubtaskId(taskId: Int, userId: Int): Int
 
     // ✅ FLOW METHODS FOR REACTIVE UPDATES
-    @Query("SELECT * FROM SubTask WHERE Task_ID = :taskId AND User_ID = :userId ORDER BY SortOrder ASC")
+    @Query("SELECT * FROM SubTask WHERE Task_ID = :taskId AND User_ID = :userId")
     fun getSubTasksFlow(taskId: Int, userId: Int): Flow<List<SubTask>>
 
     @Query("SELECT * FROM SubTask WHERE Task_ID = :taskId")

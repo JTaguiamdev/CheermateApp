@@ -3,9 +3,7 @@ package com.cheermateapp.data.db
 import androidx.room.ProvidedTypeConverter
 import androidx.room.TypeConverter
 import com.cheermateapp.data.model.Appearance
-import com.cheermateapp.data.model.DataManagement
 import com.cheermateapp.data.model.NotificationPref
-import com.cheermateapp.data.model.StatisticsPref
 import com.cheermateapp.data.model.Priority
 import com.cheermateapp.data.model.Status
 import com.cheermateapp.data.model.Category  // ✅ ADD THIS IMPORT
@@ -93,32 +91,6 @@ class AppTypeConverters(private val gson: Gson) {
         s?.let {
             try {
                 gson.fromJson(it, NotificationPref::class.java)
-            } catch (e: Exception) {
-                null
-            }
-        }
-
-    @TypeConverter
-    fun dataMgmtToJson(v: DataManagement?): String? = v?.let { gson.toJson(it) }
-
-    @TypeConverter
-    fun jsonToDataMgmt(s: String?): DataManagement? =
-        s?.let {
-            try {
-                gson.fromJson(it, DataManagement::class.java)
-            } catch (e: Exception) {
-                null
-            }
-        }
-
-    @TypeConverter
-    fun statsToJson(v: StatisticsPref?): String? = v?.let { gson.toJson(it) }
-
-    @TypeConverter
-    fun jsonToStats(s: String?): StatisticsPref? =
-        s?.let {
-            try {
-                gson.fromJson(it, StatisticsPref::class.java)
             } catch (e: Exception) {
                 null
             }
