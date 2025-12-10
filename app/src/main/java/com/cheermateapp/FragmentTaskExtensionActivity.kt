@@ -55,7 +55,7 @@ class FragmentTaskExtensionActivity : AppCompatActivity() {
     private lateinit var btnTaskReminder: TextView
     private lateinit var subtaskCard: LinearLayout
     private lateinit var etSubtaskInput: EditText
-    private lateinit var btnAddSubtask: Button
+    private lateinit var btnAddSubtask: EditText
     private lateinit var subtasksContainer: androidx.recyclerview.widget.RecyclerView
     private lateinit var subtaskAdapter: SubTaskAdapter
     private lateinit var tvNoSubtasks: TextView
