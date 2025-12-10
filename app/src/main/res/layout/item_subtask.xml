@@ -24,7 +24,7 @@
         android:layout_weight="1"
         android:text="@string/subtask_name"
         android:textSize="14sp"
-        android:textColor="?android:attr/textColorPrimary"
+        android:textColor="@android:color/white"
         android:maxLines="2"
         android:ellipsize="end" />
 
@@ -38,6 +38,6 @@
         android:contentDescription="@string/delete_subtask"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:padding="4dp"
-        app:tint="?android:attr/textColorSecondary" />
+        app:tint="@android:color/white" />
 
 </LinearLayout>

@@ -59,8 +59,10 @@ object AnalyticsUtil {
         if (completedTasks.isEmpty()) return null
         
         val completionTimes = completedTasks.mapNotNull { task ->
-            if (task.UpdatedAt > task.CreatedAt) {
-                task.UpdatedAt - task.CreatedAt
+            val createdAt = com.cheermateapp.data.model.TimestampUtil.parseTimestamp(task.CreatedAt)
+            val updatedAt = com.cheermateapp.data.model.TimestampUtil.parseTimestamp(task.UpdatedAt)
+            if (updatedAt != null && createdAt != null && updatedAt.time > createdAt.time) {
+                updatedAt.time - createdAt.time
             } else null
         }
         
@@ -79,8 +81,8 @@ object AnalyticsUtil {
         periodName: String
     ): ProductivityTrend {
         val tasksInPeriod = tasks.filter { task ->
-            val createdDate = Date(task.CreatedAt)
-            createdDate.after(periodStart) && createdDate.before(periodEnd)
+            val createdDate = com.cheermateapp.data.model.TimestampUtil.parseTimestamp(task.CreatedAt)
+            createdDate != null && createdDate.after(periodStart) && createdDate.before(periodEnd)
         }
         
         val completedTasks = tasksInPeriod.filter { 
@@ -146,7 +148,8 @@ object AnalyticsUtil {
             val dayEnd = currentDate.time + (24 * 60 * 60 * 1000) // Add 24 hours
             
             val tasksForDay = tasks.filter { task ->
-                task.CreatedAt >= dayStart && task.CreatedAt < dayEnd
+                val createdAt = com.cheermateapp.data.model.TimestampUtil.parseTimestamp(task.CreatedAt)
+                createdAt != null && createdAt.time >= dayStart && createdAt.time < dayEnd
             }
             
             val completed = tasksForDay.count { 
@@ -210,14 +213,15 @@ object AnalyticsUtil {
         // Check if there's a completed task today
         val today = dateFormat.format(Date())
         val hasTaskToday = completedTasks.any { task ->
-            dateFormat.format(Date(task.UpdatedAt)) == today
+            val updatedAt = com.cheermateapp.data.model.TimestampUtil.parseTimestamp(task.UpdatedAt)
+            updatedAt != null && dateFormat.format(updatedAt) == today
         }
         
         if (!hasTaskToday) return 0
         
         // Count consecutive days
-        val uniqueDates = completedTasks.map { task ->
-            dateFormat.format(Date(task.UpdatedAt))
+        val uniqueDates = completedTasks.mapNotNull { task ->
+            com.cheermateapp.data.model.TimestampUtil.parseTimestamp(task.UpdatedAt)?.let { dateFormat.format(it) }
         }.distinct().sorted().reversed()
         
         calendar.time = Date()

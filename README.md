@@ -8,7 +8,7 @@ A comprehensive Android task management application built with Kotlin, featuring
 - **✅ CREATE**: Add new tasks with detailed forms (title, description, priority, status, due date/time)
 - **✅ READ**: View, filter, and search tasks with real-time updates
 - **✅ UPDATE**: Complete edit functionality with pre-filled forms and progress tracking
-- **✅ DELETE**: Soft delete with confirmation dialogs
+- **✅ DELETE**: Hard delete with confirmation dialogs
 
 ### 🎨 Modern UI Features
 - **📱 Card-based Task Display**: Single task focus with navigation
@@ -23,15 +23,14 @@ A comprehensive Android task management application built with Kotlin, featuring
 
 ### 🗄️ Database Features
 - **SQLite Database**: Local data persistence with Room
-- **Soft Delete**: Tasks are archived, not permanently deleted
-- **Timestamp Management**: Proper Long timestamp handling
+- **Timestamp Management**: Human-readable String timestamp handling
 - **User-specific Data**: Multi-user support with user isolation
 - **📦 Caching System**: JSON-based caching for static data with automatic invalidation
 
 ### 🚀 Phase 2: Smart Task Features (v1.5) ✨ NEW
 - **🔄 Recurring Tasks**: Daily, weekly, monthly, and yearly recurring tasks
 - **📋 Task Templates**: Reusable templates for common workflows
-- **🔗 Task Dependencies**: Prerequisite task relationships with circular dependency prevention
+- **❌ Task Dependencies**: Prerequisite task relationships (REMOVED)
 - **📦 Bulk Operations**: Multi-select and batch edit tasks
 - **📊 Analytics**: Productivity trends, time-based analytics, streak tracking
 - **💾 Data Export/Import**: CSV and JSON export with backup/restore functionality
@@ -41,7 +40,7 @@ A comprehensive Android task management application built with Kotlin, featuring
 
 - **Language**: Kotlin
 - **UI**: Android Views with Material Design
-- **Database**: SQLite with Room persistence library (v16)
+- **Database**: SQLite with Room persistence library (v37)
 - **Caching**: JSON-based caching with Gson for static data
 - **Architecture**: MVVM pattern with LiveData
 - **Async Operations**: Coroutines with Dispatchers
@@ -50,7 +49,13 @@ A comprehensive Android task management application built with Kotlin, featuring
 
 ## 📱 Screenshots
 
-*Add screenshots of your app here*
+| | | |
+|:-------------------------:|:-------------------------:|:-------------------------:|
+| <img src="screenshots/Screenshot_20251211_025154.png" width="200"> | <img src="screenshots/Screenshot_20251211_025318.png" width="200"> | <img src="screenshots/Screenshot_20251211_025406.png" width="200"> |
+| <img src="screenshots/Screenshot_20251211_025424.png" width="200"> | <img src="screenshots/Screenshot_20251211_025443.png" width="200"> | <img src="screenshots/Screenshot_20251211_025453.png" width="200"> |
+| <img src="screenshots/Screenshot_20251211_025505.png" width="200"> | <img src="screenshots/Screenshot_20251211_025516.png" width="200"> | <img src="screenshots/Screenshot_20251211_025539.png" width="200"> |
+| <img src="screenshots/Screenshot_20251211_025542.png" width="200"> | <img src="screenshots/Screenshot_20251211_025549.png" width="200"> | <img src="screenshots/Screenshot_20251211_025602.png" width="200"> |
+| <img src="screenshots/Screenshot_20251211_025611.png" width="200"> | | |
 
 ## 📋 Development
 

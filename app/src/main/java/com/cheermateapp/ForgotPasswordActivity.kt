@@ -306,7 +306,7 @@ class ForgotPasswordActivity : AppCompatActivity() {
                         // Update user with new password
                         val updatedUser = user.copy(
                             PasswordHash = hashedPassword,
-                            UpdatedAt = System.currentTimeMillis()
+                            UpdatedAt = com.cheermateapp.data.model.TimestampUtil.getCurrentTimestamp()
                         )
                         db.userDao().update(updatedUser)
                     }

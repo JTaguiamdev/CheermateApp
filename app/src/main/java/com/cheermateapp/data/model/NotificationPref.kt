@@ -1,7 +1,7 @@
 package com.cheermateapp.data.model
 
-data class NotificationPref(
-    val enabled: Boolean = true,
-    val soundEnabled: Boolean = true,
-    val vibrationEnabled: Boolean = true
-)
+class NotificationPref {
+    var enabled: Boolean = true
+    var soundEnabled: Boolean = true
+    var vibrationEnabled: Boolean = true
+}

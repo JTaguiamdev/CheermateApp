@@ -293,7 +293,7 @@ class FragmentTaskActivity : AppCompatActivity() {
                         Category = category ?: task.Category,
                         Priority = priority ?: task.Priority,
                         DueAt = dueDate ?: task.DueAt,
-                        UpdatedAt = System.currentTimeMillis()
+                        UpdatedAt = com.cheermateapp.data.model.TimestampUtil.getCurrentTimestamp()
                     )
                     
                     // Update in database
@@ -487,7 +487,6 @@ class FragmentTaskActivity : AppCompatActivity() {
                     android.util.Log.d("FragmentTaskActivity", "   - Status: ${task.Status}")
                     android.util.Log.d("FragmentTaskActivity", "   - User_ID: ${task.User_ID}")
                     android.util.Log.d("FragmentTaskActivity", "   - DueAt: ${task.DueAt}")
-                    android.util.Log.d("FragmentTaskActivity", "   - DeletedAt: ${task.DeletedAt}")
                 }
                 android.util.Log.d("FragmentTaskActivity", "🔍 === END DEBUG ===")
 
@@ -509,7 +508,7 @@ class FragmentTaskActivity : AppCompatActivity() {
             android.util.Log.d("FragmentTaskActivity", "Total tasks in DB: ${allTasks.size}")
 
             allTasks.forEachIndexed { index, task ->
-                android.util.Log.d("FragmentTaskActivity", "Task $index: ${task.Title} (Status: ${task.Status}, DeletedAt: ${task.DeletedAt})")
+                android.util.Log.d("FragmentTaskActivity", "Task $index: ${task.Title} (Status: ${task.Status})")
             }
             android.util.Log.d("FragmentTaskActivity", "=== END DEBUG ===")
 
@@ -533,7 +532,7 @@ class FragmentTaskActivity : AppCompatActivity() {
                 android.util.Log.d("FragmentTaskActivity", "Creating test tasks for user $userId")
 
                 withContext(Dispatchers.IO) {
-                    val currentTime = System.currentTimeMillis()
+                    val currentTime = com.cheermateapp.data.model.TimestampUtil.getCurrentTimestamp()
 
                     // ✅ FIXED: Use Long timestamps instead of String dates
                     val task1 = Task(
@@ -547,8 +546,7 @@ class FragmentTaskActivity : AppCompatActivity() {
                         DueAt = "2025-09-29",
                         DueTime = "14:30",
                         CreatedAt = currentTime,  // ✅ Long timestamp
-                        UpdatedAt = currentTime,  // ✅ Long timestamp
-                        DeletedAt = null
+                        UpdatedAt = currentTime  // ✅ Long timestamp
                     )
 
                     val task2 = Task(
@@ -562,8 +560,7 @@ class FragmentTaskActivity : AppCompatActivity() {
                         DueAt = "2025-09-30",
                         DueTime = "10:00",
                         CreatedAt = currentTime,  // ✅ Long timestamp
-                        UpdatedAt = currentTime,  // ✅ Long timestamp
-                        DeletedAt = null
+                        UpdatedAt = currentTime  // ✅ Long timestamp
                     )
 
                     val task3 = Task(
@@ -576,9 +573,8 @@ class FragmentTaskActivity : AppCompatActivity() {
                         TaskProgress = 100,
                         DueAt = "2025-09-28",
                         DueTime = "16:00",
-                        CreatedAt = currentTime - 86400000L,  // ✅ 1 day ago (Long timestamp)
-                        UpdatedAt = currentTime,  // ✅ Long timestamp
-                        DeletedAt = null
+                        CreatedAt = com.cheermateapp.data.model.TimestampUtil.getCurrentTimestamp(),  // ✅ 1 day ago (Long timestamp)
+                        UpdatedAt = currentTime  // ✅ Long timestamp
                     )
 
                     db.taskDao().insert(task1)
@@ -1238,7 +1234,7 @@ class FragmentTaskActivity : AppCompatActivity() {
                     TaskProgress = progress,
                     DueAt = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(dueDate),
                     DueTime = SimpleDateFormat("HH:mm", Locale.getDefault()).format(dueDate),
-                    UpdatedAt = System.currentTimeMillis()
+                    UpdatedAt = com.cheermateapp.data.model.TimestampUtil.getCurrentTimestamp()
                 )
 
                 withContext(Dispatchers.IO) {
@@ -1273,7 +1269,7 @@ class FragmentTaskActivity : AppCompatActivity() {
                     try {
                         val db = AppDb.get(this@FragmentTaskActivity)
                         withContext(Dispatchers.IO) {
-                            db.taskDao().softDelete(task.User_ID, task.Task_ID)
+                            db.taskDao().delete(task)
                         }
 
                         Toast.makeText(this@FragmentTaskActivity, "🗑️ Task deleted", Toast.LENGTH_SHORT).show()
@@ -1479,7 +1475,7 @@ class FragmentTaskActivity : AppCompatActivity() {
                     else -> Priority.Medium
                 }
 
-                val currentTime = System.currentTimeMillis()  // ✅ Get current timestamp
+                val currentTime = com.cheermateapp.data.model.TimestampUtil.getCurrentTimestamp()  // ✅ Get current timestamp
 
                 val newTask = Task(
                     Task_ID = taskId,
@@ -1493,8 +1489,7 @@ class FragmentTaskActivity : AppCompatActivity() {
                     DueAt = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(dueDate),
                     DueTime = SimpleDateFormat("HH:mm", Locale.getDefault()).format(dueDate),
                     CreatedAt = currentTime,  // ✅ Long timestamp
-                    UpdatedAt = currentTime,  // ✅ Long timestamp
-                    DeletedAt = null
+                    UpdatedAt = currentTime  // ✅ Long timestamp
                 )
 
                 withContext(Dispatchers.IO) {

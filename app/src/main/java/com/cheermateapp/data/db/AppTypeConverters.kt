@@ -3,7 +3,6 @@ package com.cheermateapp.data.db
 import androidx.room.ProvidedTypeConverter
 import androidx.room.TypeConverter
 import com.cheermateapp.data.model.Appearance
-import com.cheermateapp.data.model.NotificationPref
 import com.cheermateapp.data.model.Priority
 import com.cheermateapp.data.model.Status
 import com.cheermateapp.data.model.Category  // ✅ ADD THIS IMPORT
@@ -11,7 +10,7 @@ import com.google.gson.Gson
 import java.util.Date
 
 @ProvidedTypeConverter
-class AppTypeConverters(private val gson: Gson) {
+class AppTypeConverters(private val gson: Gson = Gson()) {
 
     // ✅ DATE/TIME CONVERTERS
     @TypeConverter
@@ -68,31 +67,4 @@ class AppTypeConverters(private val gson: Gson) {
             Category.Work // Default fallback
         }
     }
-
-    // ✅ JSON-BACKED PREFERENCES CONVERTERS (EXISTING)
-    @TypeConverter
-    fun appearanceToJson(v: Appearance?): String? = v?.let { gson.toJson(it) }
-
-    @TypeConverter
-    fun jsonToAppearance(s: String?): Appearance? =
-        s?.let {
-            try {
-                gson.fromJson(it, Appearance::class.java)
-            } catch (e: Exception) {
-                null // Return null if JSON parsing fails
-            }
-        }
-
-    @TypeConverter
-    fun notificationToJson(v: NotificationPref?): String? = v?.let { gson.toJson(it) }
-
-    @TypeConverter
-    fun jsonToNotification(s: String?): NotificationPref? =
-        s?.let {
-            try {
-                gson.fromJson(it, NotificationPref::class.java)
-            } catch (e: Exception) {
-                null
-            }
-        }
 }

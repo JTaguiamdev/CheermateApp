@@ -1,5 +1,6 @@
 package com.cheermateapp.data.model
 
+import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
@@ -23,6 +24,7 @@ data class UserSettings(
     @PrimaryKey(autoGenerate = true)
     val UserSettings_ID: Int = 0,
     val User_ID: Int,
+    @Embedded
     val Appearance: Appearance? = null,
-    val Notification: NotificationPref? = null
+    val Notification: String = "On"
 )

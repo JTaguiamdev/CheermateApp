@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Timestamps (`CreatedAt`, `UpdatedAt`) are now stored as human-readable strings (`TEXT`) instead of `Long`.
+- Task deletion is now a hard delete.
+- The "Add Subtask" button is now an EditText to match the app's theme.
+- The default state of the notification switch now reflects database settings.
+
+### Removed
+- `TaskDependency` model and DAO.
+- Soft delete functionality (`DeletedAt` column) from `User` and `Task` tables.
+
 ### Security Update - November 2025
 
 #### Changed

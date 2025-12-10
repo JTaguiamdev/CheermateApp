@@ -26,5 +26,6 @@ data class SubTask(
     val User_ID: Int,
     val Name: String,
     val IsCompleted: Boolean = false,
-    val CreatedAt: Long = System.currentTimeMillis()
+    val CreatedAt: String = TimestampUtil.getCurrentTimestamp(),
+    val UpdatedAt: String = TimestampUtil.getCurrentTimestamp()
 )

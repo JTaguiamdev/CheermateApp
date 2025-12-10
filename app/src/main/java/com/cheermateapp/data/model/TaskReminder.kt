@@ -51,8 +51,8 @@ data class TaskReminder(
     val IsActive: Boolean = true,
     
     @ColumnInfo(name = "CreatedAt")
-    val CreatedAt: Long = System.currentTimeMillis(),
+    val CreatedAt: String = TimestampUtil.getCurrentTimestamp(),
     
     @ColumnInfo(name = "UpdatedAt")
-    val UpdatedAt: Long = System.currentTimeMillis()
+    val UpdatedAt: String = TimestampUtil.getCurrentTimestamp()
 )

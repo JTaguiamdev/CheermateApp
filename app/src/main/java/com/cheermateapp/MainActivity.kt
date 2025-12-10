@@ -439,7 +439,7 @@ class MainActivity : AppCompatActivity() {
                         
                         // Delete reminders and task
                         db.taskReminderDao().deleteAllForTask(task.Task_ID, task.User_ID)
-                        db.taskDao().softDelete(task.User_ID, task.Task_ID)
+                        db.taskDao().delete(task)
                         
                         android.util.Log.d("MainActivity", "🧹 Cleaned test task: ${task.Title}")
                     }
@@ -854,6 +854,7 @@ class MainActivity : AppCompatActivity() {
             }
 
             switchNotifications?.setOnCheckedChangeListener { _, isChecked ->
+                updateNotificationSetting(isChecked)
                 ToastManager.showToast(
                     this,
                     if (isChecked) "🔔 Notifications enabled" else "🔕 Notifications disabled",
@@ -1095,7 +1096,7 @@ class MainActivity : AppCompatActivity() {
                     TaskProgress = progress,
                     DueAt = if (dueDate.isNotBlank()) dueDate else null,
                     DueTime = if (dueTime.isNotBlank()) dueTime else null,
-                    UpdatedAt = System.currentTimeMillis()
+                    UpdatedAt = com.cheermateapp.data.model.TimestampUtil.getCurrentTimestamp()
                 )
 
                 withContext(Dispatchers.IO) {
@@ -1234,7 +1235,8 @@ class MainActivity : AppCompatActivity() {
         val chipPersonaText: String?,
         val statTotal: Int,
         val statCompleted: Int,
-        val statSuccess: Int
+        val statSuccess: Int,
+        val notificationEnabled: Boolean
     )
 
     private var settingsCache: SettingsCache? = null
@@ -1254,6 +1256,7 @@ class MainActivity : AppCompatActivity() {
         findViewById<TextView>(R.id.tvStatTotal)?.text = cache.statTotal.toString()
         findViewById<TextView>(R.id.tvStatCompleted)?.text = cache.statCompleted.toString()
         findViewById<TextView>(R.id.tvStatSuccess)?.text = "${cache.statSuccess}%"
+        findViewById<Switch>(R.id.switchNotifications)?.isChecked = cache.notificationEnabled
     }
 
     private fun loadSettingsFragmentData(forceRefresh: Boolean = false) {
@@ -1288,6 +1291,10 @@ class MainActivity : AppCompatActivity() {
                     )
                 }
 
+                val userSettings = withContext(Dispatchers.IO) {
+                    db.userSettingsDao().getSettingsByUser(userId)
+                }
+
                 // Build display values
                 val profileName: String
                 val profileEmail: String
@@ -1318,7 +1325,8 @@ class MainActivity : AppCompatActivity() {
                     chipPersonaText = chipPersonaText,
                     statTotal = stats["total"] ?: 0,
                     statCompleted = stats["completed"] ?: 0,
-                    statSuccess = successRate
+                    statSuccess = successRate,
+                    notificationEnabled = userSettings?.Notification?.equals("On", ignoreCase = true) ?: true
                 )
 
                 settingsCache = newCache
@@ -1463,8 +1471,7 @@ class MainActivity : AppCompatActivity() {
                         Username = newUsername,
                         Email = newEmail,
                         FirstName = newFirstName,
-                        LastName = newLastName,
-                        UpdatedAt = System.currentTimeMillis()
+                    UpdatedAt = com.cheermateapp.data.model.TimestampUtil.getCurrentTimestamp()
                     )
                     db.userDao().update(updatedUser)
                 }
@@ -1629,8 +1636,7 @@ class MainActivity : AppCompatActivity() {
                     // Update user
                     val updatedUser = user.copy(
                         PasswordHash = newHashedPassword,
-                        UpdatedAt = System.currentTimeMillis()
-                    )
+                                                        UpdatedAt = com.cheermateapp.data.model.TimestampUtil.getCurrentTimestamp()                    )
                     db.userDao().update(updatedUser)
                     
                     return@withContext true
@@ -1713,7 +1719,7 @@ class MainActivity : AppCompatActivity() {
                     db.personalityDao().getById(personalityId)?.Name ?: "Unknown"
                 }
 
-                ToastManager.showToast(this@MainActivity, "✅ Personality updated to $personalityName!", Toast.LENGTH_SHORT)
+                ToastManager.showToast(this@MainActivity, "Personality updated to $personalityName!", Toast.LENGTH_SHORT)
                 
                 // ✅ Update both settings fragment AND home screen personality card
                 loadSettingsFragmentData(forceRefresh = true)
@@ -1721,6 +1727,32 @@ class MainActivity : AppCompatActivity() {
 
             } catch (e: Exception) {
                 ToastManager.showToast(this@MainActivity, "Error updating personality", Toast.LENGTH_SHORT)
+            }
+        }
+    }
+
+    private fun updateNotificationSetting(enabled: Boolean) {
+        uiScope.launch {
+            try {
+                val db = AppDb.get(this@MainActivity)
+                withContext(Dispatchers.IO) {
+                    val userSettingsDao = db.userSettingsDao()
+                    var settings = userSettingsDao.getSettingsByUser(userId)
+                    if (settings == null) {
+                        settings = com.cheermateapp.data.model.UserSettings(User_ID = userId)
+                    }
+                    
+                    val notificationValue = if (enabled) "On" else "Off"
+                    settings = settings.copy(Notification = notificationValue)
+                    userSettingsDao.upsert(settings)
+                }
+                
+                // Update cache to reflect the change
+                settingsCache = settingsCache?.copy(notificationEnabled = enabled)
+                
+            } catch (e: Exception) {
+                android.util.Log.e("MainActivity", "Error updating notification setting", e)
+                ToastManager.showToast(this@MainActivity, "Error updating notification setting", Toast.LENGTH_SHORT)
             }
         }
     }

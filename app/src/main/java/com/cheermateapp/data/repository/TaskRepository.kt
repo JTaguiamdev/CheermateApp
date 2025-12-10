@@ -16,8 +16,7 @@ import kotlinx.coroutines.withContext
 class TaskRepository(
     private val taskDao: TaskDao,
     private val subTaskDao: SubTaskDao,
-    private val taskReminderDao: TaskReminderDao,
-    private val taskDependencyDao: TaskDependencyDao
+    private val taskReminderDao: TaskReminderDao
 ) {
 
     companion object {
@@ -65,34 +64,6 @@ class TaskRepository(
         } catch (e: Exception) {
             Log.e(TAG, "Error deleting task", e)
             DataResult.Error(e, "Failed to delete task: ${e.message}")
-        }
-    }
-
-    /**
-     * Soft delete a task (sets DeletedAt timestamp)
-     */
-    suspend fun softDeleteTask(userId: Int, taskId: Int): DataResult<Unit> = withContext(Dispatchers.IO) {
-        try {
-            taskDao.softDelete(userId, taskId)
-            Log.d(TAG, "Task soft deleted: userId=$userId, taskId=$taskId")
-            DataResult.Success(Unit)
-        } catch (e: Exception) {
-            Log.e(TAG, "Error soft deleting task", e)
-            DataResult.Error(e, "Failed to delete task: ${e.message}")
-        }
-    }
-
-    /**
-     * Restore a soft-deleted task
-     */
-    suspend fun restoreTask(userId: Int, taskId: Int): DataResult<Unit> = withContext(Dispatchers.IO) {
-        try {
-            taskDao.restoreTask(userId, taskId)
-            Log.d(TAG, "Task restored: userId=$userId, taskId=$taskId")
-            DataResult.Success(Unit)
-        } catch (e: Exception) {
-            Log.e(TAG, "Error restoring task", e)
-            DataResult.Error(e, "Failed to restore task: ${e.message}")
         }
     }
 
@@ -373,20 +344,6 @@ class TaskRepository(
         } catch (e: Exception) {
             Log.e(TAG, "Error inserting multiple tasks", e)
             DataResult.Error(e, "Failed to create tasks: ${e.message}")
-        }
-    }
-
-    /**
-     * Soft delete multiple tasks
-     */
-    suspend fun softDeleteTasks(userId: Int, taskIds: List<Int>): DataResult<Unit> = withContext(Dispatchers.IO) {
-        try {
-            taskDao.softDeleteMultiple(userId, taskIds)
-            Log.d(TAG, "Soft deleted ${taskIds.size} tasks")
-            DataResult.Success(Unit)
-        } catch (e: Exception) {
-            Log.e(TAG, "Error soft deleting multiple tasks", e)
-            DataResult.Error(e, "Failed to delete tasks: ${e.message}")
         }
     }
 

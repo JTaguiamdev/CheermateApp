@@ -13,8 +13,8 @@
     <include domain="database" path="." />
     
     <!-- Exclude cache files -->
-    <exclude domain="cache" path="." />
+
     
     <!-- Exclude external storage for privacy -->
-    <exclude domain="external" path="." />
+
 </full-backup-content>

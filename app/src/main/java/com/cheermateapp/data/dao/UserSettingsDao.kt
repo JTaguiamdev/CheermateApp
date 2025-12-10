@@ -19,7 +19,7 @@ interface UserSettingsDao {
     @Query("SELECT * FROM UserSettings WHERE User_ID = :userId ORDER BY UserSettings_ID DESC LIMIT 1")
     suspend fun latest(userId: Int): UserSettings?
 
-    @Query("SELECT * FROM UserSettings WHERE User_ID = :userId LIMIT 1")
+    @Query("SELECT * FROM UserSettings WHERE User_ID = :userId ORDER BY UserSettings_ID DESC LIMIT 1")
     suspend fun getSettingsByUser(userId: Int): UserSettings?
 
     @Query("SELECT * FROM UserSettings")

@@ -29,7 +29,7 @@ class AlarmReceiver : BroadcastReceiver() {
         }
 
         val db = (context.applicationContext as CheermateApp).db
-        val taskRepository = TaskRepository(db.taskDao(), db.subTaskDao(), db.taskReminderDao(), db.taskDependencyDao())
+        val taskRepository = TaskRepository(db.taskDao(), db.subTaskDao(), db.taskReminderDao())
 
         CoroutineScope(Dispatchers.IO).launch {
             try {

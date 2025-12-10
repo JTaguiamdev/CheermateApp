@@ -71,7 +71,7 @@ object BulkTaskOperations {
                 if (task != null) {
                     val updatedTask = task.copy(
                         Priority = newPriority,
-                        UpdatedAt = System.currentTimeMillis()
+                        UpdatedAt = com.cheermateapp.data.model.TimestampUtil.getCurrentTimestamp()
                     )
                     taskDao.update(updatedTask)
                     successCount++
@@ -110,56 +110,6 @@ object BulkTaskOperations {
             } catch (e: Exception) {
                 failureCount++
                 errors.add("Failed to update task $taskId: ${e.message}")
-            }
-        }
-
-        return BulkOperationResult(successCount, failureCount, errors)
-    }
-
-    /**
-     * Bulk delete tasks (soft delete)
-     */
-    suspend fun bulkDelete(
-        taskDao: TaskDao,
-        userId: Int,
-        taskIds: List<Int>
-    ): BulkOperationResult {
-        var successCount = 0
-        var failureCount = 0
-        val errors = mutableListOf<String>()
-
-        for (taskId in taskIds) {
-            try {
-                taskDao.softDelete(userId, taskId)
-                successCount++
-            } catch (e: Exception) {
-                failureCount++
-                errors.add("Failed to delete task $taskId: ${e.message}")
-            }
-        }
-
-        return BulkOperationResult(successCount, failureCount, errors)
-    }
-
-    /**
-     * Bulk restore tasks
-     */
-    suspend fun bulkRestore(
-        taskDao: TaskDao,
-        userId: Int,
-        taskIds: List<Int>
-    ): BulkOperationResult {
-        var successCount = 0
-        var failureCount = 0
-        val errors = mutableListOf<String>()
-
-        for (taskId in taskIds) {
-            try {
-                taskDao.restoreTask(userId, taskId)
-                successCount++
-            } catch (e: Exception) {
-                failureCount++
-                errors.add("Failed to restore task $taskId: ${e.message}")
             }
         }
 
@@ -212,7 +162,7 @@ object BulkTaskOperations {
                     val updatedTask = task.copy(
                         DueAt = newDueDate,
                         DueTime = newDueTime ?: task.DueTime,
-                        UpdatedAt = System.currentTimeMillis()
+                        UpdatedAt = com.cheermateapp.data.model.TimestampUtil.getCurrentTimestamp()
                     )
                     taskDao.update(updatedTask)
                     successCount++

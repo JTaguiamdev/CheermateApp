@@ -280,21 +280,20 @@
                     <EditText
                         android:id="@+id/et_subtask_input"
                         android:layout_width="0dp"
-                        android:layout_height="wrap_content"
+                        android:layout_height="40dp"
                         android:layout_weight="1"
                         android:background="@drawable/bg_chip_glass"
                         android:fontFamily="@font/sf_pro_rounded_regular"
                         android:hint="Enter subtask"
-                        android:minHeight="40dp"
-                        android:paddingStart="14dp"
-                        android:paddingTop="10dp"
-                        android:paddingEnd="14dp"
-                        android:paddingBottom="10dp"
+                        android:paddingStart="16dp"
+                        android:paddingTop="2dp"
+                        android:paddingEnd="16dp"
+                        android:paddingBottom="2dp"
                         android:textColor="@android:color/white"
                         android:textColorHint="@color/text_secondary_white_70"
                         android:textSize="16sp" />
 
-                    <Button
+                    <EditText
                         android:id="@+id/btn_add_subtask"
                         android:layout_width="wrap_content"
                         android:layout_height="40dp"
@@ -309,6 +308,9 @@
                         android:textAllCaps="false"
                         android:textColor="@android:color/white"
                         android:textSize="16sp"
+                        android:focusable="false"
+                        android:clickable="true"
+                        android:gravity="center"
                         android:visibility="gone" />
                 </LinearLayout>
 

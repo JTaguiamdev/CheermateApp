@@ -53,4 +53,7 @@
         <color name="glass_stroke_color">#66FFFFFF</color>
         <color name="glass_hint_color">#B3FFFFFF</color>
         <color name="glass_background_dark">#1AFFFFFF</color>
+    <color name="glass_border_dark">#33FFFFFF</color>
+    <color name="glass_hover_dark">#1AFFFFFF</color>
+    <color name="glass_pressed_dark">#26FFFFFF</color>
     </resources>

@@ -94,7 +94,7 @@ class ProperViewModelUsageExampleActivity : AppCompatActivity() {
             },
             onCompleteClick = { task ->
                 // Mark task as completed
-                taskViewModel.markTaskCompleted(userId, task.Task_ID)
+                taskViewModel.updateTask(task.copy(Status = Status.Done))
             }
         )
         
@@ -239,7 +239,7 @@ class ProperViewModelUsageExampleActivity : AppCompatActivity() {
             Description = "Task created via ViewModel",
             Priority = Priority.Medium,
             Status = Status.Pending,
-            CreatedAt = System.currentTimeMillis()
+            CreatedAt = com.cheermateapp.data.model.TimestampUtil.getCurrentTimestamp()
         )
         
         // Insert via ViewModel - UI will auto-update via Flow!

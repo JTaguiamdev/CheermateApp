@@ -13,10 +13,9 @@
         
         <!-- Exclude sensitive data like passwords (handled by Room encryption if enabled) -->
         <!-- Cache files should not be backed up -->
-        <exclude domain="cache" path="." />
         
         <!-- External storage should be excluded for privacy -->
-        <exclude domain="external" path="." />
+
 
     </cloud-backup>
     
@@ -28,6 +27,5 @@
         <include domain="database" path="." />
         
         <!-- Do not transfer cache -->
-        <exclude domain="cache" path="." />
     </device-transfer>
 </data-extraction-rules>

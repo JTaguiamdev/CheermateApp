@@ -34,8 +34,8 @@ object AlarmTestHelper {
             Log.d(TAG, "⏱️ Will trigger in $seconds seconds")
             
             val db = (context.applicationContext as CheermateApp).db
-            val currentTime = System.currentTimeMillis()
-            val triggerTime = currentTime + (seconds * 1000)
+            val currentTime = com.cheermateapp.data.model.TimestampUtil.getCurrentTimestamp()
+            val triggerTime = System.currentTimeMillis() + (seconds * 1000)
             
             // Create a test task
             val testTask = Task(
@@ -55,7 +55,7 @@ object AlarmTestHelper {
             Log.d(TAG, "📋 Test task details:")
             Log.d(TAG, "  Title: ${testTask.Title}")
             Log.d(TAG, "  Description: ${testTask.Description}")
-            Log.d(TAG, "  Created at: ${Date(testTask.CreatedAt)}")
+            Log.d(TAG, "  Created at: ${testTask.CreatedAt}")
             
             // Insert the task first (needs to be in a coroutine)
             return withContext(Dispatchers.IO) {
@@ -71,8 +71,8 @@ object AlarmTestHelper {
                     User_ID = 1,
                     RemindAt = triggerTime,
                     ReminderType = com.cheermateapp.data.model.ReminderType.AT_SPECIFIC_TIME,
-                    CreatedAt = currentTime,
-                    UpdatedAt = currentTime
+                    CreatedAt = com.cheermateapp.data.model.TimestampUtil.getCurrentTimestamp(),
+                    UpdatedAt = com.cheermateapp.data.model.TimestampUtil.getCurrentTimestamp()
                 )
                 
                 Log.d(TAG, "⏰ Test reminder details:")
@@ -145,7 +145,7 @@ object AlarmTestHelper {
                 val task = db.taskDao().getTaskByCompositeKey(1, taskId) // Assuming user ID 1
                 if (task != null) {
                     db.taskReminderDao().deleteAllForTask(taskId, task.User_ID)
-                    db.taskDao().softDelete(task.User_ID, taskId)
+                    db.taskDao().delete(task)
                 }
             }
             

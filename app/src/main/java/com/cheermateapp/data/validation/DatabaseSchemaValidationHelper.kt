@@ -17,7 +17,6 @@ object DatabaseSchemaValidationHelper {
             Task::class,
             SubTask::class,
             TaskReminder::class,
-            TaskDependency::class,
             UserSettings::class,
             Personality::class,
             SecurityQuestion::class,

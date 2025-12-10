@@ -223,14 +223,9 @@ This document tracks immediate tasks and known issues that need to be addressed 
 
 ### To Investigate
 - [ ] **Verify timestamp handling**
-  - Ensure CreatedAt, UpdatedAt, DeletedAt work correctly
+  - Ensure CreatedAt, UpdatedAt work correctly
   - Test across different timezones
-  - Verify Long timestamp conversions
-
-- [ ] **Test soft delete functionality**
-  - Ensure deleted tasks don't appear in regular queries
-  - Verify restore functionality works
-  - Test cascade delete for related entities
+  - Verify String timestamp conversions
 
 - [ ] **Verify foreign key constraints**
   - Test data integrity with user deletion

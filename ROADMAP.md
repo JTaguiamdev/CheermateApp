@@ -104,7 +104,7 @@ Improve user experience, add smart features, and increase user engagement.
 - **Advanced Task Features**
   - ✅ Recurring tasks (daily, weekly, monthly) (DONE)
   - ✅ Task templates for common workflows (DONE)
-  - ✅ Task dependencies (prerequisite tasks) (DONE)
+  - ❌ Task dependencies (prerequisite tasks) (REMOVED)
   - ✅ Bulk operations (multi-select, batch edit) (DONE)
 
 #### Enhanced UI/UX 🚧 PARTIALLY COMPLETE

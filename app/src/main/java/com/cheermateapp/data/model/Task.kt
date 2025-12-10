@@ -85,13 +85,10 @@ data class Task(
     val TaskProgress: Int = 0,
 
     @ColumnInfo(name = "CreatedAt")
-    val CreatedAt: Long = System.currentTimeMillis(),
+    val CreatedAt: String = TimestampUtil.getCurrentTimestamp(),
 
     @ColumnInfo(name = "UpdatedAt")
-    val UpdatedAt: Long = System.currentTimeMillis(),
-
-    @ColumnInfo(name = "DeletedAt")
-    val DeletedAt: Long? = null
+    val UpdatedAt: String = TimestampUtil.getCurrentTimestamp()
 ) {
     companion object {
         fun create(
@@ -105,9 +102,8 @@ data class Task(
             dueTime: String? = null,
             status: com.cheermateapp.data.model.Status = com.cheermateapp.data.model.Status.Pending,
             taskProgress: Int = 0,
-            createdAt: Long = System.currentTimeMillis(),
-            updatedAt: Long = System.currentTimeMillis(),
-            deletedAt: Long? = null
+            createdAt: String = TimestampUtil.getCurrentTimestamp(),
+            updatedAt: String = TimestampUtil.getCurrentTimestamp()
         ) = Task(
             Task_ID = taskId,
             User_ID = userId,
@@ -120,8 +116,7 @@ data class Task(
             Status = status,
             TaskProgress = taskProgress,
             CreatedAt = createdAt,
-            UpdatedAt = updatedAt,
-            DeletedAt = deletedAt
+            UpdatedAt = updatedAt
         )
 
         fun dateToString(date: Date): String {
