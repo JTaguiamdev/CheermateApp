@@ -117,56 +117,6 @@ object BulkTaskOperations {
     }
 
     /**
-     * Bulk delete tasks (soft delete)
-     */
-    suspend fun bulkDelete(
-        taskDao: TaskDao,
-        userId: Int,
-        taskIds: List<Int>
-    ): BulkOperationResult {
-        var successCount = 0
-        var failureCount = 0
-        val errors = mutableListOf<String>()
-
-        for (taskId in taskIds) {
-            try {
-                taskDao.softDelete(userId, taskId)
-                successCount++
-            } catch (e: Exception) {
-                failureCount++
-                errors.add("Failed to delete task $taskId: ${e.message}")
-            }
-        }
-
-        return BulkOperationResult(successCount, failureCount, errors)
-    }
-
-    /**
-     * Bulk restore tasks
-     */
-    suspend fun bulkRestore(
-        taskDao: TaskDao,
-        userId: Int,
-        taskIds: List<Int>
-    ): BulkOperationResult {
-        var successCount = 0
-        var failureCount = 0
-        val errors = mutableListOf<String>()
-
-        for (taskId in taskIds) {
-            try {
-                taskDao.restoreTask(userId, taskId)
-                successCount++
-            } catch (e: Exception) {
-                failureCount++
-                errors.add("Failed to restore task $taskId: ${e.message}")
-            }
-        }
-
-        return BulkOperationResult(successCount, failureCount, errors)
-    }
-
-    /**
      * Bulk mark tasks as completed
      */
     suspend fun bulkComplete(

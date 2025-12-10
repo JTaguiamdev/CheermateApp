@@ -217,8 +217,7 @@ class TaskDialogExample : AppCompatActivity() {
                     DueAt = dueDate,
                     DueTime = dueTime,
                     CreatedAt = com.cheermateapp.data.model.TimestampUtil.getCurrentTimestamp(),
-                    UpdatedAt = com.cheermateapp.data.model.TimestampUtil.getCurrentTimestamp(),
-                    DeletedAt = null
+                    UpdatedAt = com.cheermateapp.data.model.TimestampUtil.getCurrentTimestamp()
                 )
                 
                 // Insert task into database

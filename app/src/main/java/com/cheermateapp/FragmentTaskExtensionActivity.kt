@@ -863,18 +863,54 @@ class FragmentTaskExtensionActivity : AppCompatActivity() {
             markTaskAsCompleted()
         }
         
-        view.findViewById<LinearLayout>(R.id.action_snooze).setOnClickListener {
-            bottomSheetDialog.dismiss()
-            showSnoozeDialog()
-        }
-        
         view.findViewById<LinearLayout>(R.id.action_wont_do).setOnClickListener {
             bottomSheetDialog.dismiss()
             markTaskAsWontDo()
         }
         
+        view.findViewById<LinearLayout>(R.id.action_delete_task).setOnClickListener {
+            bottomSheetDialog.dismiss()
+            deleteTask()
+        }
+        
         bottomSheetDialog.setContentView(view)
         bottomSheetDialog.show()
+    }
+
+    private fun deleteTask() {
+        currentTask?.let { task ->
+            AlertDialog.Builder(this)
+                .setTitle("Delete Task")
+                .setMessage("Are you sure you want to delete '${task.Title}'? This action cannot be undone.")
+                .setPositiveButton("Delete") { _, _ ->
+                    lifecycleScope.launch {
+                        try {
+                            val db = AppDb.get(this@FragmentTaskExtensionActivity)
+                            withContext(Dispatchers.IO) {
+                                db.taskDao().delete(task)
+                            }
+                            
+                            Toast.makeText(
+                                this@FragmentTaskExtensionActivity,
+                                "Task deleted successfully",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            
+                            setResult(RESULT_OK)
+                            finish()
+                        } catch (e: Exception) {
+                            android.util.Log.e("FragmentTaskExtensionActivity", "Error deleting task", e)
+                            Toast.makeText(
+                                this@FragmentTaskExtensionActivity,
+                                "Error deleting task",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    }
+                }
+                .setNegativeButton("Cancel", null)
+                .show()
+        }
     }
 
     private fun markTaskAsCompleted() {

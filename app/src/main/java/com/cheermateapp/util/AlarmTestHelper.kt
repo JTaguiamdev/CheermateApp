@@ -145,7 +145,7 @@ object AlarmTestHelper {
                 val task = db.taskDao().getTaskByCompositeKey(1, taskId) // Assuming user ID 1
                 if (task != null) {
                     db.taskReminderDao().deleteAllForTask(taskId, task.User_ID)
-                    db.taskDao().softDelete(task.User_ID, taskId)
+                    db.taskDao().delete(task)
                 }
             }
             

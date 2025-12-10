@@ -527,7 +527,7 @@ class FragmentSettingsActivity : AppCompatActivity() {
                     db.personalityDao().getById(personalityId)?.Name ?: "Unknown"
                 }
 
-                Toast.makeText(this@FragmentSettingsActivity, "✅ Personality updated to $personalityName!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@FragmentSettingsActivity, "Personality updated to $personalityName!", Toast.LENGTH_SHORT).show()
                 loadSettingsUserData()
 
             } catch (e: Exception) {

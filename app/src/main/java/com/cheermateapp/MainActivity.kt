@@ -439,7 +439,7 @@ class MainActivity : AppCompatActivity() {
                         
                         // Delete reminders and task
                         db.taskReminderDao().deleteAllForTask(task.Task_ID, task.User_ID)
-                        db.taskDao().softDelete(task.User_ID, task.Task_ID)
+                        db.taskDao().delete(task)
                         
                         android.util.Log.d("MainActivity", "🧹 Cleaned test task: ${task.Title}")
                     }
@@ -1326,7 +1326,7 @@ class MainActivity : AppCompatActivity() {
                     statTotal = stats["total"] ?: 0,
                     statCompleted = stats["completed"] ?: 0,
                     statSuccess = successRate,
-                    notificationEnabled = userSettings?.Notification == "On"
+                    notificationEnabled = userSettings?.Notification?.equals("On", ignoreCase = true) ?: true
                 )
 
                 settingsCache = newCache
@@ -1719,7 +1719,7 @@ class MainActivity : AppCompatActivity() {
                     db.personalityDao().getById(personalityId)?.Name ?: "Unknown"
                 }
 
-                ToastManager.showToast(this@MainActivity, "✅ Personality updated to $personalityName!", Toast.LENGTH_SHORT)
+                ToastManager.showToast(this@MainActivity, "Personality updated to $personalityName!", Toast.LENGTH_SHORT)
                 
                 // ✅ Update both settings fragment AND home screen personality card
                 loadSettingsFragmentData(forceRefresh = true)

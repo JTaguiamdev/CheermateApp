@@ -23,7 +23,7 @@ import com.google.gson.Gson
         UserSettings::class,
         MessageTemplate::class
     ],
-    version = 36,
+    version = 37,
     exportSchema = false
 )
 @TypeConverters(AppTypeConverters::class)
@@ -416,6 +416,35 @@ abstract class AppDb : RoomDatabase() {
             }
         }
 
+        private val MIGRATION_36_37 = createMigration(36, 37) { db ->
+            recreateTableWithSchema(db, "Task",
+                createSql = """
+                    CREATE TABLE Task_new (
+                        Task_ID INTEGER NOT NULL,
+                        User_ID INTEGER NOT NULL,
+                        Title TEXT NOT NULL,
+                        Description TEXT,
+                        Category TEXT NOT NULL,
+                        Priority TEXT NOT NULL,
+                        DueAt TEXT,
+                        DueTime TEXT,
+                        Status TEXT NOT NULL,
+                        TaskProgress INTEGER NOT NULL,
+                        CreatedAt TEXT NOT NULL,
+                        UpdatedAt TEXT NOT NULL,
+                        PRIMARY KEY(Task_ID, User_ID),
+                        FOREIGN KEY(User_ID) REFERENCES User(User_ID) ON DELETE CASCADE
+                    )
+                """.trimIndent(),
+                copySql = """
+                    INSERT INTO Task_new (Task_ID, User_ID, Title, Description, Category, Priority, DueAt, DueTime, Status, TaskProgress, CreatedAt, UpdatedAt)
+                    SELECT Task_ID, User_ID, Title, Description, Category, Priority, DueAt, DueTime, Status, TaskProgress, CreatedAt, UpdatedAt FROM Task
+                """.trimIndent()
+            ) {
+                it.execSQL("CREATE INDEX IF NOT EXISTS index_Task_User_ID ON Task(User_ID)")
+            }
+        }
+
         private fun buildDatabase(appContext: Context): AppDb {
             return Room.databaseBuilder(
                 appContext,
@@ -438,7 +467,8 @@ abstract class AppDb : RoomDatabase() {
                     MIGRATION_32_33,
                     MIGRATION_33_34,
                     MIGRATION_34_35,
-                    MIGRATION_35_36
+                    MIGRATION_35_36,
+                    MIGRATION_36_37
                 )
                 .addTypeConverter(AppTypeConverters(Gson()))
                 .build()

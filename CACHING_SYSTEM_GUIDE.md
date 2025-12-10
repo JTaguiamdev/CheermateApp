@@ -96,8 +96,8 @@ data class PersonalityType(
     val Name: String,
     val Description: String,
     val IsActive: Boolean = true,
-    val CreatedAt: Long,
-    val UpdatedAt: Long
+    val CreatedAt: String,
+    val UpdatedAt: String
 )
 ```
 
@@ -107,8 +107,8 @@ data class SecurityQuestion(
     val SecurityQuestion_ID: Int,
     val Prompt: String,
     val IsActive: Boolean = true,
-    val CreatedAt: Long,
-    val UpdatedAt: Long
+    val CreatedAt: String,
+    val UpdatedAt: String
 )
 ```
 

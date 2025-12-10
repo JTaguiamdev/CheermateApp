@@ -88,10 +88,7 @@ data class Task(
     val CreatedAt: String = TimestampUtil.getCurrentTimestamp(),
 
     @ColumnInfo(name = "UpdatedAt")
-    val UpdatedAt: String = TimestampUtil.getCurrentTimestamp(),
-
-    @ColumnInfo(name = "DeletedAt")
-    val DeletedAt: Long? = null
+    val UpdatedAt: String = TimestampUtil.getCurrentTimestamp()
 ) {
     companion object {
         fun create(
