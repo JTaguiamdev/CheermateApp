@@ -185,10 +185,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
                 android:background="@drawable/bg_card_glass_hover"
-                android:clickable="true"
                 android:elevation="2dp"
-                android:focusable="true"
-                android:foreground="?attr/selectableItemBackground"
                 android:orientation="vertical"
                 android:padding="16dp"
                 android:stateListAnimator="@animator/card_elevation_state">

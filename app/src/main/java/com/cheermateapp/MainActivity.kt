@@ -211,7 +211,7 @@ class MainActivity : AppCompatActivity() {
                 // Observe DB changes for live daily progress bar updates only on Home
                 findViewById<com.google.android.material.bottomnavigation.BottomNavigationView>(R.id.bottomNav)?.let { nav ->
                     if (nav.selectedItemId == R.id.nav_home) {
-                        startObserveTaskChangesForProgressBar()
+                        startObserveTaskChanges()
                     }
                 }
 
@@ -537,7 +537,7 @@ class MainActivity : AppCompatActivity() {
             // Refresh home statistics, recent tasks, and progress when showing Home
             loadTaskStatistics()
             loadRecentTasks()
-            startObserveTaskChangesForProgressBar()
+            startObserveTaskChanges()
             
         } catch (e: Exception) {
             android.util.Log.e("MainActivity", "Error showing home screen", e)
@@ -1829,9 +1829,7 @@ class MainActivity : AppCompatActivity() {
             }
 
 
-            findViewById<View>(R.id.cardPersonality)?.setOnClickListener {
-                navigateToSettings() // Navigate to settings instead of handling here
-            }
+
 
             findViewById<TextView>(R.id.btnMotivate)?.setOnClickListener {
                 showMotivationalMessage()
@@ -2594,7 +2592,7 @@ class MainActivity : AppCompatActivity() {
 
                         when (labelTextView?.text?.toString()?.lowercase()) {
                             "total" -> valueTextView?.text = stats["total"].toString()
-                            "done" -> valueTextView?.text = stats["completed"].toString()
+                            "completed" -> valueTextView?.text = stats["completed"].toString()
                             "today" -> valueTextView?.text = stats["today"].toString()
                             "pending" -> valueTextView?.text = stats["pending"].toString()
                         }
@@ -3082,6 +3080,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onPause() {
         super.onPause()
+        stopObserveTaskChanges()
     }
 
     override fun onDestroy() {
@@ -3089,40 +3088,52 @@ class MainActivity : AppCompatActivity() {
     }
 
     // ✅ OBSERVE TASK CHANGES FOR LIVE PROGRESS BAR UPDATES ON HOME SCREEN
-        private var progressBarObserverJob: kotlinx.coroutines.Job? = null
-        private fun startObserveTaskChangesForProgressBar() {
-            progressBarObserverJob?.cancel()
-            progressBarObserverJob = lifecycleScope.launch {
-                try {
-                    val db = AppDb.get(this@MainActivity)
-    
-                    val today = Calendar.getInstance()
-                    val todayStr = dateToString(today.time)
-    
-                    // Observe today total, completed, and in-progress tasks
-                    kotlinx.coroutines.flow.combine(
-                        db.taskDao().getTodayTasksCountFlow(userId, todayStr),
-                        db.taskDao().getCompletedTodayTasksCountFlow(userId, todayStr),
-                        db.taskDao().getInProgressTodayTasksCountFlow(userId, todayStr)
-                    ) { totalToday, completedToday, inProgressToday ->
-                        Triple(totalToday, completedToday, inProgressToday)
-                    }.collect { (totalToday, completedToday, inProgressToday) ->
-                        // Update UI on main thread
-                        withContext(Dispatchers.Main) {
-                            updateProgressDisplay(completedToday, inProgressToday, totalToday)
-                            android.util.Log.d(
-                                "MainActivity",
-                                "🔄 Live progress updated: completed=$completedToday, inProgress=$inProgressToday, total=$totalToday"
-                            )
-                        }
+    private var taskObserverJob: kotlinx.coroutines.Job? = null
+    private fun startObserveTaskChanges() {
+        taskObserverJob?.cancel()
+        taskObserverJob = lifecycleScope.launch {
+            try {
+                val db = AppDb.get(this@MainActivity)
+                val todayStr = dateToString(Calendar.getInstance().time)
+
+                // Combine all the flows for real-time updates
+                kotlinx.coroutines.flow.combine(
+                    db.taskDao().getAllTasksCountFlow(userId),
+                    db.taskDao().getCompletedTasksCountFlow(userId),
+                    db.taskDao().getTodayTasksCountFlow(userId, todayStr),
+                    db.taskDao().getPendingTasksCountFlow(userId),
+                    db.taskDao().getInProgressTodayTasksCountFlow(userId, todayStr),
+                    db.taskDao().getCompletedTodayTasksCountFlow(userId, todayStr)
+                ) { total: Int, completed: Int, today: Int, pending: Int, inProgressToday: Int, completedToday: Int ->
+                    mapOf(
+                        "total" to total,
+                        "completed" to completed,
+                        "today" to today,
+                        "pending" to pending,
+                        "inProgressToday" to inProgressToday,
+                        "completedToday" to completedToday
+                    )
+                }.collect { stats ->
+                    // Update UI on main thread
+                    withContext(Dispatchers.Main) {
+                        // Update the grid statistics
+                        updateStatisticsDisplay(stats)
+
+                        // Update the progress bar display
+                        updateProgressDisplay(stats["completedToday"] ?: 0, stats["inProgressToday"] ?: 0, stats["today"] ?: 0)
+                        android.util.Log.d(
+                            "MainActivity",
+                            "🔄 Live stats updated: $stats"
+                        )
                     }
-                } catch (e: Exception) {
-                    android.util.Log.e("MainActivity", "Error observing task changes for progress bar", e)
                 }
+            } catch (e: Exception) {
+                android.util.Log.e("MainActivity", "Error observing task changes", e)
             }
         }
-        private fun stopObserveTaskChangesForProgressBar() {
-            progressBarObserverJob?.cancel()
-            progressBarObserverJob = null
+    }
+        private fun stopObserveTaskChanges() {
+            taskObserverJob?.cancel()
+            taskObserverJob = null
         }
     }
