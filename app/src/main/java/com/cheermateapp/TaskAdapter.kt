@@ -61,7 +61,7 @@ class TaskAdapter(
         holder.tvPriority.text = task.getPriorityText()
 
         // Set due date
-        if (task.Status == Status.Done) {
+        if (task.Status == Status.Completed) {
             holder.tvDueDate.visibility = View.GONE
         } else if (task.DueAt != null) {
             val dueText = formatDueDate(task)
@@ -82,7 +82,7 @@ class TaskAdapter(
         holder.itemView.setOnClickListener { onTaskClick(task) }
 
         holder.btnComplete?.setOnClickListener {
-            if (task.Status != Status.Done) {
+            if (task.Status != Status.Completed) {
                 onTaskComplete(task)
             }
         }
@@ -91,12 +91,12 @@ class TaskAdapter(
         holder.btnDelete?.setOnClickListener { onTaskDelete(task) }
 
         // Update button states for completed tasks
-        if (task.Status == Status.Done) {
-            (holder.btnComplete as? TextView)?.text = "✅ Done"
+        if (task.Status == Status.Completed) {
+            (holder.btnComplete as? TextView)?.text = "✅ Completed"
             holder.btnComplete?.alpha = 0.3f
             holder.btnComplete?.isEnabled = false
         } else {
-            (holder.btnComplete as? TextView)?.text = "Done"
+            (holder.btnComplete as? TextView)?.text = "Completed"
             holder.btnComplete?.alpha = 1.0f
             holder.btnComplete?.isEnabled = true
         }

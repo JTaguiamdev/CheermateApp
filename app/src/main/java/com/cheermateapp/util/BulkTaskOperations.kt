@@ -37,7 +37,7 @@ object BulkTaskOperations {
                 val statusString = when (newStatus) {
                     Status.Pending -> "Pending"
                     Status.InProgress -> "InProgress"
-                    Status.Done -> "Done"
+                    Status.Completed -> "Completed"
                     Status.Cancelled -> "Cancelled"
                     Status.OverDue -> "OverDue"
                 }

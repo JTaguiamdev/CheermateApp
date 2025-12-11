@@ -129,7 +129,7 @@ class ActivityLogin : AppCompatActivity() {
                                                 // User needs to select personality first
                                                 Toast.makeText(this@ActivityLogin, "Please select your personality", Toast.LENGTH_SHORT).show()
                                                 val intent = Intent(this@ActivityLogin, PersonalityActivity::class.java).apply {
-                                                    putExtra("USER_ID", user.User_ID.toString())
+                                                    putExtra("USER_ID", user.User_ID)
                                                 }
                                                 startActivity(intent)
                                                 finish()

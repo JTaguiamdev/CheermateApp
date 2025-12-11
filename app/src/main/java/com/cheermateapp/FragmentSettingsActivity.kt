@@ -229,7 +229,7 @@ class FragmentSettingsActivity : AppCompatActivity() {
             0
         }
 
-        val message = "📊 Total: ${stats["total"]} • Done: ${stats["completed"]} • Today: ${stats["today"]} • Pending: ${stats["pending"]} • Success: $successRate%"
+        val message = "📊 Total: ${stats["total"]} • Completed: ${stats["completed"]} • Today: ${stats["today"]} • Pending: ${stats["pending"]} • Success: $successRate%"
         Toast.makeText(this, message, Toast.LENGTH_LONG).show()
     }
 

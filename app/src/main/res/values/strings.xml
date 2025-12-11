@@ -16,7 +16,7 @@
     <string name="cd_avatar">User avatar</string>
     <string name="Continue">Continue</string>
     <string name="tasks">Tasks</string>
-    <string name="done_0">Done (0)</string>
+    <string name="done_0">Completed (0)</string>
     <string name="no_tasks_found_create_your_first_task">No tasks found. Create your first task!</string>
     <string name="search_tasks">Search tasks...</string>
     <string name="pending_0">Pending (0)</string>
@@ -28,7 +28,7 @@
     <string name="jasper">Jasper</string>
     <string name="personality_type">Personality Type</string>
     <string name="personality_description_goes_here">Personality description goes here!</string>
-    <string name="mark_as_done">Mark as Done</string>
+    <string name="mark_as_done">Mark as Completed</string>
     <string name="next">Next ▶</string>
     <string name="_1_3">1 / 3</string>
     <string name="previous">◀ Previous</string>
@@ -56,7 +56,7 @@
     <string name="tap_to_add">Tap to add</string>
     <string name="quick_schedule">Quick Schedule</string>
     <string name="calendar">Calendar</string>
-    <string name="done">● Done</string>
+    <string name="done">● Completed</string>
     <string name="overdue">● Overdue</string>
     <string name="pending">● Pending</string>
     <string name="addTask">+</string>

@@ -11,7 +11,7 @@ import java.util.*
  */
 private fun Task.getStatusEmoji(): String {
     return when (this.Status) {
-        com.cheermateapp.data.model.Status.Done -> "✅"
+        com.cheermateapp.data.model.Status.Completed -> "✅"
         com.cheermateapp.data.model.Status.Pending -> "⏳"
         com.cheermateapp.data.model.Status.InProgress -> "🔄"
         com.cheermateapp.data.model.Status.Cancelled -> "❌"
@@ -26,7 +26,7 @@ fun Task.getStatusColor(): Int {
     return when (this.Status) {
         com.cheermateapp.data.model.Status.Pending -> Color.parseColor("#FFA500") // Orange
         com.cheermateapp.data.model.Status.InProgress -> Color.BLUE
-        com.cheermateapp.data.model.Status.Done -> Color.GREEN
+        com.cheermateapp.data.model.Status.Completed -> Color.GREEN
         com.cheermateapp.data.model.Status.Cancelled -> Color.GRAY
         com.cheermateapp.data.model.Status.OverDue -> Color.RED
     }
@@ -131,7 +131,7 @@ fun Task.getStatusText(): String {
     return when (this.Status) {
         com.cheermateapp.data.model.Status.Pending -> "⏳ Pending"
         com.cheermateapp.data.model.Status.InProgress -> "🔄 In Progress"
-        com.cheermateapp.data.model.Status.Done -> "✅ Done"
+        com.cheermateapp.data.model.Status.Completed -> "✅ Done"
         com.cheermateapp.data.model.Status.Cancelled -> "❌ Cancelled"
         com.cheermateapp.data.model.Status.OverDue -> "🔴 Overdue"
     }
@@ -184,7 +184,7 @@ private fun isSameDay(cal1: Calendar, cal2: Calendar): Boolean {
  */
 fun Task.getCompletionPercentage(): Int {
     return when (this.Status) {
-        com.cheermateapp.data.model.Status.Done -> 100
+        com.cheermateapp.data.model.Status.Completed -> 100
         com.cheermateapp.data.model.Status.Pending -> this.TaskProgress
         com.cheermateapp.data.model.Status.InProgress -> this.TaskProgress
         com.cheermateapp.data.model.Status.OverDue -> this.TaskProgress
@@ -196,14 +196,14 @@ fun Task.getCompletionPercentage(): Int {
  * Check if task is completed
  */
 fun Task.isCompleted(): Boolean {
-    return this.Status == com.cheermateapp.data.model.Status.Done
+    return this.Status == com.cheermateapp.data.model.Status.Completed
 }
 
 /**
  * Check if task is active (not completed or cancelled)
  */
 fun Task.isActive(): Boolean {
-    return this.Status != com.cheermateapp.data.model.Status.Done && this.Status != com.cheermateapp.data.model.Status.Cancelled
+    return this.Status != com.cheermateapp.data.model.Status.Completed && this.Status != com.cheermateapp.data.model.Status.Cancelled
 }
 
 /**

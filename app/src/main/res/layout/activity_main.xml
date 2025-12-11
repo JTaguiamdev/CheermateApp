@@ -185,10 +185,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
                 android:background="@drawable/bg_card_glass_hover"
-                android:clickable="true"
                 android:elevation="2dp"
-                android:focusable="true"
-                android:foreground="?attr/selectableItemBackground"
                 android:orientation="vertical"
                 android:padding="16dp"
                 android:stateListAnimator="@animator/card_elevation_state">
@@ -265,6 +262,7 @@
                         android:orientation="vertical"
                         android:padding="12dp">
                         <TextView
+                            android:id="@+id/tvStatTotalCount"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:fontFamily="@font/sf_pro_rounded_bold"
@@ -280,7 +278,7 @@
                             android:textSize="12sp" />
                     </LinearLayout>
 
-                    <!-- Done -->
+                    <!-- Completed -->
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="80dp"
@@ -292,6 +290,7 @@
                         android:padding="12dp">
 
                         <TextView
+                            android:id="@+id/tvStatCompletedCount"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:fontFamily="@font/sf_pro_rounded_bold"
@@ -303,7 +302,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:fontFamily="@font/sf_pro_rounded_regular"
-                            android:text="Done"
+                            android:text="Completed"
                             android:textColor="@color/text_secondary_white_70"
                             android:textSize="12sp" />
                     </LinearLayout>
@@ -319,6 +318,7 @@
                         android:orientation="vertical"
                         android:padding="12dp">
                         <TextView
+                            android:id="@+id/tvStatTodayCount"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:fontFamily="@font/sf_pro_rounded_bold"
@@ -334,7 +334,7 @@
                             android:textSize="12sp" />
                     </LinearLayout>
 
-                    <!-- Overdue -->
+                    <!-- Pending -->
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="80dp"
@@ -345,6 +345,7 @@
                         android:orientation="vertical"
                         android:padding="12dp">
                         <TextView
+                            android:id="@+id/tvStatPendingCount"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:fontFamily="@font/sf_pro_rounded_bold"

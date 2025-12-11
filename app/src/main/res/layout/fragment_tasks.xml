@@ -135,7 +135,7 @@
                 android:fontFamily="@font/sf_pro_rounded_bold"
                 android:paddingHorizontal="12dp"
                 android:paddingVertical="6dp"
-                android:layout_marginStart="13dp"
+                android:layout_marginStart="5dp"
                 android:text="@string/all_0"
                 android:textColor="@android:color/white"
                 android:textSize="12sp" />

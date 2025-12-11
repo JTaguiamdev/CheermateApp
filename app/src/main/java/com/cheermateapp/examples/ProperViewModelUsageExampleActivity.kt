@@ -94,7 +94,7 @@ class ProperViewModelUsageExampleActivity : AppCompatActivity() {
             },
             onCompleteClick = { task ->
                 // Mark task as completed
-                taskViewModel.updateTask(task.copy(Status = Status.Done))
+                taskViewModel.updateTask(task.copy(Status = Status.Completed))
             }
         )
         

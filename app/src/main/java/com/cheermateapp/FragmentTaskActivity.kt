@@ -53,6 +53,7 @@ class FragmentTaskActivity : AppCompatActivity() {
     private var progressSubtitle: TextView? = null
     private var progressPercent: TextView? = null
     private var progressCompleted: View? = null
+    private var progressInProgress: View? = null
 
     private var currentFilter = FilterType.ALL
     private var userId: Int = 0
@@ -61,7 +62,7 @@ class FragmentTaskActivity : AppCompatActivity() {
     private var filteredTasks: List<Task> = emptyList()
 
     enum class FilterType {
-        ALL, TODAY, PENDING, DONE
+        ALL, TODAY, PENDING, COMPLETED
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -172,6 +173,7 @@ class FragmentTaskActivity : AppCompatActivity() {
             progressSubtitle = findViewById(R.id.progressSubtitle)
             progressPercent = findViewById(R.id.progressPercent)
             progressCompleted = findViewById(R.id.progressCompleted)
+            progressInProgress = findViewById(R.id.progressInProgress)
 
             // Setup RecyclerView
             recyclerViewTasks.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(this)
@@ -239,7 +241,7 @@ class FragmentTaskActivity : AppCompatActivity() {
 
             tabDone.setOnClickListener {
                 android.util.Log.d("FragmentTaskActivity", "🔍 DONE tab clicked")
-                setFilter(FilterType.DONE)
+                setFilter(FilterType.COMPLETED)
                 updateTabSelection(tabDone)
             }
 
@@ -350,7 +352,7 @@ class FragmentTaskActivity : AppCompatActivity() {
             com.cheermateapp.data.model.Status.Pending -> "⏳ Pending"
             com.cheermateapp.data.model.Status.InProgress -> "🔄 In Progress"
             com.cheermateapp.data.model.Status.OverDue -> "🔴 Overdue"
-            com.cheermateapp.data.model.Status.Done -> "✅ Done"
+            com.cheermateapp.data.model.Status.Completed -> "✅ Completed"
             com.cheermateapp.data.model.Status.Cancelled -> "❌ Cancelled"
         }
     }
@@ -395,7 +397,7 @@ class FragmentTaskActivity : AppCompatActivity() {
             com.cheermateapp.data.model.Status.Pending -> "⏳"
             com.cheermateapp.data.model.Status.InProgress -> "🔄"
             com.cheermateapp.data.model.Status.OverDue -> "🔴"
-            com.cheermateapp.data.model.Status.Done -> "✅"
+            com.cheermateapp.data.model.Status.Completed -> "✅"
             com.cheermateapp.data.model.Status.Cancelled -> "❌"
         }
     }
@@ -429,7 +431,7 @@ class FragmentTaskActivity : AppCompatActivity() {
                 FilterType.ALL -> "📋 No tasks available\n\nTap the + button to create your first task!"
                 FilterType.TODAY -> "📅 No tasks due today\n\nGreat! You're all caught up for today!"
                 FilterType.PENDING -> "⏳ No pending tasks\n\nAll taskgit s are either completed or not yet assigned!"
-                FilterType.DONE -> "✅ No completed tasks yet\n\nStart completing tasks to see them here!"
+                FilterType.COMPLETED -> "✅ No completed tasks yet\n\nStart completing tasks to see them here!"
             }
 
             tvEmptyState.text = emptyMessage
@@ -569,7 +571,7 @@ class FragmentTaskActivity : AppCompatActivity() {
                         Title = "Buy Groceries",
                         Description = "Weekly shopping list",
                         Priority = Priority.Low,
-                        Status = Status.Done,
+                        Status = Status.Completed,
                         TaskProgress = 100,
                         DueAt = "2025-09-28",
                         DueTime = "16:00",
@@ -633,10 +635,11 @@ class FragmentTaskActivity : AppCompatActivity() {
                             android.util.Log.d("FragmentTaskActivity", "🔍 Getting PENDING tasks...")
                             db.taskDao().getPendingTasks(userId)
                         }
-                        FilterType.DONE -> {
+                        FilterType.COMPLETED -> {
                             android.util.Log.d("FragmentTaskActivity", "🔍 Getting COMPLETED tasks...")
                             db.taskDao().getCompletedTasks(userId)
                         }
+                        else -> emptyList()
                     }
                 }
 
@@ -670,7 +673,7 @@ class FragmentTaskActivity : AppCompatActivity() {
                         "all" to db.taskDao().getAllTasksCount(userId),
                         "today" to db.taskDao().getTodayTasksCount(userId, todayStr),
                         "pending" to db.taskDao().getPendingTasksCount(userId),
-                        "done" to db.taskDao().getCompletedTasksCount(userId),
+                        "completed" to db.taskDao().getCompletedTasksCount(userId),
                         "inProgress" to db.taskDao().getInProgressTasksCount(userId)
                     )
                 }
@@ -678,13 +681,13 @@ class FragmentTaskActivity : AppCompatActivity() {
                 tabAll.text = "All (${counts["all"]})"
                 tabToday.text = "Today (${counts["today"]})"
                 tabPending.text = "Pending (${counts["pending"]})"
-                tabDone.text = "Done (${counts["done"]})"
+                tabDone.text = "Completed (${counts["completed"]})"
 
                 val totalTasks = counts["all"] ?: 0
                 tvTasksSub.text = "$totalTasks total tasks"
 
                 // ✅ Update progress card
-                updateProgressCard(counts["done"] ?: 0, counts["inProgress"] ?: 0, counts["all"] ?: 0)
+                updateProgressCard(counts["completed"] ?: 0, counts["inProgress"] ?: 0, counts["all"] ?: 0)
 
             } catch (e: Exception) {
                 android.util.Log.e("FragmentTaskActivity", "Error updating tab counts", e)
@@ -701,21 +704,18 @@ class FragmentTaskActivity : AppCompatActivity() {
             progressSubtitle?.text = "$completed of $total tasks completed"
             progressPercent?.text = "$percentage%"
 
-            val progressCompleted = findViewById<View>(R.id.progressCompleted)
-            val progressInProgress = findViewById<View>(R.id.progressInProgress)
-
             // Update progress bar fill using weight
-            progressCompleted?.layoutParams?.let { params ->
-                if (params is LinearLayout.LayoutParams) {
+            progressCompleted?.let { progressView ->
+                (progressView.layoutParams as? LinearLayout.LayoutParams)?.also { params ->
                     params.weight = percentage.coerceAtLeast(0).toFloat()
-                    progressCompleted.layoutParams = params
+                    progressView.layoutParams = params
                 }
             }
 
-            progressInProgress?.layoutParams?.let { params ->
-                if (params is LinearLayout.LayoutParams) {
+            progressInProgress?.let { progressView ->
+                (progressView.layoutParams as? LinearLayout.LayoutParams)?.also { params ->
                     params.weight = inProgressPercentage.coerceAtLeast(0).toFloat()
-                    progressInProgress.layoutParams = params
+                    progressView.layoutParams = params
                 }
             }
 
@@ -846,15 +846,17 @@ class FragmentTaskActivity : AppCompatActivity() {
                             Status.Pending -> 1
                             Status.InProgress -> 2
                             Status.OverDue -> 3
-                            Status.Done -> 4
+                            Status.Completed -> 4
                             Status.Cancelled -> 5
+                            else -> 0
                         }
                         val status2 = when (task2.Status) {
                             Status.Pending -> 1
                             Status.InProgress -> 2
                             Status.OverDue -> 3
-                            Status.Done -> 4
+                            Status.Completed -> 4
                             Status.Cancelled -> 5
+                            else -> 0
                         }
                         status1.compareTo(status2)
                     }
@@ -961,7 +963,7 @@ class FragmentTaskActivity : AppCompatActivity() {
             }
             
             // Update button state based on task status
-            if (task.Status == Status.Done) {
+            if (task.Status == Status.Completed) {
                 btnComplete.text = "✅ Completed"
                 btnComplete.alpha = 0.5f
                 btnComplete.isEnabled = false
@@ -1066,7 +1068,7 @@ class FragmentTaskActivity : AppCompatActivity() {
             val currentStatusIndex = when (task.Status) {
                 Status.Pending -> 0
                 Status.InProgress -> 1
-                Status.Done -> 2
+                Status.Completed -> 2
                 Status.Cancelled -> 3
                 Status.OverDue -> 0 // Default to Pending for OverDue
             }
@@ -1221,7 +1223,7 @@ class FragmentTaskActivity : AppCompatActivity() {
                 val statusEnum = when (status.uppercase()) {
                     "PENDING" -> Status.Pending
                     "INPROGRESS" -> Status.InProgress
-                    "DONE" -> Status.Done
+                    "COMPLETED" -> Status.Completed
                     "CANCELLED" -> Status.Cancelled
                     else -> Status.Pending
                 }

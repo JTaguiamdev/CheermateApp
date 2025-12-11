@@ -211,7 +211,7 @@ class MainActivity : AppCompatActivity() {
                 // Observe DB changes for live daily progress bar updates only on Home
                 findViewById<com.google.android.material.bottomnavigation.BottomNavigationView>(R.id.bottomNav)?.let { nav ->
                     if (nav.selectedItemId == R.id.nav_home) {
-                        startObserveTaskChangesForProgressBar()
+                        startObserveTaskChanges()
                     }
                 }
 
@@ -253,7 +253,7 @@ class MainActivity : AppCompatActivity() {
 
     // ✅ FIXED - Use only existing status values
     private fun isTaskOverdue(task: Task, currentTime: Long): Boolean {
-        if (task.Status == Status.Done) {
+        if (task.Status == Status.Completed) {
             return false // Already completed
         }
 
@@ -318,7 +318,7 @@ class MainActivity : AppCompatActivity() {
             Status.InProgress -> "⏳"
             Status.OverDue -> "🔄"
             Status.Cancelled -> "❌"
-            Status.Done -> "✅"
+            Status.Completed -> "✅"
         }
     }
 
@@ -537,7 +537,7 @@ class MainActivity : AppCompatActivity() {
             // Refresh home statistics, recent tasks, and progress when showing Home
             loadTaskStatistics()
             loadRecentTasks()
-            startObserveTaskChangesForProgressBar()
+            startObserveTaskChanges()
             
         } catch (e: Exception) {
             android.util.Log.e("MainActivity", "Error showing home screen", e)
@@ -691,7 +691,7 @@ class MainActivity : AppCompatActivity() {
             }
 
             tabDone?.setOnClickListener {
-                tasksViewModel.setTaskFilter("DONE")
+                tasksViewModel.setTaskFilter("COMPLETED")
                 updateTaskTabSelection(tabDone)
             }
 
@@ -718,7 +718,7 @@ class MainActivity : AppCompatActivity() {
                     tvEmptyState?.text = when (tasksViewModel.taskFilter.value) {
                         "TODAY" -> "No tasks for today\n\nTap the + button to create your first task"
                         "PENDING" -> "No pending tasks\n\nAll caught up!"
-                        "DONE" -> "No completed tasks yet\n\nComplete a task to see it here"
+                        "COMPLETED" -> "No completed tasks yet\n\nComplete a task to see it here"
                         else -> "No tasks available\n\nTap the + button to create your first task"
                     }
                 } else {
@@ -746,7 +746,7 @@ class MainActivity : AppCompatActivity() {
         }
         lifecycleScope.launch {
             tasksViewModel.completedTasksCount.collectLatest {
-                tabDone.text = "Done ($it)"
+                tabDone.text = "Completed ($it)"
             }
         }
     }
@@ -891,13 +891,13 @@ class MainActivity : AppCompatActivity() {
             try {
                 val db = AppDb.get(this@MainActivity)
                 val updatedTask = task.copy(
-                    Status = Status.Done,
+                    Status = Status.Completed,
                     TaskProgress = 100
                 )
                 withContext(Dispatchers.IO) {
                     db.taskDao().update(updatedTask)
                 }
-                ToastManager.showToast(this@MainActivity, "✅ Task marked as done!", Toast.LENGTH_SHORT)
+                ToastManager.showToast(this@MainActivity, "✅ Task marked as completed!", Toast.LENGTH_SHORT)
             } catch (e: Exception) {
                 android.util.Log.e("MainActivity", "Error marking task as done", e)
                 ToastManager.showToast(this@MainActivity, "Failed to update task", Toast.LENGTH_SHORT)
@@ -972,7 +972,7 @@ class MainActivity : AppCompatActivity() {
             val currentStatusIndex = when (task.Status) {
                 Status.Pending -> 0
                 Status.InProgress -> 1
-                Status.Done -> 2
+                Status.Completed -> 2
                 Status.Cancelled -> 3
                 Status.OverDue -> 0 // Default to Pending for OverDue
             }
@@ -1080,12 +1080,17 @@ class MainActivity : AppCompatActivity() {
                     else -> Priority.Medium
                 }
 
-                val statusEnum = when (status.uppercase()) {
+                var statusEnum = when (status.uppercase()) {
                     "PENDING" -> Status.Pending
                     "INPROGRESS" -> Status.InProgress
-                    "DONE" -> Status.Done
+                    "DONE" -> Status.Completed
                     "CANCELLED" -> Status.Cancelled
                     else -> Status.Pending
+                }
+
+                // If progress is 100, force status to Done
+                if (progress == 100) {
+                    statusEnum = Status.Completed
                 }
 
                 val updatedTask = originalTask.copy(
@@ -1193,14 +1198,14 @@ class MainActivity : AppCompatActivity() {
                             com.cheermateapp.data.model.Status.Pending -> 1
                             com.cheermateapp.data.model.Status.InProgress -> 2
                             com.cheermateapp.data.model.Status.OverDue -> 3
-                            com.cheermateapp.data.model.Status.Done -> 4
+                            com.cheermateapp.data.model.Status.Completed -> 4
                             com.cheermateapp.data.model.Status.Cancelled -> 5
                         }
                         val status2 = when (task2.Status) {
                             com.cheermateapp.data.model.Status.Pending -> 1
                             com.cheermateapp.data.model.Status.InProgress -> 2
                             com.cheermateapp.data.model.Status.OverDue -> 3
-                            com.cheermateapp.data.model.Status.Done -> 4
+                            com.cheermateapp.data.model.Status.Completed -> 4
                             com.cheermateapp.data.model.Status.Cancelled -> 5
                         }
                         status1.compareTo(status2)
@@ -1824,9 +1829,7 @@ class MainActivity : AppCompatActivity() {
             }
 
 
-            findViewById<View>(R.id.cardPersonality)?.setOnClickListener {
-                navigateToSettings() // Navigate to settings instead of handling here
-            }
+
 
             findViewById<TextView>(R.id.btnMotivate)?.setOnClickListener {
                 showMotivationalMessage()
@@ -2555,7 +2558,7 @@ class MainActivity : AppCompatActivity() {
 
                 updateStatisticsDisplay(stats)
                 // ✅ Update progress bar with today's tasks progress
-                // updateProgressDisplay(stats["todayCompleted"] ?: 0, stats["todayInProgress"] ?: 0, stats["today"] ?: 0)
+                updateProgressDisplay(stats["todayCompleted"] ?: 0, stats["todayInProgress"] ?: 0, stats["today"] ?: 0)
 
                 android.util.Log.d("MainActivity", "✅ Dashboard statistics loaded")
 
@@ -2577,25 +2580,10 @@ class MainActivity : AppCompatActivity() {
 
     private fun updateGridStatistics(stats: Map<String, Int>) {
         try {
-            val cardStats = findViewById<LinearLayout>(R.id.cardStats)
-            val gridLayout = cardStats?.getChildAt(0) as? GridLayout
-
-            if (gridLayout != null) {
-                for (i in 0 until gridLayout.childCount) {
-                    val cellLayout = gridLayout.getChildAt(i) as? LinearLayout
-                    if (cellLayout != null && cellLayout.childCount >= 2) {
-                        val valueTextView = cellLayout.getChildAt(0) as? TextView
-                        val labelTextView = cellLayout.getChildAt(1) as? TextView
-
-                        when (labelTextView?.text?.toString()?.lowercase()) {
-                            "total" -> valueTextView?.text = stats["total"].toString()
-                            "done" -> valueTextView?.text = stats["completed"].toString()
-                            "today" -> valueTextView?.text = stats["today"].toString()
-                            "pending" -> valueTextView?.text = stats["pending"].toString()
-                        }
-                    }
-                }
-            }
+            findViewById<TextView>(R.id.tvStatTotalCount)?.text = stats["total"].toString()
+            findViewById<TextView>(R.id.tvStatCompletedCount)?.text = stats["completed"].toString()
+            findViewById<TextView>(R.id.tvStatTodayCount)?.text = stats["today"].toString()
+            findViewById<TextView>(R.id.tvStatPendingCount)?.text = stats["pending"].toString()
         } catch (e: Exception) {
             android.util.Log.e("MainActivity", "Error updating grid statistics", e)
         }
@@ -2811,7 +2799,7 @@ class MainActivity : AppCompatActivity() {
             tvTaskStatus.text = when (task.Status) {
                 com.cheermateapp.data.model.Status.Pending -> "⏳ Pending"
                 com.cheermateapp.data.model.Status.InProgress -> "🔄 In Progress"
-                com.cheermateapp.data.model.Status.Done -> "✅ Done"
+                com.cheermateapp.data.model.Status.Completed -> "✅ Completed"
                 com.cheermateapp.data.model.Status.OverDue -> "🔴 Overdue"
                 com.cheermateapp.data.model.Status.Cancelled -> "❌ Cancelled"
             }
@@ -2841,7 +2829,7 @@ class MainActivity : AppCompatActivity() {
             }
 
             // 8. Due Date
-            if (task.Status == com.cheermateapp.data.model.Status.Done) {
+            if (task.Status == com.cheermateapp.data.model.Status.Completed) {
                 tvTaskDueDate.visibility = View.GONE
             } else {
                 tvTaskDueDate.visibility = View.VISIBLE
@@ -2851,7 +2839,7 @@ class MainActivity : AppCompatActivity() {
 
             // 9. Button States based on Task Status
             when (task.Status) {
-                com.cheermateapp.data.model.Status.Done -> {
+                com.cheermateapp.data.model.Status.Completed -> {
                     btnComplete.text = "✅ Completed"
                     btnComplete.isClickable = false
                     btnComplete.alpha = 0.6f
@@ -2882,7 +2870,7 @@ class MainActivity : AppCompatActivity() {
 
             // Complete Button
             btnComplete.setOnClickListener {
-                if (task.Status != com.cheermateapp.data.model.Status.Done && 
+                if (task.Status != com.cheermateapp.data.model.Status.Completed && 
                     task.Status != com.cheermateapp.data.model.Status.Cancelled) {
                     onTaskDone(task)
                 }
@@ -2961,7 +2949,7 @@ class MainActivity : AppCompatActivity() {
                 text = when (task.Status) {
                     Status.Pending -> "⏳ Pending"
                     Status.InProgress -> "🔄 In Progress"
-                    Status.Done -> "✅ Done"
+                    Status.Completed -> "✅ Done"
                     Status.OverDue -> "🔴 Overdue"
                     Status.Cancelled -> "❌ Cancelled"
                 }
@@ -3006,7 +2994,7 @@ class MainActivity : AppCompatActivity() {
         AlertDialog.Builder(this)
             .setTitle("Task Details")
             .setMessage(message)
-            .setPositiveButton("Mark as Done") { _, _ ->
+            .setPositiveButton("Mark as Completed") { _, _ ->
                 onTaskDone(task)
             }
             .setNeutralButton("Edit") { _, _ ->
@@ -3077,6 +3065,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onPause() {
         super.onPause()
+        stopObserveTaskChanges()
     }
 
     override fun onDestroy() {
@@ -3084,40 +3073,53 @@ class MainActivity : AppCompatActivity() {
     }
 
     // ✅ OBSERVE TASK CHANGES FOR LIVE PROGRESS BAR UPDATES ON HOME SCREEN
-        private var progressBarObserverJob: kotlinx.coroutines.Job? = null
-        private fun startObserveTaskChangesForProgressBar() {
-            progressBarObserverJob?.cancel()
-            progressBarObserverJob = lifecycleScope.launch {
-                try {
-                    val db = AppDb.get(this@MainActivity)
-    
-                    val today = Calendar.getInstance()
-                    val todayStr = dateToString(today.time)
-    
-                    // Observe today total, completed, and in-progress tasks
-                    kotlinx.coroutines.flow.combine(
-                        db.taskDao().getTodayTasksCountFlow(userId, todayStr),
-                        db.taskDao().getCompletedTodayTasksCountFlow(userId, todayStr),
-                        db.taskDao().getInProgressTodayTasksCountFlow(userId, todayStr)
-                    ) { totalToday, completedToday, inProgressToday ->
-                        Triple(totalToday, completedToday, inProgressToday)
-                    }.collect { (totalToday, completedToday, inProgressToday) ->
-                        // Update UI on main thread
-                        withContext(Dispatchers.Main) {
-                            updateProgressDisplay(completedToday, inProgressToday, totalToday)
-                            android.util.Log.d(
-                                "MainActivity",
-                                "🔄 Live progress updated: completed=$completedToday, inProgress=$inProgressToday, total=$totalToday"
-                            )
-                        }
+    private var taskObserverJob: kotlinx.coroutines.Job? = null
+    private fun startObserveTaskChanges() {
+        taskObserverJob?.cancel()
+        taskObserverJob = lifecycleScope.launch {
+            try {
+                val db = AppDb.get(this@MainActivity)
+                val todayStr = dateToString(Calendar.getInstance().time)
+
+                val flows = listOf(
+                    db.taskDao().getAllTasksCountFlow(userId),
+                    db.taskDao().getCompletedTasksCountFlow(userId),
+                    db.taskDao().getTodayTasksCountFlow(userId, todayStr),
+                    db.taskDao().getPendingTasksCountFlow(userId),
+                    db.taskDao().getInProgressTodayTasksCountFlow(userId, todayStr),
+                    db.taskDao().getCompletedTodayTasksCountFlow(userId, todayStr)
+                )
+
+                kotlinx.coroutines.flow.combine(flows) { array ->
+                    mapOf(
+                        "total" to array[0],
+                        "completed" to array[1],
+                        "today" to array[2],
+                        "pending" to array[3],
+                        "inProgressToday" to array[4],
+                        "completedToday" to array[5]
+                    )
+                }.collect { stats ->
+                    // Update UI on main thread
+                    withContext(Dispatchers.Main) {
+                        // Update the grid statistics
+                        updateStatisticsDisplay(stats)
+
+                        // Update the progress bar display
+                        updateProgressDisplay(stats["completedToday"] ?: 0, stats["inProgressToday"] ?: 0, stats["today"] ?: 0)
+                        android.util.Log.d(
+                            "MainActivity",
+                            "🔄 Live stats updated: $stats"
+                        )
                     }
-                } catch (e: Exception) {
-                    android.util.Log.e("MainActivity", "Error observing task changes for progress bar", e)
                 }
+            } catch (e: Exception) {
+                android.util.Log.e("MainActivity", "Error observing task changes", e)
             }
         }
-        private fun stopObserveTaskChangesForProgressBar() {
-            progressBarObserverJob?.cancel()
-            progressBarObserverJob = null
+    }
+        private fun stopObserveTaskChanges() {
+            taskObserverJob?.cancel()
+            taskObserverJob = null
         }
     }
