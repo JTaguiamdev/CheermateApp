@@ -2580,25 +2580,10 @@ class MainActivity : AppCompatActivity() {
 
     private fun updateGridStatistics(stats: Map<String, Int>) {
         try {
-            val cardStats = findViewById<LinearLayout>(R.id.cardStats)
-            val gridLayout = cardStats?.getChildAt(0) as? GridLayout
-
-            if (gridLayout != null) {
-                for (i in 0 until gridLayout.childCount) {
-                    val cellLayout = gridLayout.getChildAt(i) as? LinearLayout
-                    if (cellLayout != null && cellLayout.childCount >= 2) {
-                        val valueTextView = cellLayout.getChildAt(0) as? TextView
-                        val labelTextView = cellLayout.getChildAt(1) as? TextView
-
-                        when (labelTextView?.text?.toString()?.lowercase()) {
-                            "total" -> valueTextView?.text = stats["total"].toString()
-                            "completed" -> valueTextView?.text = stats["completed"].toString()
-                            "today" -> valueTextView?.text = stats["today"].toString()
-                            "pending" -> valueTextView?.text = stats["pending"].toString()
-                        }
-                    }
-                }
-            }
+            findViewById<TextView>(R.id.tvStatTotalCount)?.text = stats["total"].toString()
+            findViewById<TextView>(R.id.tvStatCompletedCount)?.text = stats["completed"].toString()
+            findViewById<TextView>(R.id.tvStatTodayCount)?.text = stats["today"].toString()
+            findViewById<TextView>(R.id.tvStatPendingCount)?.text = stats["pending"].toString()
         } catch (e: Exception) {
             android.util.Log.e("MainActivity", "Error updating grid statistics", e)
         }
@@ -3096,22 +3081,23 @@ class MainActivity : AppCompatActivity() {
                 val db = AppDb.get(this@MainActivity)
                 val todayStr = dateToString(Calendar.getInstance().time)
 
-                // Combine all the flows for real-time updates
-                kotlinx.coroutines.flow.combine(
+                val flows = listOf(
                     db.taskDao().getAllTasksCountFlow(userId),
                     db.taskDao().getCompletedTasksCountFlow(userId),
                     db.taskDao().getTodayTasksCountFlow(userId, todayStr),
                     db.taskDao().getPendingTasksCountFlow(userId),
                     db.taskDao().getInProgressTodayTasksCountFlow(userId, todayStr),
                     db.taskDao().getCompletedTodayTasksCountFlow(userId, todayStr)
-                ) { total: Int, completed: Int, today: Int, pending: Int, inProgressToday: Int, completedToday: Int ->
+                )
+
+                kotlinx.coroutines.flow.combine(flows) { array ->
                     mapOf(
-                        "total" to total,
-                        "completed" to completed,
-                        "today" to today,
-                        "pending" to pending,
-                        "inProgressToday" to inProgressToday,
-                        "completedToday" to completedToday
+                        "total" to array[0],
+                        "completed" to array[1],
+                        "today" to array[2],
+                        "pending" to array[3],
+                        "inProgressToday" to array[4],
+                        "completedToday" to array[5]
                     )
                 }.collect { stats ->
                     // Update UI on main thread

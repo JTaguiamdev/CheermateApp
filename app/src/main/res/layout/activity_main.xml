@@ -262,6 +262,7 @@
                         android:orientation="vertical"
                         android:padding="12dp">
                         <TextView
+                            android:id="@+id/tvStatTotalCount"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:fontFamily="@font/sf_pro_rounded_bold"
@@ -277,7 +278,7 @@
                             android:textSize="12sp" />
                     </LinearLayout>
 
-                    <!-- Done -->
+                    <!-- Completed -->
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="80dp"
@@ -289,6 +290,7 @@
                         android:padding="12dp">
 
                         <TextView
+                            android:id="@+id/tvStatCompletedCount"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:fontFamily="@font/sf_pro_rounded_bold"
@@ -316,6 +318,7 @@
                         android:orientation="vertical"
                         android:padding="12dp">
                         <TextView
+                            android:id="@+id/tvStatTodayCount"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:fontFamily="@font/sf_pro_rounded_bold"
@@ -331,7 +334,7 @@
                             android:textSize="12sp" />
                     </LinearLayout>
 
-                    <!-- Overdue -->
+                    <!-- Pending -->
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="80dp"
@@ -342,6 +345,7 @@
                         android:orientation="vertical"
                         android:padding="12dp">
                         <TextView
+                            android:id="@+id/tvStatPendingCount"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:fontFamily="@font/sf_pro_rounded_bold"
