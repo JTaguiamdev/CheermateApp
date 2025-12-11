@@ -20,10 +20,9 @@ import com.google.gson.Gson
         SubTask::class,
         SecurityQuestion::class,
         UserSecurityAnswer::class,
-        UserSettings::class,
         MessageTemplate::class
     ],
-    version = 37,
+    version = 38,
     exportSchema = false
 )
 @TypeConverters(AppTypeConverters::class)
@@ -33,7 +32,6 @@ abstract class AppDb : RoomDatabase() {
     abstract fun taskDao(): TaskDao
     abstract fun subTaskDao(): SubTaskDao
     abstract fun taskReminderDao(): TaskReminderDao
-    abstract fun userSettingsDao(): UserSettingsDao
     abstract fun securityDao(): SecurityDao
     abstract fun personalityDao(): PersonalityDao
     abstract fun messageTemplateDao(): MessageTemplateDao
@@ -89,32 +87,7 @@ abstract class AppDb : RoomDatabase() {
             db.execSQL("DROP TABLE IF EXISTS TaskTemplate")
         }
 
-        private val MIGRATION_21_22 = createMigration(21, 22) { db ->
-            // Create new UserSettings table
-            db.execSQL("""
-                CREATE TABLE IF NOT EXISTS UserSettings (
-                    UserSettings_ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-                    User_ID INTEGER NOT NULL,
-                    Appearance TEXT,
-                    Notification TEXT,
-                    DataManagement TEXT,
-                    Statistics TEXT,
-                    FOREIGN KEY (User_ID) REFERENCES User(User_ID) ON DELETE CASCADE
-                )
-            """.trimIndent())
 
-            // Create index
-            db.execSQL("CREATE INDEX IF NOT EXISTS index_UserSettings_User_ID ON UserSettings(User_ID)")
-
-            // Migrate data from old Settings table
-            db.execSQL("""
-                INSERT INTO UserSettings (User_ID, Appearance, Notification, DataManagement, Statistics)
-                SELECT User_ID, Appearance, Notification, DataManagement, Statistics FROM Settings
-            """.trimIndent())
-
-            // Drop old table
-            db.execSQL("DROP TABLE IF EXISTS Settings")
-        }
 
         private val MIGRATION_22_23 = createMigration(22, 23) { db ->
             db.execSQL("ALTER TABLE MessageTemplate RENAME COLUMN TextTemplate TO MessageText")
@@ -159,25 +132,7 @@ abstract class AppDb : RoomDatabase() {
             ) { createIndexesForUser(it) }
         }
 
-        private val MIGRATION_25_26 = createMigration(25, 26) { db ->
-            recreateTableWithSchema(db, "UserSettings",
-                createSql = """
-                    CREATE TABLE UserSettings_new (
-                        UserSettings_ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-                        User_ID INTEGER NOT NULL,
-                        Appearance TEXT,
-                        Notification TEXT,
-                        FOREIGN KEY (User_ID) REFERENCES User(User_ID) ON DELETE CASCADE
-                    )
-                """.trimIndent(),
-                copySql = """
-                    INSERT INTO UserSettings_new (UserSettings_ID, User_ID, Appearance, Notification)
-                    SELECT UserSettings_ID, User_ID, Appearance, Notification FROM UserSettings
-                """.trimIndent()
-            ) {
-                it.execSQL("CREATE INDEX IF NOT EXISTS index_UserSettings_User_ID ON UserSettings(User_ID)")
-            }
-        }
+
 
         private val MIGRATION_26_27 = createMigration(26, 27) { db ->
             recreateTableWithSchema(db, "SubTask",
@@ -248,49 +203,9 @@ abstract class AppDb : RoomDatabase() {
             // No schema changes, just version bump for TypeConverter update
         }
 
-        private val MIGRATION_31_32 = createMigration(31, 32) { db ->
-            // Update UserSettings table to match @Embedded structure
-            recreateTableWithSchema(db, "UserSettings",
-                createSql = """
-                    CREATE TABLE UserSettings_new (
-                        UserSettings_ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-                        User_ID INTEGER NOT NULL,
-                        theme TEXT,
-                        enabled INTEGER,
-                        soundEnabled INTEGER,
-                        vibrationEnabled INTEGER,
-                        FOREIGN KEY (User_ID) REFERENCES User(User_ID) ON DELETE CASCADE
-                    )
-                """.trimIndent(),
-                copySql = """
-                    INSERT INTO UserSettings_new (UserSettings_ID, User_ID, theme, enabled, soundEnabled, vibrationEnabled)
-                    SELECT UserSettings_ID, User_ID, 'light', 1, 1, 1 FROM UserSettings
-                """.trimIndent()
-            ) {
-                it.execSQL("CREATE INDEX IF NOT EXISTS index_UserSettings_User_ID ON UserSettings(User_ID)")
-            }
-        }
 
-        private val MIGRATION_32_33 = createMigration(32, 33) { db ->
-            // Update UserSettings table to replace notification fields with single Notification column
-            recreateTableWithSchema(db, "UserSettings",
-                createSql = """
-                    CREATE TABLE UserSettings_new (
-                        UserSettings_ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-                        User_ID INTEGER NOT NULL,
-                        theme TEXT,
-                        Notification TEXT NOT NULL DEFAULT 'On',
-                        FOREIGN KEY (User_ID) REFERENCES User(User_ID) ON DELETE CASCADE
-                    )
-                """.trimIndent(),
-                copySql = """
-                    INSERT INTO UserSettings_new (UserSettings_ID, User_ID, theme, Notification)
-                    SELECT UserSettings_ID, User_ID, theme, 'On' FROM UserSettings
-                """.trimIndent()
-            ) {
-                it.execSQL("CREATE INDEX IF NOT EXISTS index_UserSettings_User_ID ON UserSettings(User_ID)")
-            }
-        }
+
+
 
         private val MIGRATION_33_34 = createMigration(33, 34) { db ->
             recreateTableWithSchema(db, "User",
@@ -445,6 +360,10 @@ abstract class AppDb : RoomDatabase() {
             }
         }
 
+        private val MIGRATION_37_38 = createMigration(37, 38) { db ->
+            db.execSQL("DROP TABLE IF EXISTS UserSettings")
+        }
+
         private fun buildDatabase(appContext: Context): AppDb {
             return Room.databaseBuilder(
                 appContext,
@@ -454,21 +373,15 @@ abstract class AppDb : RoomDatabase() {
                 .addMigrations(
                     MIGRATION_19_20,
                     MIGRATION_20_21,
-                    MIGRATION_21_22,
                     MIGRATION_22_23,
                     MIGRATION_23_24,
                     MIGRATION_24_25,
-                    MIGRATION_25_26,
                     MIGRATION_26_27,
-                    MIGRATION_27_28,
-                    MIGRATION_29_30,
-                    MIGRATION_30_31,
-                    MIGRATION_31_32,
-                    MIGRATION_32_33,
                     MIGRATION_33_34,
                     MIGRATION_34_35,
                     MIGRATION_35_36,
-                    MIGRATION_36_37
+                    MIGRATION_36_37,
+                    MIGRATION_37_38
                 )
                 .addTypeConverter(AppTypeConverters(Gson()))
                 .build()

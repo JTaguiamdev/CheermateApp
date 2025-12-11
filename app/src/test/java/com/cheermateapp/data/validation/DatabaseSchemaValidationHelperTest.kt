@@ -22,7 +22,7 @@ class DatabaseSchemaValidationHelperTest {
         assertTrue("Should contain SubTask", entities.any { it.simpleName == "SubTask" })
         assertTrue("Should contain TaskReminder", entities.any { it.simpleName == "TaskReminder" })
         assertTrue("Should contain TaskDependency", entities.any { it.simpleName == "TaskDependency" })
-        assertTrue("Should contain UserSettings", entities.any { it.simpleName == "UserSettings" })
+
         assertTrue("Should contain Personality", entities.any { it.simpleName == "Personality" })
         assertTrue("Should contain SecurityQuestion", entities.any { it.simpleName == "SecurityQuestion" })
     }

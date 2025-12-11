@@ -835,26 +835,12 @@ class MainActivity : AppCompatActivity() {
                     .putBoolean("ignore_next_toggle", true)
                     .apply()
                 com.cheermateapp.util.ThemeManager.setThemeMode(this, newMode)
-                // Persist to UserSettings.Appearance
-                lifecycleScope.launch {
-                    try {
-                        val db = com.cheermateapp.data.db.AppDb.get(this@MainActivity)
-                        val current = withContext(kotlinx.coroutines.Dispatchers.IO) { db.userSettingsDao().getSettingsByUser(userId) }
-                        val appearance = com.cheermateapp.data.model.Appearance(theme = if (isChecked) "dark" else "light")
-                        val newSettings = if (current != null) {
-                            current.copy(Appearance = appearance)
-                        } else {
-                            com.cheermateapp.data.model.UserSettings(User_ID = userId, Appearance = appearance)
-                        }
-                        withContext(kotlinx.coroutines.Dispatchers.IO) { db.userSettingsDao().upsert(newSettings) }
-                    } catch (_: Exception) {}
-                }
                 // Single controlled recreate to apply theme
                 recreate()
             }
 
             switchNotifications?.setOnCheckedChangeListener { _, isChecked ->
-                updateNotificationSetting(isChecked)
+                com.cheermateapp.data.SettingsManager.setNotificationsEnabled(this, isChecked)
                 ToastManager.showToast(
                     this,
                     if (isChecked) "🔔 Notifications enabled" else "🔕 Notifications disabled",
@@ -1296,9 +1282,7 @@ class MainActivity : AppCompatActivity() {
                     )
                 }
 
-                val userSettings = withContext(Dispatchers.IO) {
-                    db.userSettingsDao().getSettingsByUser(userId)
-                }
+
 
                 // Build display values
                 val profileName: String
@@ -1331,7 +1315,7 @@ class MainActivity : AppCompatActivity() {
                     statTotal = stats["total"] ?: 0,
                     statCompleted = stats["completed"] ?: 0,
                     statSuccess = successRate,
-                    notificationEnabled = userSettings?.Notification?.equals("On", ignoreCase = true) ?: true
+                    notificationEnabled = com.cheermateapp.data.SettingsManager.isNotificationsEnabled(this@MainActivity)
                 )
 
                 settingsCache = newCache
@@ -1736,31 +1720,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun updateNotificationSetting(enabled: Boolean) {
-        uiScope.launch {
-            try {
-                val db = AppDb.get(this@MainActivity)
-                withContext(Dispatchers.IO) {
-                    val userSettingsDao = db.userSettingsDao()
-                    var settings = userSettingsDao.getSettingsByUser(userId)
-                    if (settings == null) {
-                        settings = com.cheermateapp.data.model.UserSettings(User_ID = userId)
-                    }
-                    
-                    val notificationValue = if (enabled) "On" else "Off"
-                    settings = settings.copy(Notification = notificationValue)
-                    userSettingsDao.upsert(settings)
-                }
-                
-                // Update cache to reflect the change
-                settingsCache = settingsCache?.copy(notificationEnabled = enabled)
-                
-            } catch (e: Exception) {
-                android.util.Log.e("MainActivity", "Error updating notification setting", e)
-                ToastManager.showToast(this@MainActivity, "Error updating notification setting", Toast.LENGTH_SHORT)
-            }
-        }
-    }
+
 
     private fun showLogoutConfirmation() {
         AlertDialog.Builder(this)

@@ -582,7 +582,7 @@ class RoomSchemaValidator : SchemaValidator {
         val orphanedEntities = allEntities - referencedEntities
         
         // Filter out entities that are intentionally standalone (like User, UserSettings, etc.)
-        val intentionallyStandalone = setOf("User", "UserSettings", "Personality", "SecurityQuestion")
+        val intentionallyStandalone = setOf("User", "Personality", "SecurityQuestion")
         
         orphanedEntities.forEach { entity ->
             val entityName = entity.simpleName ?: "Unknown"
