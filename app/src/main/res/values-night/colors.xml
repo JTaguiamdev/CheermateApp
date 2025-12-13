@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="black">#FFFFFFFF</color> <!-- White in dark mode -->
-    <color name="white">#FF000000</color> <!-- Black in dark mode -->
+    <color name="white">#FFCCCCCC</color> <!-- Black in dark mode -->
     <color name="gradient_start">#FFA667C3</color>
     <color name="gradient_end">#FF00B4D8</color>
 
