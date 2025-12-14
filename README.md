@@ -87,5 +87,28 @@ A comprehensive Android task management application built with Kotlin, featuring
 ### Installation
 1. Clone the repository
 
+### 📱 For Testers - Get APK
+
+#### Option 1: GitHub Releases (Recommended)
+1. **Visit**: [Releases Page](https://github.com/YOUR_USERNAME/CheermateApp/releases)
+2. **Download**: Latest APK from release assets
+3. **Install**: Follow instructions in release notes
+
+#### Option 2: Build Locally
+```powershell
+# Quick PowerShell build
+.\scripts\quick-build-apk.ps1
+
+# OR Windows batch build  
+.\scripts\generate-test-apk.bat
+```
+
+#### Option 3: Automatic Builds
+- **Every push** to main/develop triggers automatic APK build
+- **Check Actions tab** for build progress
+- **APKs auto-published** to releases page
+
+📋 **See [scripts/README.md](scripts/README.md) for detailed build instructions**
+
 ---\n
 **Last Updated:** December 2025

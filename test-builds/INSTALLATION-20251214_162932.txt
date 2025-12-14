@@ -1,0 +1,70 @@
+========================================
+    CheermateApp Test Installation
+========================================
+
+📱 APK File: CheermateApp-v1.5-test-20251214_162932.apk
+📦 Size: 11.87 MB
+🏷️ Version: v1.5-test-20251214_162932
+📅 Built: 2025-12-14 16:29:34
+
+========================================
+    Installation Steps
+========================================
+
+1. 📲 TRANSFER APK TO DEVICE
+   - Email to yourself, or
+   - Use USB cable, or  
+   - Upload to cloud storage
+
+2. ⚙️ ENABLE UNKNOWN SOURCES
+   - Settings > Security > Unknown Sources (Android 7-)
+   - Settings > Apps & Notifications > Special Access > Install Unknown Apps (Android 8+)
+
+3. 📱 INSTALL APK  
+   - Tap the APK file
+   - Follow installation prompts
+   - Grant permissions when asked
+
+========================================
+    New Features to Test
+========================================
+
+👆 SWIPE GESTURES (NEW!)
+   ✅ Swipe RIGHT on tasks → Mark as completed
+   🗑️ Swipe LEFT on tasks → Delete task
+   ⚠️ Confirmation dialogs prevent accidents
+
+🌙 DARK MODE
+   🔄 Toggle in Settings
+   🎨 Test UI consistency
+
+📊 LIVE STATISTICS  
+   📈 Check Settings for real-time counts
+   🔄 Verify updates after task changes
+
+========================================
+    Testing Checklist
+========================================
+
+□ App installs successfully
+□ Login/Register works
+□ Can create new tasks
+□ Swipe right completes tasks ⭐ NEW
+□ Swipe left deletes tasks ⭐ NEW  
+□ Confirmation dialogs appear ⭐ NEW
+□ Dark mode toggle works
+□ Statistics update live
+□ Search finds tasks
+□ Filters work (All/Today/Pending/Done)
+
+========================================
+    Report Issues
+========================================
+
+🐛 Found a bug? Please note:
+   - What you were doing
+   - What happened vs expected
+   - Device model & Android version
+   - Steps to reproduce
+
+Built with ❤️ for testing

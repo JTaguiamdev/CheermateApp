@@ -1,0 +1,184 @@
+name: 🚀 Build Test APK
+
+# Trigger on push to main branch or manual trigger
+on:
+  push:
+    branches: [ main, develop ]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - 'screenshots/**'
+  workflow_dispatch:
+    inputs:
+      release_type:
+        description: 'Release type'
+        required: true
+        default: 'test'
+        type: choice
+        options:
+        - test
+        - beta
+        - release
+      custom_message:
+        description: 'Custom release message'
+        required: false
+        default: 'Test release for testers'
+
+jobs:
+  build-apk:
+    name: 📱 Build & Release APK
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 Checkout Code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    
+    - name: ☕ Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+    
+    - name: 📦 Cache Gradle Dependencies
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-
+    
+    - name: 🔧 Make Gradlew Executable
+      run: chmod +x ./gradlew
+    
+    - name: 🧹 Clean Build
+      run: ./gradlew clean
+    
+    - name: 🔨 Build Debug APK
+      run: ./gradlew assembleDebug
+    
+    - name: 📊 Generate Build Info
+      id: build_info
+      run: |
+        echo "build_date=$(date +'%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_OUTPUT
+        echo "commit_sha=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+        echo "version=v1.5-test-$(date +'%Y%m%d-%H%M')" >> $GITHUB_OUTPUT
+        
+        # Find APK file (try multiple naming patterns)
+        APK_FILE=""
+        if [ -f "app/build/outputs/apk/debug/app-debug.apk" ]; then
+          APK_FILE="app/build/outputs/apk/debug/app-debug.apk"
+        elif [ -f "app/build/outputs/apk/debug/CheermateApp-1.0-debug.apk" ]; then
+          APK_FILE="app/build/outputs/apk/debug/CheermateApp-1.0-debug.apk"
+        else
+          echo "APK not found! Contents of debug directory:"
+          ls -la app/build/outputs/apk/debug/
+          exit 1
+        fi
+        
+        # Calculate APK size
+        APK_SIZE=$(stat -c%s "$APK_FILE")
+        APK_SIZE_MB=$((APK_SIZE / 1024 / 1024))
+        echo "apk_size=${APK_SIZE_MB}MB" >> $GITHUB_OUTPUT
+        echo "apk_file=${APK_FILE}" >> $GITHUB_OUTPUT
+    
+    - name: 📝 Generate Release Notes
+      id: release_notes
+      run: |
+        cat << 'EOF' > release_notes.md
+        # 🚀 CheermateApp Test Release ${{ steps.build_info.outputs.version }}
+        
+        ## 📱 Quick Install
+        
+        1. **Download APK** from Assets below
+        2. **Enable Unknown Sources** in Android Settings > Security
+        3. **Install APK** by tapping the downloaded file
+        4. **Grant permissions** when prompted
+        
+        ## ✨ New Features to Test
+        
+        ### 👆 Swipe Gestures (NEW!)
+        - **Swipe Right** → Mark task as completed ✅
+        - **Swipe Left** → Delete task 🗑️ 
+        - **Confirmation dialogs** prevent accidents
+        - **Visual feedback** with green/red backgrounds
+        
+        ### 🎨 Enhanced UI
+        - **Dark Mode Toggle** in Settings 🌙
+        - **Live Statistics** updates in Settings 📊
+        - **Smooth Animations** throughout the app
+        
+        ### 📋 Core Features
+        - **Task Management**: Create, edit, complete tasks
+        - **Smart Filtering**: All | Today | Pending | Done
+        - **Real-time Search**: Find tasks instantly 🔍
+        - **Progress Tracking**: Visual completion indicators
+        
+        ## 🧪 Testing Priority
+        
+        **Please focus on testing:**
+        
+        - [ ] 👆 **Swipe gestures** (NEW feature!)
+        - [ ] 🌙 **Dark mode** toggle
+        - [ ] 📊 **Statistics** live updates
+        - [ ] 📱 **General app stability**
+        
+        ## 🐛 Report Issues
+        
+        **Found a bug?** Please report with:
+        - **Steps to reproduce**
+        - **Expected vs actual behavior** 
+        - **Device model & Android version**
+        - **Screenshots** (if helpful)
+        
+        ## 📋 Build Details
+        
+        - **Build Date**: ${{ steps.build_info.outputs.build_date }}
+        - **Version**: 1.5 (Enhanced UX & Smart Features)
+        - **Commit**: ${{ steps.build_info.outputs.commit_sha }}
+        - **APK Size**: ${{ steps.build_info.outputs.apk_size }}
+        - **Build Type**: Debug (Testing)
+        
+        ---
+        
+        **Thank you for testing!** 🙏 Your feedback makes CheermateApp better!
+        EOF
+    
+    - name: 📤 Upload APK Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: CheermateApp-${{ steps.build_info.outputs.version }}
+        path: ${{ steps.build_info.outputs.apk_file }}
+        retention-days: 30
+    
+    - name: 🏷️ Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: ${{ steps.build_info.outputs.version }}
+        name: 🚀 CheermateApp Test - ${{ steps.build_info.outputs.version }}
+        body_path: release_notes.md
+        files: ${{ steps.build_info.outputs.apk_file }}
+        prerelease: true
+        draft: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: 📊 Build Summary
+      run: |
+        echo "## 🎉 Build Completed Successfully!" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### 📱 Release Information" >> $GITHUB_STEP_SUMMARY
+        echo "- **Version**: ${{ steps.build_info.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **APK Size**: ${{ steps.build_info.outputs.apk_size }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Build Date**: ${{ steps.build_info.outputs.build_date }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Commit**: ${{ steps.build_info.outputs.commit_sha }}" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### 🔗 Links" >> $GITHUB_STEP_SUMMARY
+        echo "- **[📦 View Release](https://github.com/${{ github.repository }}/releases/tag/${{ steps.build_info.outputs.version }})**" >> $GITHUB_STEP_SUMMARY
+        echo "- **[📱 Download APK](https://github.com/${{ github.repository }}/releases/download/${{ steps.build_info.outputs.version }}/app-debug.apk)**" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### 🎯 For Testers" >> $GITHUB_STEP_SUMMARY
+        echo "Share the release link with testers: https://github.com/${{ github.repository }}/releases/tag/${{ steps.build_info.outputs.version }}" >> $GITHUB_STEP_SUMMARY
