@@ -546,16 +546,35 @@ class FragmentTaskExtensionActivity : AppCompatActivity() {
                     this,
                     { _, hourOfDay, minute ->
                         val timeFormat = SimpleDateFormat("h:mm a", Locale.getDefault())
-                        calendar.set(Calendar.HOUR_OF_DAY, hourOfDay)
-                        calendar.set(Calendar.MINUTE, minute)
-                        val timeString = timeFormat.format(calendar.time)
                         
+                        // ✅ FIX: Create reminder calendar with correct date logic
+                        val reminderCalendar = Calendar.getInstance()
+                        reminderCalendar.set(Calendar.HOUR_OF_DAY, hourOfDay)
+                        reminderCalendar.set(Calendar.MINUTE, minute)
+                        reminderCalendar.set(Calendar.SECOND, 0)
+                        reminderCalendar.set(Calendar.MILLISECOND, 0)
+                        
+                        // ✅ FIX: If selected time has passed today, schedule for tomorrow
+                        val now = Calendar.getInstance()
+                        if (reminderCalendar.timeInMillis <= now.timeInMillis) {
+                            android.util.Log.d("FragmentTaskExtension", "⚠️ Selected time has passed, scheduling for tomorrow")
+                            reminderCalendar.add(Calendar.DAY_OF_MONTH, 1)
+                        }
+                        
+                        val timeString = timeFormat.format(reminderCalendar.time)
                         android.util.Log.d("FragmentTaskExtension", "🎯 Setting specific time reminder: $timeString")
+                        android.util.Log.d("FragmentTaskExtension", "📅 Reminder timestamp: ${reminderCalendar.timeInMillis}")
                         
-                        // ✅ Save reminder to database (UI will be updated in callback)
+                        // ✅ Save reminder to database with corrected timestamp
                         currentTask?.let { task ->
-                            saveReminderToDatabase(task, ReminderType.AT_SPECIFIC_TIME, calendar.timeInMillis)
-                            Toast.makeText(this, "Reminder set at $timeString", Toast.LENGTH_SHORT).show()
+                            saveReminderToDatabase(task, ReminderType.AT_SPECIFIC_TIME, reminderCalendar.timeInMillis)
+                            
+                            val displayText = if (reminderCalendar.get(Calendar.DAY_OF_YEAR) > now.get(Calendar.DAY_OF_YEAR)) {
+                                "Reminder set for tomorrow at $timeString"
+                            } else {
+                                "Reminder set at $timeString"
+                            }
+                            Toast.makeText(this, displayText, Toast.LENGTH_SHORT).show()
                         }
                     },
                     calendar.get(Calendar.HOUR_OF_DAY),
@@ -1093,6 +1112,15 @@ class FragmentTaskExtensionActivity : AppCompatActivity() {
                                         "✅ Task marked as Completed!",
                                         Toast.LENGTH_SHORT
                                     ).show()                            
+                                    
+                                    // Trigger global statistics broadcast
+                                    lifecycleScope.launch {
+                                        val db = com.cheermateapp.data.db.AppDb.get(this@FragmentTaskExtensionActivity)
+                                        kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+                                            com.cheermateapp.util.StatisticsBroadcaster.refreshFromDatabase(db, task.User_ID)
+                                        }
+                                    }
+                                    
                                     // Set result to notify caller that task was modified
                                     setResult(RESULT_OK)
                                 } catch (e: Exception) {

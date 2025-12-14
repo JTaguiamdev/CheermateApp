@@ -7,11 +7,16 @@ import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.ViewModelProvider
 import com.cheermateapp.data.StaticDataRepository
 import com.cheermateapp.data.db.AppDb
 import com.cheermateapp.data.model.Personality
-
+import com.cheermateapp.ui.tasks.TasksViewModel
+import com.cheermateapp.ui.tasks.TasksViewModelFactory
 import com.cheermateapp.util.ThemeManager
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
+import com.cheermateapp.util.StatisticsBroadcaster
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -25,6 +30,7 @@ class FragmentSettingsActivity : AppCompatActivity() {
 
     private var userId: Int = 0
     private lateinit var staticDataRepository: StaticDataRepository
+    private lateinit var tasksViewModel: TasksViewModel
 
     private fun updateDarkModeIcon() {
         val darkModeIcon = findViewById<ImageView>(R.id.darkModeIcon)
@@ -43,6 +49,11 @@ class FragmentSettingsActivity : AppCompatActivity() {
         
         // Initialize repository
         staticDataRepository = StaticDataRepository(this)
+        
+        // Initialize TasksViewModel
+        val db = AppDb.get(this)
+        val factory = TasksViewModelFactory(db, userId)
+        tasksViewModel = ViewModelProvider(this, factory)[TasksViewModel::class.java]
 
         setupToolbar()
         setupBottomNavigation()
@@ -132,8 +143,8 @@ class FragmentSettingsActivity : AppCompatActivity() {
                         switchDarkMode.isChecked = com.cheermateapp.data.SettingsManager.isDarkMode(this@FragmentSettingsActivity)
                     }
 
-                    // ✅ UPDATE TASK STATISTICS
-                    loadUserTaskStatistics()
+                    // ✅ SETUP LIVE TASK STATISTICS
+                    setupLiveStatisticsObservers()
 
                 } catch (e: Exception) {
                     android.util.Log.e("FragmentSettingsActivity", "Error loading user data", e)
@@ -145,6 +156,74 @@ class FragmentSettingsActivity : AppCompatActivity() {
             findViewById<TextView>(R.id.tvProfileEmail)?.text = "guest@example.com"
             findViewById<TextView>(R.id.tvCurrentPersona)?.text = "Guest Mode"
             findViewById<TextView>(R.id.chipPersona)?.text = "Guest User"
+            // Setup live statistics for guest mode too
+            setupLiveStatisticsObservers()
+        }
+    }
+
+    private fun setupLiveStatisticsObservers() {
+        android.util.Log.d("FragmentSettingsActivity", "🔔 Setting up global statistics broadcaster observers")
+        
+        // 1. Feed TasksViewModel data into global broadcaster
+        lifecycleScope.launch {
+            combine(
+                tasksViewModel.allTasksCount,
+                tasksViewModel.completedTasksCount
+            ) { total, completed ->
+                StatisticsBroadcaster.updateStatistics(total, completed)
+                total to completed
+            }.collectLatest { /* Data flows to global broadcaster */ }
+        }
+        
+        // 2. Listen to global broadcaster for UI updates
+        lifecycleScope.launch {
+            StatisticsBroadcaster.statistics.collectLatest { globalStats ->
+                if (globalStats != null) {
+                    android.util.Log.d("FragmentSettingsActivity", "📡 Received global statistics broadcast: $globalStats")
+                    updateStatisticsUI(globalStats)
+                }
+            }
+        }
+    }
+    
+    private fun updateStatisticsUI(stats: StatisticsBroadcaster.Statistics) {
+        val tvStatTotal = findViewById<TextView>(R.id.tvStatTotal)
+        val tvStatCompleted = findViewById<TextView>(R.id.tvStatCompleted)
+        val tvStatSuccess = findViewById<TextView>(R.id.tvStatSuccess)
+        
+        if (tvStatTotal != null && tvStatCompleted != null && tvStatSuccess != null) {
+            // Update fragment_settings.xml statistics immediately
+            tvStatTotal.text = stats.total.toString()
+            tvStatCompleted.text = stats.completed.toString()
+            tvStatSuccess.text = "${stats.successRate}%"
+            
+            android.util.Log.d("FragmentSettingsActivity", "✅ FRAGMENT_SETTINGS.XML UPDATED: Total=${stats.total}, Completed=${stats.completed}, Success=${stats.successRate}%")
+        } else {
+            android.util.Log.w("FragmentSettingsActivity", "❌ Statistics TextViews not found in fragment_settings.xml layout")
+        }
+    }
+    
+    // Cache for current statistics values to prevent unnecessary re-renders
+    private data class StatisticsCache(
+        val total: Int,
+        val completed: Int,
+        val successRate: Int
+    )
+    private var currentStatsCache: StatisticsCache? = null
+    
+    // Force refresh statistics via global broadcaster
+    fun refreshStatistics() {
+        android.util.Log.d("FragmentSettingsActivity", "🔄 Force refreshing statistics via global broadcaster...")
+        lifecycleScope.launch {
+            try {
+                val db = AppDb.get(this@FragmentSettingsActivity)
+                // Force refresh through global broadcaster
+                withContext(Dispatchers.IO) {
+                    StatisticsBroadcaster.refreshFromDatabase(db, userId)
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("FragmentSettingsActivity", "Error force refreshing statistics", e)
+            }
         }
     }
 
@@ -719,5 +798,14 @@ class FragmentSettingsActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         loadSettingsUserData()
+        // Refresh statistics whenever user returns to settings
+        refreshStatistics()
+        
+        // Force UI update with current global statistics if available
+        val currentStats = StatisticsBroadcaster.getCurrentStatistics()
+        if (currentStats != null) {
+            android.util.Log.d("FragmentSettingsActivity", "📱 onResume: Updating UI with current global stats: $currentStats")
+            updateStatisticsUI(currentStats)
+        }
     }
 }

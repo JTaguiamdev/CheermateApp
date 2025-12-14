@@ -28,6 +28,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.lifecycle.ViewModelProvider
@@ -56,6 +57,7 @@ import com.cheermateapp.util.AlarmTestHelper
 import com.cheermateapp.util.ReminderManager
 import com.cheermateapp.util.ThemeManager
 import com.cheermateapp.util.ToastManager
+import com.cheermateapp.util.SwipeGestureHelper
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.textfield.TextInputEditText
@@ -63,6 +65,8 @@ import com.google.android.material.textfield.TextInputLayout
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
+import com.cheermateapp.util.StatisticsBroadcaster
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
@@ -70,10 +74,22 @@ import java.util.*
 
 
 class MainActivity : AppCompatActivity() {
-
+    
     companion object {
         const val EXTRA_SHOW_DASHBOARD = "SHOW_DASHBOARD"
         const val EXTRA_USER_ID = "USER_ID"
+        
+        // Global reference to refresh statistics from anywhere
+        private var mainActivityInstance: MainActivity? = null
+        
+        fun refreshGlobalStatistics() {
+            mainActivityInstance?.let { activity ->
+                android.util.Log.d("MainActivity", "🌍 Global statistics refresh requested")
+                activity.refreshSettingsStatistics()
+            } ?: run {
+                android.util.Log.w("MainActivity", "❌ No MainActivity instance available for global refresh")
+            }
+        }
     }
 
     private val uiScope = CoroutineScope(Dispatchers.Main)
@@ -138,12 +154,18 @@ class MainActivity : AppCompatActivity() {
     private val taskDetailLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
-        // When returning from task detail activity, the UI will update reactively.
+        // When returning from task detail activity, refresh statistics if task was modified
+        if (result.resultCode == RESULT_OK) {
+            android.util.Log.d("MainActivity", "🔄 Task was modified, refreshing statistics")
+            refreshSettingsStatistics()
+        }
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // Set global instance for statistics refresh
+        mainActivityInstance = this
         com.cheermateapp.util.ThemeManager.initializeTheme(this)
 
         try {
@@ -661,6 +683,9 @@ class MainActivity : AppCompatActivity() {
             )
             taskRecyclerView?.adapter = taskAdapter
 
+            // ✅ Setup swipe gestures
+            setupSwipeGestures()
+
             btnSort?.setOnClickListener {
                 showSortOptionsDialog()
             }
@@ -748,6 +773,71 @@ class MainActivity : AppCompatActivity() {
         lifecycleScope.launch {
             tasksViewModel.completedTasksCount.collectLatest { count: Int -> // Explicit type here
                 tabDone.text = "Completed ($count)"
+            }
+        }
+    }
+    
+    private fun setupSettingsStatisticsObservers() {
+        // Set up global broadcaster observers that update TasksViewModel AND global state
+        android.util.Log.d("MainActivity", "🔔 Setting up global statistics broadcaster")
+        
+        // 1. Listen to TasksViewModel changes and update global broadcaster
+        lifecycleScope.launch {
+            combine(
+                tasksViewModel.allTasksCount,
+                tasksViewModel.completedTasksCount
+            ) { total, completed ->
+                // Update global broadcaster with latest data
+                StatisticsBroadcaster.updateStatistics(total, completed)
+                StatisticsBroadcaster.Statistics(total, completed, if (total > 0) (completed * 100) / total else 0)
+            }.collectLatest { /* Data flows to global broadcaster */ }
+        }
+        
+        // 2. Listen to global broadcaster for UI updates (when settings screen is visible)
+        lifecycleScope.launch {
+            StatisticsBroadcaster.statistics.collectLatest { globalStats ->
+                if (globalStats != null) {
+                    android.util.Log.d("MainActivity", "📡 Received global statistics broadcast: $globalStats")
+                    
+                    val tvStatTotal = findViewById<TextView>(R.id.tvStatTotal)
+                    val tvStatCompleted = findViewById<TextView>(R.id.tvStatCompleted)
+                    val tvStatSuccess = findViewById<TextView>(R.id.tvStatSuccess)
+                    
+                    if (tvStatTotal != null && tvStatCompleted != null && tvStatSuccess != null) {
+                        // Update UI from global broadcast
+                        tvStatTotal.text = globalStats.total.toString()
+                        tvStatCompleted.text = globalStats.completed.toString()
+                        tvStatSuccess.text = "${globalStats.successRate}%"
+                        
+                        android.util.Log.d("MainActivity", "✅ GLOBAL BROADCAST UPDATE: Settings UI updated to Total=${globalStats.total}, Completed=${globalStats.completed}, Success=${globalStats.successRate}%")
+                    } else {
+                        android.util.Log.d("MainActivity", "📡 Global broadcast received but settings views not currently visible")
+                    }
+                }
+            }
+        }
+    }
+    
+    // Cache for current statistics values to prevent unnecessary re-renders
+    private data class StatisticsCache(
+        val total: Int,
+        val completed: Int,
+        val successRate: Int
+    )
+    private var currentStatsCache: StatisticsCache? = null
+    
+    // Force refresh statistics and update global broadcaster
+    fun refreshSettingsStatistics() {
+        android.util.Log.d("MainActivity", "🔄 Force refreshing statistics via global broadcaster...")
+        lifecycleScope.launch {
+            try {
+                val db = AppDb.get(this@MainActivity)
+                // Force refresh through global broadcaster which will notify all observers
+                withContext(Dispatchers.IO) {
+                    StatisticsBroadcaster.refreshFromDatabase(db, userId)
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("MainActivity", "Error force refreshing statistics", e)
             }
         }
     }
@@ -856,6 +946,9 @@ class MainActivity : AppCompatActivity() {
                 showLogoutConfirmation()
             }
 
+            // Setup live statistics observers for settings fragment
+            setupSettingsStatisticsObservers()
+            
             // Load settings data
             loadSettingsFragmentData()
 
@@ -888,6 +981,8 @@ class MainActivity : AppCompatActivity() {
                     db.taskDao().update(updatedTask)
                 }
                 ToastManager.showToast(this@MainActivity, "✅ Task marked as completed!", Toast.LENGTH_SHORT)
+                // Refresh statistics if settings is currently visible
+                refreshSettingsStatistics()
             } catch (e: Exception) {
                 android.util.Log.e("MainActivity", "Error marking task as done", e)
                 ToastManager.showToast(this@MainActivity, "Failed to update task", Toast.LENGTH_SHORT)
@@ -1103,6 +1198,9 @@ class MainActivity : AppCompatActivity() {
                     "✅ Task '$title' updated successfully!",
                     Toast.LENGTH_LONG
                 )
+                
+                // Refresh statistics if status or progress changed
+                refreshSettingsStatistics()
 
             } catch (e: Exception) {
                 android.util.Log.e("MainActivity", "Error updating task", e)
@@ -1228,9 +1326,6 @@ class MainActivity : AppCompatActivity() {
         val profileEmail: String,
         val personaName: String?,
         val chipPersonaText: String?,
-        val statTotal: Int,
-        val statCompleted: Int,
-        val statSuccess: Int,
         val notificationEnabled: Boolean
     )
 
@@ -1248,9 +1343,7 @@ class MainActivity : AppCompatActivity() {
         findViewById<TextView>(R.id.tvProfileEmail)?.text = cache.profileEmail
         findViewById<TextView>(R.id.tvCurrentPersona)?.text = cache.personaName ?: ""
         findViewById<TextView>(R.id.chipPersona)?.text = cache.chipPersonaText ?: "Your Personality"
-        findViewById<TextView>(R.id.tvStatTotal)?.text = cache.statTotal.toString()
-        findViewById<TextView>(R.id.tvStatCompleted)?.text = cache.statCompleted.toString()
-        findViewById<TextView>(R.id.tvStatSuccess)?.text = "${cache.statSuccess}%"
+        // Statistics are now handled by live TasksViewModel observers
         findViewById<Switch>(R.id.switchNotifications)?.isChecked = cache.notificationEnabled
     }
 
@@ -1276,18 +1369,6 @@ class MainActivity : AppCompatActivity() {
                     db.personalityDao().getByUser(userId)
                 }
 
-                val stats: Map<String, Int> = withContext(Dispatchers.IO) {
-                    val totalTasks = db.taskDao().getAllTasksCount(userId)
-                    val completedTasks = db.taskDao().getCompletedTasksCount(userId)
-
-                    mapOf(
-                        "total" to totalTasks,
-                        "completed" to completedTasks
-                    )
-                }
-
-
-
                 // Build display values
                 val profileName: String
                 val profileEmail: String
@@ -1307,18 +1388,11 @@ class MainActivity : AppCompatActivity() {
                 val personaName = personality?.Name
                 val chipPersonaText = personality?.let { "${it.Name} Personality" }
 
-                val successRate = if (stats["total"]!! > 0) {
-                    (stats["completed"]!! * 100) / stats["total"]!!
-                } else 0
-
                 val newCache = SettingsCache(
                     profileName = profileName,
                     profileEmail = profileEmail,
                     personaName = personaName,
                     chipPersonaText = chipPersonaText,
-                    statTotal = stats["total"] ?: 0,
-                    statCompleted = stats["completed"] ?: 0,
-                    statSuccess = successRate,
                     notificationEnabled = com.cheermateapp.data.SettingsManager.isNotificationsEnabled(this@MainActivity)
                 )
 
@@ -2233,8 +2307,16 @@ class MainActivity : AppCompatActivity() {
                 val db = AppDb.get(this@MainActivity)
 
                 // Parse due date and time
-                val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
-                val dueDateTime = dateFormat.parse("$dueDate $dueTime")
+                // ✅ FIX: Handle 12-hour format (h:mm a) from time picker
+                val dueDateTime = if (dueTime.contains("AM") || dueTime.contains("PM")) {
+                    // Time is in 12-hour format from time picker
+                    val dateFormat12 = SimpleDateFormat("yyyy-MM-dd h:mm a", Locale.getDefault())
+                    dateFormat12.parse("$dueDate $dueTime")
+                } else {
+                    // Time is in 24-hour format (fallback)
+                    val dateFormat24 = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
+                    dateFormat24.parse("$dueDate $dueTime")
+                }
 
                 if (dueDateTime != null) {
                     val dueTimeMillis = dueDateTime.time
@@ -3035,6 +3117,10 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+        // Clear global instance
+        if (mainActivityInstance == this) {
+            mainActivityInstance = null
+        }
     }
 
     // ✅ OBSERVE TASK CHANGES FOR LIVE PROGRESS BAR UPDATES ON HOME SCREEN
@@ -3087,4 +3173,168 @@ class MainActivity : AppCompatActivity() {
             taskObserverJob?.cancel()
             taskObserverJob = null
         }
+
+    // ✅ SWIPE GESTURES IMPLEMENTATION
+    private fun setupSwipeGestures() {
+        val swipeGestureHelper = SwipeGestureHelper(
+            context = this,
+            onSwipeComplete = { position ->
+                handleSwipeComplete(position)
+            },
+            onSwipeDelete = { position ->
+                handleSwipeDelete(position)
+            }
+        )
+        
+        val itemTouchHelper = ItemTouchHelper(swipeGestureHelper)
+        taskRecyclerView?.let { recyclerView ->
+            itemTouchHelper.attachToRecyclerView(recyclerView)
+        }
+        
+        android.util.Log.d("MainActivity", "✅ Swipe gestures setup completed")
+    }
+
+    private fun handleSwipeComplete(position: Int) {
+        val task = taskAdapter?.tasks?.getOrNull(position)
+        if (task == null) {
+            android.util.Log.w("MainActivity", "⚠️ Cannot complete - task not found at position $position")
+            taskAdapter?.notifyItemChanged(position) // Restore item position
+            return
+        }
+
+        // Show confirmation dialog
+        AlertDialog.Builder(this)
+            .setTitle("Mark as Completed")
+            .setMessage("Are you sure you want to mark '${task.Title}' as completed?")
+            .setIcon(R.drawable.ic_check)
+            .setPositiveButton("Complete") { _, _ ->
+                // Mark task as completed
+                completeTaskFromSwipe(task, position)
+            }
+            .setNegativeButton("Cancel") { _, _ ->
+                // Restore item position
+                taskAdapter?.notifyItemChanged(position)
+            }
+            .setOnCancelListener {
+                // Restore item position if dialog is dismissed
+                taskAdapter?.notifyItemChanged(position)
+            }
+            .show()
+    }
+
+    private fun handleSwipeDelete(position: Int) {
+        val task = taskAdapter?.tasks?.getOrNull(position)
+        if (task == null) {
+            android.util.Log.w("MainActivity", "⚠️ Cannot delete - task not found at position $position")
+            taskAdapter?.notifyItemChanged(position) // Restore item position
+            return
+        }
+
+        // Show confirmation dialog
+        AlertDialog.Builder(this)
+            .setTitle("Delete Task")
+            .setMessage("Are you sure you want to delete '${task.Title}'?\n\nThis action cannot be undone.")
+            .setIcon(R.drawable.ic_delete)
+            .setPositiveButton("Delete") { _, _ ->
+                // Delete the task
+                deleteTaskFromSwipe(task, position)
+            }
+            .setNegativeButton("Cancel") { _, _ ->
+                // Restore item position
+                taskAdapter?.notifyItemChanged(position)
+            }
+            .setOnCancelListener {
+                // Restore item position if dialog is dismissed
+                taskAdapter?.notifyItemChanged(position)
+            }
+            .show()
+    }
+
+    private fun completeTaskFromSwipe(task: Task, position: Int) {
+        uiScope.launch {
+            try {
+                val db = AppDb.get(this@MainActivity)
+                
+                withContext(Dispatchers.IO) {
+                    // Update task status in database
+                    db.taskDao().updateTaskStatus(
+                        userId = task.User_ID,
+                        taskId = task.Task_ID,
+                        status = "Completed"
+                    )
+                    android.util.Log.d("MainActivity", "✅ Task '${task.Title}' marked as completed via swipe")
+                }
+
+                // Update the task in the adapter
+                val updatedTask = task.copy(
+                    Status = com.cheermateapp.data.model.Status.Completed,
+                    TaskProgress = 100,
+                    UpdatedAt = com.cheermateapp.data.model.TimestampUtil.getCurrentTimestamp()
+                )
+                
+                taskAdapter?.tasks?.set(position, updatedTask)
+                taskAdapter?.notifyItemChanged(position)
+
+                // Show success message
+                ToastManager.showToast(
+                    this@MainActivity,
+                    "✅ '${task.Title}' marked as completed!",
+                    Toast.LENGTH_SHORT
+                )
+
+                // Refresh data to update statistics
+                loadRecentTasks()
+
+            } catch (e: Exception) {
+                android.util.Log.e("MainActivity", "❌ Error completing task via swipe", e)
+                ToastManager.showToast(
+                    this@MainActivity,
+                    "❌ Error completing task",
+                    Toast.LENGTH_SHORT
+                )
+                // Restore item position on error
+                taskAdapter?.notifyItemChanged(position)
+            }
+        }
+    }
+
+    private fun deleteTaskFromSwipe(task: Task, position: Int) {
+        uiScope.launch {
+            try {
+                val db = AppDb.get(this@MainActivity)
+                
+                withContext(Dispatchers.IO) {
+                    // Delete task and related data from database
+                    db.taskReminderDao().deleteAllForTask(task.Task_ID, task.User_ID)
+                    db.subTaskDao().deleteAllForTask(task.Task_ID, task.User_ID)
+                    db.taskDao().delete(task)
+                    android.util.Log.d("MainActivity", "🗑️ Task '${task.Title}' deleted via swipe")
+                }
+
+                // Remove the task from adapter
+                taskAdapter?.tasks?.removeAt(position)
+                taskAdapter?.notifyItemRemoved(position)
+
+                // Show success message
+                ToastManager.showToast(
+                    this@MainActivity,
+                    "🗑️ '${task.Title}' deleted successfully",
+                    Toast.LENGTH_SHORT
+                )
+
+                // Refresh data to update statistics and empty state
+                loadRecentTasks()
+
+            } catch (e: Exception) {
+                android.util.Log.e("MainActivity", "❌ Error deleting task via swipe", e)
+                ToastManager.showToast(
+                    this@MainActivity,
+                    "❌ Error deleting task",
+                    Toast.LENGTH_SHORT
+                )
+                // Restore item position on error
+                taskAdapter?.notifyItemChanged(position)
+            }
+        }
+    }
     }

@@ -108,4 +108,8 @@
 
     <!-- Generic Icon fill color -->
     <color name="icon_fill_color">#FFFFFF</color>
+    
+    <!-- Swipe gesture colors -->
+    <color name="success_green">#4CAF50</color>
+    <color name="error_red">#F44336</color>
 </resources>

@@ -319,6 +319,14 @@ class FragmentTaskActivity : AppCompatActivity() {
 
                 Toast.makeText(this@FragmentTaskActivity, "✅ Task '${task.Title}' completed!", Toast.LENGTH_SHORT).show()
 
+                // Trigger global statistics broadcast  
+                lifecycleScope.launch {
+                    val db = com.cheermateapp.data.db.AppDb.get(this@FragmentTaskActivity)
+                    kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+                        com.cheermateapp.util.StatisticsBroadcaster.refreshFromDatabase(db, task.User_ID)
+                    }
+                }
+
                 // ✅ FIXED: Update progress bar immediately before reloading tasks
                 updateTabCounts()
 

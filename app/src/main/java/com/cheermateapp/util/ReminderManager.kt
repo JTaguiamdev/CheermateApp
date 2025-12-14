@@ -50,14 +50,38 @@ object ReminderManager {
             true
         }
         
+        val currentTimeMillis = System.currentTimeMillis()
+        val timeUntilAlarm = reminderTimeMillis - currentTimeMillis
+        
         android.util.Log.d("ReminderManager", "📋 SCHEDULING ALARM:")
         android.util.Log.d("ReminderManager", "  Task ID: $taskId")
         android.util.Log.d("ReminderManager", "  Task Title: '$taskTitle'")
         android.util.Log.d("ReminderManager", "  User ID: $userId")
         android.util.Log.d("ReminderManager", "  Reminder Time: ${com.cheermateapp.data.model.TaskReminder.formatTimestamp(reminderTimeMillis)}")
         android.util.Log.d("ReminderManager", "  Current Time: ${java.util.Date()}")
-        android.util.Log.d("ReminderManager", "  Time Until Alarm: ${(reminderTimeMillis - System.currentTimeMillis()) / 1000} seconds")
+        android.util.Log.d("ReminderManager", "  Time Until Alarm: ${timeUntilAlarm / 1000} seconds")
         android.util.Log.d("ReminderManager", "  Can Schedule Exact Alarms: $canSchedule")
+        
+        // ⚠️ PREVENT SCHEDULING ALARMS IN THE PAST
+        var adjustedReminderTime = reminderTimeMillis
+        if (timeUntilAlarm <= 0) {
+            android.util.Log.w("ReminderManager", "⚠️ Alarm time is in the past!")
+            android.util.Log.w("ReminderManager", "⏰ Original time was ${Math.abs(timeUntilAlarm / 1000)} seconds ago")
+            
+            // Auto-adjust to next day at the same time
+            adjustedReminderTime = reminderTimeMillis + (24 * 60 * 60 * 1000) // Add 24 hours
+            val newTimeUntilAlarm = adjustedReminderTime - currentTimeMillis
+            
+            android.util.Log.i("ReminderManager", "🔄 Auto-adjusting to next day")
+            android.util.Log.i("ReminderManager", "📅 New alarm time: ${com.cheermateapp.data.model.TaskReminder.formatTimestamp(adjustedReminderTime)}")
+            android.util.Log.i("ReminderManager", "⏰ Time until new alarm: ${newTimeUntilAlarm / 1000} seconds")
+            
+            // Still in the past? Something is wrong with date calculation
+            if (newTimeUntilAlarm <= 0) {
+                android.util.Log.e("ReminderManager", "❌ Even next day is in the past! Skipping alarm.")
+                return
+            }
+        }
         
         // Schedule alarm
         try {
@@ -65,24 +89,24 @@ object ReminderManager {
                 android.util.Log.d("ReminderManager", "🔧 Using setExactAndAllowWhileIdle (API 23+)")
                 alarmManager.setExactAndAllowWhileIdle(
                     AlarmManager.RTC_WAKEUP,
-                    reminderTimeMillis,
+                    adjustedReminderTime,
                     pendingIntent
                 )
             } else {
                 android.util.Log.d("ReminderManager", "🔧 Using setExact (API < 23)")
                 alarmManager.setExact(
                     AlarmManager.RTC_WAKEUP,
-                    reminderTimeMillis,
+                    adjustedReminderTime,
                     pendingIntent
                 )
             }
             
             android.util.Log.d("ReminderManager", "✅ ALARM SCHEDULED SUCCESSFULLY!")
-            android.util.Log.d("ReminderManager", "⏰ Reminder set for task '$taskTitle' at ${com.cheermateapp.data.model.TaskReminder.formatTimestamp(reminderTimeMillis)}")
+            android.util.Log.d("ReminderManager", "⏰ Reminder set for task '$taskTitle' at ${com.cheermateapp.data.model.TaskReminder.formatTimestamp(adjustedReminderTime)}")
             
             // ✅ ALSO SCHEDULE UPCOMING ALARM NOTIFICATION
             com.cheermateapp.util.UpcomingAlarmManager.scheduleUpcomingAlarmNotification(
-                context, taskId, taskTitle, reminderTimeMillis
+                context, taskId, taskTitle, adjustedReminderTime
             )
             
         } catch (e: SecurityException) {
