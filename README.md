@@ -20,6 +20,7 @@ A comprehensive Android task management application built with Kotlin, featuring
 - **🏷️ Color-coded Priorities**: Visual priority indicators
 - **📅 Date/Time Pickers**: Professional date and time selection
 - **🌙 Dark Mode**: Functional light/dark theme support with persistent preferences
+- **💬 Simplified Task Creation Toast**: Clearer "Task created successfully" message
 
 ### 🗄️ Database Features
 - **SQLite Database**: Local data persistence with Room
@@ -71,7 +72,7 @@ A comprehensive Android task management application built with Kotlin, featuring
 ### Current Status
 - **Version:** 1.5 (Phase 2 - Core Features Implemented)
 - **Status:** Active Development
-- **Current Milestone:** v1.5 - Enhanced UX & Smart Features (Q2 2025)
+- **Current Milestone:** v1.5 - Enhanced UX & Smart Features (UI integration in progress)
 - **Next Milestone:** v2.0 - Cloud & Collaboration (Q3 2025)
 
 ## 🚀 Getting Started
@@ -83,3 +84,6 @@ A comprehensive Android task management application built with Kotlin, featuring
 
 ### Installation
 1. Clone the repository
+
+---\n
+**Last Updated:** December 2025

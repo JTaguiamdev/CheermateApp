@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Changed
+- Simplified "Task created successfully" toast message for task creation dialog.
 - Timestamps (`CreatedAt`, `UpdatedAt`) are now stored as human-readable strings (`TEXT`) instead of `Long`.
 - Task deletion is now a hard delete.
 - The "Add Subtask" button is now an EditText to match the app's theme.
@@ -16,16 +17,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 - `TaskDependency` model and DAO.
 - Soft delete functionality (`DeletedAt` column) from `User` and `Task` tables.
-
-### Security Update - November 2025
-
-#### Changed
-- **Password Hashing Migration**: Migrated from BCrypt to PBKDF2-HMAC-SHA256
-  - Replaced BCrypt implementation with PBKDF2-HMAC-SHA256 (100,000 iterations)
-  - Removed BCrypt dependency from build configuration
-  - Updated all password hashing and verification logic
-  - Hash format: `iterations:salt:hash` (Base64 encoded)
-  - Maintains same security level with Java standard library algorithms
 
 ### Phase 2 Implementation (v1.5) - January 2025
 
@@ -106,6 +97,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **New Database Tables:** 3
 - **New DAOs:** 3
 - **New Utility Classes:** 4
+
+### Security Update - November 2025
+
+#### Changed
+- **Password Hashing Migration**: Migrated from BCrypt to PBKDF2-HMAC-SHA256
+  - Replaced BCrypt implementation with PBKDF2-HMAC-SHA256 (100,000 iterations)
+  - Removed BCrypt dependency from build configuration
+  - Updated all password hashing and verification logic
+  - Hash format: `iterations:salt:hash` (Base64 encoded)
+  - Maintains same security level with Java standard library algorithms
 
 ---
 
@@ -375,4 +376,4 @@ For support, please check:
 
 **License:** [Add your license here]
 
-**Last Updated:** January 2025
+**Last Updated:** December 2025

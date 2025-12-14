@@ -3,32 +3,14 @@
 ## Overview
 This document tracks immediate tasks and known issues that need to be addressed in CheermateApp. For long-term planning, see [ROADMAP.md](ROADMAP.md).
 
-**Last Updated:** December 2024  
-**Current Version:** 1.0.0
+**Last Updated:** December 2025  
+**Current Version:** 1.5
 
 ---
 
 ## 🔴 High Priority (Critical)
 
 ### Authentication & Security
-- [ ] **Implement Forgot Password functionality**
-  - Currently shows placeholder "Password recovery coming soon"
-  - Location: `ForgotPasswordActivity.kt`
-  - Requires: Email service integration or security questions flow
-  - Related: `SecurityQuestion.kt`, `UserSecurityAnswer.kt` models already exist
-
-- [ ] **Complete Sign Up Activity implementation**
-  - Currently shows "SignUpActivity - Coming Soon!" toast
-  - Location: `SignUpActivity.kt`
-  - Requires: Full registration form with validation
-  - Related: `ActivityLogin.kt` has placeholder for sign up navigation
-
-- [ ] **Implement proper password hashing**
-  - Current state: Review if passwords are stored securely
-  - Should use: BCrypt, Argon2, or similar secure hashing
-  - Priority: Security best practice
-
-### Database & Data Integrity
 - [ ] **Test all DAO methods**
   - Verify parameter order consistency in methods
   - Test method name changes (e.g., `getById()`, `deleteById()`)
@@ -40,24 +22,6 @@ This document tracks immediate tasks and known issues that need to be addressed 
 ## 🟡 Medium Priority (Important)
 
 ### User Experience Features
-- [ ] **Profile Editing functionality**
-  - Currently shows "👤 Profile editing coming soon!"
-  - Location: `MainActivity.kt` and `FragmentSettingsActivity.kt`
-  - Features needed:
-    - Edit username (with uniqueness check)
-    - Edit email (with validation and uniqueness check)
-    - Change password (with current password verification)
-    - Update avatar/profile picture
-
-- [ ] **Data Import feature**
-  - Currently shows "📥 Import data coming soon!"
-  - Location: `FragmentSettingsActivity.kt`
-  - Requirements:
-    - Import tasks from CSV/JSON
-    - Import backup files
-    - Validate imported data format
-    - Handle duplicate tasks
-
 - [ ] **Cloud Sync functionality**
   - Currently shows "🔄 Cloud sync coming soon!"
   - Location: `FragmentSettingsActivity.kt`
@@ -68,22 +32,6 @@ This document tracks immediate tasks and known issues that need to be addressed 
     - Third-party sync service
 
 ### Task Management Enhancements
-- [ ] **SubTask functionality**
-  - Models exist: `SubTask.kt`, `SubTaskDao.kt`
-  - Need to implement UI for:
-    - Adding subtasks to main tasks
-    - Marking subtasks as complete
-    - Progress calculation based on subtasks
-    - Displaying subtasks in task details
-
-- [ ] **Task Reminders/Notifications**
-  - Models exist: `TaskReminder.kt`, `TaskReminderDao.kt`
-  - Need to implement:
-    - Notification scheduling system
-    - Reminder preferences UI
-    - Android notification channels
-    - Snooze/dismiss functionality
-
 - [ ] **Task Tags/Categories**
   - Add ability to categorize tasks beyond priority
   - Use cases: Work, Personal, Shopping, Health, etc.
@@ -95,21 +43,6 @@ This document tracks immediate tasks and known issues that need to be addressed 
   - Implement file cleanup on task deletion
 
 ### UI/UX Improvements
-- [ ] **Add actual screenshots to README**
-  - Currently says "*Add screenshots of your app here*"
-  - Capture screenshots of:
-    - Login screen
-    - Dashboard/Home
-    - Task list with filters
-    - Task detail view
-    - Settings screen
-    - Personality selection
-
-- [ ] **Dark Mode support**
-  - Implement theme switching
-  - Save theme preference in `SettingsDao`
-  - Use `Appearance.kt` model
-
 - [ ] **Onboarding flow for new users**
   - Tutorial/walkthrough on first launch
   - Feature highlights
@@ -120,7 +53,7 @@ This document tracks immediate tasks and known issues that need to be addressed 
 ## 🟢 Low Priority (Nice to Have)
 
 ### Statistics & Analytics
-- [ ] **Enhanced statistics dashboard**
+- [ ] **Enhanced statistics dashboard (UI Pending)**
   - Productivity trends over time
   - Task completion patterns
   - Time-of-day analysis
@@ -144,16 +77,6 @@ This document tracks immediate tasks and known issues that need to be addressed 
   - Comments on tasks
 
 ### Advanced Features
-- [ ] **Recurring Tasks**
-  - Daily, weekly, monthly, yearly patterns
-  - Custom recurrence rules
-  - Skip/reschedule recurring instances
-
-- [ ] **Task Templates**
-  - Save frequently used task configurations
-  - Quick add from templates
-  - Template categories
-
 - [ ] **Voice Input**
   - Add tasks via voice commands
   - Voice notes for task descriptions
@@ -222,7 +145,7 @@ This document tracks immediate tasks and known issues that need to be addressed 
 ## 🐛 Known Issues / Bugs
 
 ### To Investigate
-- [ ] **Verify timestamp handling**
+- [x] **Verify timestamp handling**
   - Ensure CreatedAt, UpdatedAt work correctly
   - Test across different timezones
   - Verify String timestamp conversions
@@ -290,6 +213,20 @@ Track completed items here for reference:
 - ✅ Basic dashboard/home screen (completed)
 - ✅ Task filtering and search (completed)
 - ✅ Settings screen structure (completed)
+- ✅ Implement Forgot Password functionality (completed)
+- ✅ Complete Sign Up Activity implementation (completed)
+- ✅ Implement proper password hashing (completed)
+- ✅ Simplified "Task created successfully" toast message for task creation dialog (completed)
+- ✅ Profile Editing functionality (completed)
+- ✅ Data Import feature (completed)
+- ✅ SubTask functionality (completed)
+- ✅ Task Reminders/Notifications (completed)
+- ✅ Add actual screenshots to README (completed)
+- ✅ Dark Mode support (completed)
+- ✅ Recurring Tasks (completed)
+- ✅ Task Templates (completed)
+- ✅ Enhanced statistics dashboard (utilities implemented)
+- ✅ Verify timestamp handling (completed)
 
 ### Priority Guidelines
 - 🔴 **High Priority**: Security issues, critical features, blocking bugs
