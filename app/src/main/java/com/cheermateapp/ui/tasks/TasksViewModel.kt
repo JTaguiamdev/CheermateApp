@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import java.util.*
 
@@ -50,35 +51,14 @@ class TasksViewModel(private val db: AppDb, private val userId: Int) : ViewModel
         filteredList
     }
 
-    // 3. Derive counts from the main list
-    val allTasksCount: Flow<Int> = allTasks.map { list ->
-        val count = list.size
-        android.util.Log.d("TasksViewModel", "Recalculating allTasksCount. Count: $count")
-        count
-    }
+    // 3. Use direct count flows for better real-time performance
+    val allTasksCount: Flow<Int> = db.taskDao().getAllTasksCountFlow(userId)
 
-    val todayTasksCount: Flow<Int> = allTasks.map { list ->
-        val todayStr = dateToString(Date())
-        val altTodayFormat = java.text.SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
-        val altTodayStr = altTodayFormat.format(Date())
-        val count = list.count { it.DueDate == todayStr || it.DueDate == altTodayStr }
-        android.util.Log.d("TasksViewModel", "Recalculating todayTasksCount. Today is: $todayStr or $altTodayStr. Found $count tasks.")
-        val dueDates = list.take(5).map { "'${it.DueDate}'" }.joinToString()
-        android.util.Log.d("TasksViewModel", "Sample task due dates for today check: [$dueDates]")
-        count
-    }
+    val todayTasksCount: Flow<Int> = db.taskDao().getTodayTasksCountFlow(userId, dateToString(Date()))
 
-    val pendingTasksCount: Flow<Int> = allTasks.map { list ->
-        val count = list.count { it.Status == Status.Pending || it.Status == Status.InProgress }
-        android.util.Log.d("TasksViewModel", "Recalculating pendingTasksCount. Count: $count")
-        count
-    }
+    val pendingTasksCount: Flow<Int> = db.taskDao().getPendingTasksCountFlow(userId)
 
-    val completedTasksCount: Flow<Int> = allTasks.map { list ->
-        val count = list.count { it.Status == Status.Completed }
-        android.util.Log.d("TasksViewModel", "Recalculating completedTasksCount. Count: $count")
-        count
-    }
+    val completedTasksCount: Flow<Int> = db.taskDao().getCompletedTasksCountFlow(userId)
 
     fun setTaskFilter(filter: String) {
         _taskFilter.value = filter

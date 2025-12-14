@@ -1093,6 +1093,15 @@ class FragmentTaskExtensionActivity : AppCompatActivity() {
                                         "✅ Task marked as Completed!",
                                         Toast.LENGTH_SHORT
                                     ).show()                            
+                                    
+                                    // Trigger global statistics broadcast
+                                    lifecycleScope.launch {
+                                        val db = com.cheermateapp.data.db.AppDb.get(this@FragmentTaskExtensionActivity)
+                                        kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+                                            com.cheermateapp.util.StatisticsBroadcaster.refreshFromDatabase(db, task.User_ID)
+                                        }
+                                    }
+                                    
                                     // Set result to notify caller that task was modified
                                     setResult(RESULT_OK)
                                 } catch (e: Exception) {
