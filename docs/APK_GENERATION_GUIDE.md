@@ -149,17 +149,17 @@ Testers can access APKs via:
 
 1. **Direct Release Link**: 
    ```
-   https://github.com/YOUR_USERNAME/CheermateApp/releases
+   https://github.com/JTaguiamdev/CheermateApp/releases
    ```
 
 2. **Specific Release**:
    ```  
-   https://github.com/YOUR_USERNAME/CheermateApp/releases/tag/v1.5-test-20241214-1430
+   https://github.com/JTaguiamdev/CheermateApp/releases/tag/v1.5-test-20241214-1430
    ```
 
 3. **Direct APK Download**:
    ```
-   https://github.com/YOUR_USERNAME/CheermateApp/releases/download/v1.5-test-20241214-1430/app-debug.apk
+   https://github.com/JTaguiamdev/CheermateApp/releases/download/v1.5-test-20241214-1430/app-debug.apk
    ```
 
 ---
@@ -292,9 +292,9 @@ gh auth login
 ## 🔗 Quick Links
 
 ### Repository Links
-- **📋 Releases Page**: `https://github.com/YOUR_USERNAME/CheermateApp/releases`
-- **⚙️ Actions Page**: `https://github.com/YOUR_USERNAME/CheermateApp/actions`  
-- **📝 Issues Page**: `https://github.com/YOUR_USERNAME/CheermateApp/issues`
+- **📋 Releases Page**: `https://github.com/JTaguiamdev/CheermateApp/releases`
+- **⚙️ Actions Page**: `https://github.com/JTaguiamdev/CheermateApp/actions`  
+- **📝 Issues Page**: `https://github.com/JTaguiamdev/CheermateApp/issues`
 
 ### Documentation
 - **📱 User Guide**: [docs/USER_FEATURES_GUIDE.md](USER_FEATURES_GUIDE.md)

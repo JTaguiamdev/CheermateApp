@@ -203,7 +203,7 @@ echo ✅ APK uploaded: %APK_NAME%
 echo ✅ Release notes: Generated
 echo ✅ Release type: Pre-release ^(for testing^)
 echo.
-echo 🌐 View release: https://github.com/YOUR_USERNAME/CheermateApp/releases
+echo 🌐 View release: https://github.com/JTaguiamdev/CheermateApp/releases
 echo 📱 Direct APK link will be available in release
 echo 📋 Release notes include testing instructions
 echo.
