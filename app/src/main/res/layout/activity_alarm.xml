@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/alarm_background"
+    android:keepScreenOn="true">
+
+    <!-- ✅ ALARM CLOCK ICON -->
+    <ImageView
+        android:id="@+id/iv_alarm_icon"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="80dp"
+        android:src="@drawable/ic_alarm_large"
+        android:tint="@color/alarm_accent" />
+
+    <!-- ✅ CURRENT TIME DISPLAY -->
+    <TextView
+        android:id="@+id/tv_alarm_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/iv_alarm_icon"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="32dp"
+        android:text="8:45 AM"
+        android:textColor="@color/alarm_text_primary"
+        android:textSize="48sp"
+        android:textStyle="bold"
+        android:fontFamily="sans-serif-thin" />
+
+    <!-- ✅ TASK TITLE -->
+    <TextView
+        android:id="@+id/tv_alarm_task_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tv_alarm_time"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="40dp"
+        android:layout_marginEnd="32dp"
+        android:gravity="center"
+        android:text="Task Title"
+        android:textColor="@color/alarm_text_primary"
+        android:textSize="24sp"
+        android:textStyle="bold" />
+
+    <!-- ✅ TASK DESCRIPTION -->
+    <TextView
+        android:id="@+id/tv_alarm_task_description"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tv_alarm_task_title"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="32dp"
+        android:gravity="center"
+        android:text="Task description"
+        android:textColor="@color/alarm_text_secondary"
+        android:textSize="16sp" />
+
+    <!-- ✅ ALARM INDICATOR (Pulsing Animation) -->
+    <TextView
+        android:id="@+id/tv_alarm_indicator"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tv_alarm_task_description"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="32dp"
+        android:background="@drawable/bg_alarm_indicator"
+        android:paddingStart="24dp"
+        android:paddingTop="8dp"
+        android:paddingEnd="24dp"
+        android:paddingBottom="8dp"
+        android:text="🔔 ALARM"
+        android:textColor="@color/alarm_accent"
+        android:textSize="14sp"
+        android:textStyle="bold" />
+
+    <!-- ✅ ACTION BUTTONS CONTAINER -->
+    <LinearLayout
+        android:id="@+id/ll_alarm_actions"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginStart="32dp"
+        android:layout_marginEnd="32dp"
+        android:layout_marginBottom="80dp"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:weightSum="2">
+
+        <!-- ✅ SNOOZE BUTTON -->
+        <Button
+            android:id="@+id/btn_alarm_snooze"
+            android:layout_width="0dp"
+            android:layout_height="64dp"
+            android:layout_marginEnd="16dp"
+            android:layout_weight="1"
+            android:background="@drawable/bg_alarm_button_snooze"
+            android:drawableStart="@drawable/ic_snooze"
+            android:drawablePadding="8dp"
+            android:drawableTint="@color/alarm_button_snooze_text"
+            android:text="Snooze 10m"
+            android:textColor="@color/alarm_button_snooze_text"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <!-- ✅ STOP BUTTON -->
+        <Button
+            android:id="@+id/btn_alarm_stop"
+            android:layout_width="0dp"
+            android:layout_height="64dp"
+            android:layout_marginStart="16dp"
+            android:layout_weight="1"
+            android:background="@drawable/bg_alarm_button_stop"
+            android:drawableStart="@drawable/ic_stop"
+            android:drawablePadding="8dp"
+            android:drawableTint="@color/alarm_button_stop_text"
+            android:text="Stop"
+            android:textColor="@color/alarm_button_stop_text"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+    </LinearLayout>
+
+    <!-- ✅ SWIPE HINT (Optional) -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/ll_alarm_actions"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="24dp"
+        android:text="Tap to dismiss alarm"
+        android:textColor="@color/alarm_text_hint"
+        android:textSize="12sp" />
+
+</RelativeLayout>

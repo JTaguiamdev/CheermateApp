@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- ✅ ALARM ACTIVITY COLORS -->
+    <color name="alarm_background">#FF1A1A1A</color>
+    <color name="alarm_text_primary">#FFFFFFFF</color>
+    <color name="alarm_text_secondary">#FFB3B3B3</color>
+    <color name="alarm_text_hint">#FF808080</color>
+    <color name="alarm_accent">#FFFF6B6B</color>
+    
+    <!-- ✅ ALARM BUTTON COLORS -->
+    <color name="alarm_button_snooze_bg">#FF4A90E2</color>
+    <color name="alarm_button_snooze_text">#FFFFFFFF</color>
+    <color name="alarm_button_stop_bg">#FFFF6B6B</color>
+    <color name="alarm_button_stop_text">#FFFFFFFF</color>
+    
+    <!-- ✅ NOTIFICATION COLORS -->
+    <color name="notification_accent">#FF4A90E2</color>
+    <color name="notification_upcoming">#FFFF9500</color>
+</resources>

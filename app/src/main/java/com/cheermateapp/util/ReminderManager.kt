@@ -80,6 +80,11 @@ object ReminderManager {
             android.util.Log.d("ReminderManager", "✅ ALARM SCHEDULED SUCCESSFULLY!")
             android.util.Log.d("ReminderManager", "⏰ Reminder set for task '$taskTitle' at ${com.cheermateapp.data.model.TaskReminder.formatTimestamp(reminderTimeMillis)}")
             
+            // ✅ ALSO SCHEDULE UPCOMING ALARM NOTIFICATION
+            com.cheermateapp.util.UpcomingAlarmManager.scheduleUpcomingAlarmNotification(
+                context, taskId, taskTitle, reminderTimeMillis
+            )
+            
         } catch (e: SecurityException) {
             android.util.Log.e("ReminderManager", "❌ PERMISSION DENIED for scheduling alarm", e)
             android.util.Log.e("ReminderManager", "💡 Please check SCHEDULE_EXACT_ALARM permission")
