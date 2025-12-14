@@ -28,6 +28,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.lifecycle.ViewModelProvider
@@ -56,6 +57,7 @@ import com.cheermateapp.util.AlarmTestHelper
 import com.cheermateapp.util.ReminderManager
 import com.cheermateapp.util.ThemeManager
 import com.cheermateapp.util.ToastManager
+import com.cheermateapp.util.SwipeGestureHelper
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.textfield.TextInputEditText
@@ -680,6 +682,9 @@ class MainActivity : AppCompatActivity() {
                 onTaskDelete = { task -> onTaskDelete(task) }
             )
             taskRecyclerView?.adapter = taskAdapter
+
+            // ✅ Setup swipe gestures
+            setupSwipeGestures()
 
             btnSort?.setOnClickListener {
                 showSortOptionsDialog()
@@ -3168,4 +3173,168 @@ class MainActivity : AppCompatActivity() {
             taskObserverJob?.cancel()
             taskObserverJob = null
         }
+
+    // ✅ SWIPE GESTURES IMPLEMENTATION
+    private fun setupSwipeGestures() {
+        val swipeGestureHelper = SwipeGestureHelper(
+            context = this,
+            onSwipeComplete = { position ->
+                handleSwipeComplete(position)
+            },
+            onSwipeDelete = { position ->
+                handleSwipeDelete(position)
+            }
+        )
+        
+        val itemTouchHelper = ItemTouchHelper(swipeGestureHelper)
+        taskRecyclerView?.let { recyclerView ->
+            itemTouchHelper.attachToRecyclerView(recyclerView)
+        }
+        
+        android.util.Log.d("MainActivity", "✅ Swipe gestures setup completed")
+    }
+
+    private fun handleSwipeComplete(position: Int) {
+        val task = taskAdapter?.tasks?.getOrNull(position)
+        if (task == null) {
+            android.util.Log.w("MainActivity", "⚠️ Cannot complete - task not found at position $position")
+            taskAdapter?.notifyItemChanged(position) // Restore item position
+            return
+        }
+
+        // Show confirmation dialog
+        AlertDialog.Builder(this)
+            .setTitle("Mark as Completed")
+            .setMessage("Are you sure you want to mark '${task.Title}' as completed?")
+            .setIcon(R.drawable.ic_check)
+            .setPositiveButton("Complete") { _, _ ->
+                // Mark task as completed
+                completeTaskFromSwipe(task, position)
+            }
+            .setNegativeButton("Cancel") { _, _ ->
+                // Restore item position
+                taskAdapter?.notifyItemChanged(position)
+            }
+            .setOnCancelListener {
+                // Restore item position if dialog is dismissed
+                taskAdapter?.notifyItemChanged(position)
+            }
+            .show()
+    }
+
+    private fun handleSwipeDelete(position: Int) {
+        val task = taskAdapter?.tasks?.getOrNull(position)
+        if (task == null) {
+            android.util.Log.w("MainActivity", "⚠️ Cannot delete - task not found at position $position")
+            taskAdapter?.notifyItemChanged(position) // Restore item position
+            return
+        }
+
+        // Show confirmation dialog
+        AlertDialog.Builder(this)
+            .setTitle("Delete Task")
+            .setMessage("Are you sure you want to delete '${task.Title}'?\n\nThis action cannot be undone.")
+            .setIcon(R.drawable.ic_delete)
+            .setPositiveButton("Delete") { _, _ ->
+                // Delete the task
+                deleteTaskFromSwipe(task, position)
+            }
+            .setNegativeButton("Cancel") { _, _ ->
+                // Restore item position
+                taskAdapter?.notifyItemChanged(position)
+            }
+            .setOnCancelListener {
+                // Restore item position if dialog is dismissed
+                taskAdapter?.notifyItemChanged(position)
+            }
+            .show()
+    }
+
+    private fun completeTaskFromSwipe(task: Task, position: Int) {
+        uiScope.launch {
+            try {
+                val db = AppDb.get(this@MainActivity)
+                
+                withContext(Dispatchers.IO) {
+                    // Update task status in database
+                    db.taskDao().updateTaskStatus(
+                        userId = task.User_ID,
+                        taskId = task.Task_ID,
+                        status = "Completed"
+                    )
+                    android.util.Log.d("MainActivity", "✅ Task '${task.Title}' marked as completed via swipe")
+                }
+
+                // Update the task in the adapter
+                val updatedTask = task.copy(
+                    Status = com.cheermateapp.data.model.Status.Completed,
+                    TaskProgress = 100,
+                    UpdatedAt = com.cheermateapp.data.model.TimestampUtil.getCurrentTimestamp()
+                )
+                
+                taskAdapter?.tasks?.set(position, updatedTask)
+                taskAdapter?.notifyItemChanged(position)
+
+                // Show success message
+                ToastManager.showToast(
+                    this@MainActivity,
+                    "✅ '${task.Title}' marked as completed!",
+                    Toast.LENGTH_SHORT
+                )
+
+                // Refresh data to update statistics
+                loadRecentTasks()
+
+            } catch (e: Exception) {
+                android.util.Log.e("MainActivity", "❌ Error completing task via swipe", e)
+                ToastManager.showToast(
+                    this@MainActivity,
+                    "❌ Error completing task",
+                    Toast.LENGTH_SHORT
+                )
+                // Restore item position on error
+                taskAdapter?.notifyItemChanged(position)
+            }
+        }
+    }
+
+    private fun deleteTaskFromSwipe(task: Task, position: Int) {
+        uiScope.launch {
+            try {
+                val db = AppDb.get(this@MainActivity)
+                
+                withContext(Dispatchers.IO) {
+                    // Delete task and related data from database
+                    db.taskReminderDao().deleteAllForTask(task.Task_ID, task.User_ID)
+                    db.subTaskDao().deleteAllForTask(task.Task_ID, task.User_ID)
+                    db.taskDao().delete(task)
+                    android.util.Log.d("MainActivity", "🗑️ Task '${task.Title}' deleted via swipe")
+                }
+
+                // Remove the task from adapter
+                taskAdapter?.tasks?.removeAt(position)
+                taskAdapter?.notifyItemRemoved(position)
+
+                // Show success message
+                ToastManager.showToast(
+                    this@MainActivity,
+                    "🗑️ '${task.Title}' deleted successfully",
+                    Toast.LENGTH_SHORT
+                )
+
+                // Refresh data to update statistics and empty state
+                loadRecentTasks()
+
+            } catch (e: Exception) {
+                android.util.Log.e("MainActivity", "❌ Error deleting task via swipe", e)
+                ToastManager.showToast(
+                    this@MainActivity,
+                    "❌ Error deleting task",
+                    Toast.LENGTH_SHORT
+                )
+                // Restore item position on error
+                taskAdapter?.notifyItemChanged(position)
+            }
+        }
+    }
     }
