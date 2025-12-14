@@ -90,7 +90,7 @@ A comprehensive Android task management application built with Kotlin, featuring
 ### 📱 For Testers - Get APK
 
 #### Option 1: GitHub Releases (Recommended)
-1. **Visit**: [Releases Page](https://github.com/YOUR_USERNAME/CheermateApp/releases)
+1. **Visit**: [Releases Page](https://github.com/JTaguiamdev/CheermateApp/releases)
 2. **Download**: Latest APK from release assets
 3. **Install**: Follow instructions in release notes
 
